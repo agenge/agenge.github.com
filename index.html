@@ -1,0 +1,858 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="前言 为啥写篇文章 熟悉WordPress的或许都明白，为了写作，你要学习很多东西，例如Linux、Apache/Nginx、Mysql以及各种中间件；
+你要花钱买VPS/虚拟主机，你要自己优化Web Server和Mysql，你要定期备份Mysql；
+WordPress官方已经被墙（ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-12T22:18:00+08:00" pubdate data-updated="true">Sep 12<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<h2>为啥写篇文章</h2>
+
+<ol>
+<li><p>熟悉WordPress的或许都明白，为了写作，你要学习很多东西，例如Linux、Apache/Nginx、Mysql以及各种中间件；</p></li>
+<li><p>你要花钱买VPS/虚拟主机，你要自己优化Web Server和Mysql，你要定期备份Mysql；</p></li>
+<li><p>WordPress官方已经被墙（对于合格的IT屌丝，这点不是问题）；</p></li>
+</ol>
+
+
+<p>你可能已经在心理产生疑问：“你说这么多费话，无非就是想让我放弃WP，难道你有解决上述问题的完美方案？”
+虽不敢说完美解决，但至少有这么一个blog平台：</p>
+
+<ul>
+<li>无须数据库</li>
+<li>无须Web Server</li>
+<li>无须备份且数据永不丢失（相对自己备份而言）</li>
+<li>所有操作均有版本记录</li>
+</ul>
+
+
+<p>看了之后是不是很“鸡动”？没错，这个平台就是Github，结合jekyll/Octopress就完全可以专心写作，
+不过相对WP，功能确实要少些，图片和视频功能实在太弱。</p>
+
+<h2>Jekyll/Octopress是啥</h2>
+
+<p>Jekyll即是一个轻量级Blog系统，而且还是一个强大的静态网站生成系统，具体的介绍请参考以下链接：</p>
+
+<p>1、<a href="http://calefy.org/2012/03/03/my-process-of-building-jekyll-blog.html">Jekyll建站之旅</a></p>
+
+<p>2、<a href="http://www.cnblogs.com/purediy/archive/2013/03/07/2948892.html">通过GitHub Pages建立个人站点（详细步骤）</a></p>
+
+<p>3、<a href="http://ztpala.com/2011/09/12/jekyll-and-github-pages/">Jekyll介绍</a></p>
+
+<p>Octopress其实就是一个基于Jekyll实现的静态网站系统，具体介绍如下（引用）：</p>
+
+<ul>
+<li><p>使用 Markdown 标记语言书写源文件， 通过 Markdown 解析器转换为 HTML 文件</p></li>
+<li><p>通过 Octopress 提供的站点模板提供所需的 Web 资产文件 （Javascript、CSS、image 等）</p></li>
+<li><p>只包含静态网页，无需数据库支持，对系统要求低且迁移方便</p></li>
+<li><p>以编写程序的方式编制网站，便于实现版本控制</p></li>
+<li><p>Octopress / Jekyll 使用简洁的Ruby框架实现。</p>
+
+<ul>
+<li><p>Octopress 以 rake 任务的形式实现静态站点页面生成, 操作十分简单</p></li>
+<li><p>Octopress 以 rake 任务的形式实现到普通网站和 Github 的发布</p></li>
+<li><p>Octopress 与 Github 完美结合，你无需学习过多的 git 命令语法，使非专业人士的使用成为可能</p></li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/09/12/write-blog-octopress-with-github/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-09T00:00:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>介绍</h2>
+
+<p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
+
+<p>DRBD工作需要在两个节点上同时准备一块一模一样的分区组成镜像，这就是为什么它叫做分布式复制块设备，它主要通过复制数据来实现文件同步（备份），主要用于集群文件共享， 我们通过它的工作原理来了解块复制和文件复制的不同。</p>
+
+<p>首先，您需要知道，DRBD是工作在系统内核空间，而不是用户空间，它直接复制的是二进制数据，这是它速度快的根本原因。其次，DRBD至少需要两个节点来工作，一主一次。</p>
+
+<p>DRBD的文件同步过程和普通复制过程的不同：</p>
+
+<p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
+
+<h2>准备工作</h2>
+
+<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
+
+<table class="table table-bordered table-striped table-condensed">
+    <tr>
+        <td valign="top" width="180"></td>
+        <td valign="top" width="182">主节点(Primary Node)</td>
+        <td valign="top" width="183">次节点(Secondary Node)</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">主机名</td>
+        <td valign="top" width="182">drbd-01.i.12582.com</td>
+        <td valign="top" width="183">drbd-02.i.12582.com</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">操作系统</td>
+        <td valign="top" width="182">CentOS 6.3 x86_64位</td>
+        <td valign="top" width="183">CentOS 6.3 x86_64位</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">硬盘分区</td>
+        <td valign="top" width="182">/dev/sdb  8G</td>
+        <td valign="top" width="183">/dev/sdb  8G</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">IP地址</td>
+        <td valign="top" width="182">192.168.30.234</td>
+        <td valign="top" width="183">192.168.30.235</td>
+    </tr>
+</table>
+
+
+<p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-28T00:00:00+08:00" pubdate data-updated="true">Jul 28<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>前言</h2>
+
+<p>最近有幸接触到流媒体领域，这可是偶之前一直灰常弱的一方面，可以说完全没有任何概念，经过Google的N次方搜索之后，头脑中总算有个概念，以下文章均来自互联网，偶就不一一帖出原链接，如果有语句或解释，很可能是偶借鉴您的文章，希望不要介意。当然，有些是偶自己写的，您就凑合着看，对于新手来讲，我相信收获肯定不少。</p>
+
+<h3>阅读对象</h3>
+
+<ol>
+<li>流媒体新手或渴望了解流媒体</li>
+<li>这篇文章合适有耐心的人，如果您觉得没那么多时间看这些”费话“，请直接关闭当前标签页
+会更好。</li>
+<li>永远追求上进的学习爱好者。</li>
+<li><strong>不适合</strong>流媒体的牛逼人物。</li>
+</ol>
+
+
+<hr />
+
+<h2>视频扫盲</h2>
+
+<h3>什么是编解码？什么是codec？</h3>
+
+<p>所谓编解码，就是codec。 <strong>CODEC</strong>= <strong>CO</strong>de（编码）+<strong>DEC</strong>ode（解码）.假设显示器的设置是：每秒刷新60次，也就是刷新率为60Hz，1024 * 768的分辨率，那么此时显卡每秒要处理的数据量是 60 * 1024 * 768 个像素点，可想而知，视频文件的大小是很恐怖的。如果不用任何方法压缩，就单纯的存储视频文件，那么1GB的文件，也只能存储37秒左右的视频内容。所以，咱们需要一个方式来压缩（code,编码）它，再存储起来，要播放的时候，再解压缩（decode,解码）。这样牺牲一些时间，来换取很大一部分空间，这是值得的，并且咱们的硬件设备也有这个能力做到。</p>
+
+<h3>屏幕比例与分辨率的联系</h3>
+
+<p>4:3、16:9、16:10，还有5:4，1920x1024、1280x720、1024x768、640x480等，已经被这些比例和分辨率搞得头昏脑涨？目前市场上针对比例和分辨率还比较混乱，下面的扫盲<strong>仅限于</strong>常见的几种。其实我们最常见的屏幕比例无非上面提到的4:3、16:9、16:10这三种，而5:4只是一个特殊比例，每种比例都算是一个家庭，其中4:3是最最常见的，也是历史最久的比例，它所对应的最高分辨率为：640x480，更小的分辨率此处不再一一列出。16:9 主要用于HD电视领域，也就是我们经常听到的720p、1080p，两个比例对应的分辨率：</p>
+
+<ul>
+<li>720p   1280x720</li>
+<li>1080p 1920x1080</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/07/28/video-decoder-intro/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-24T00:00:00+08:00" pubdate data-updated="true">Jul 24<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<p>对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
+不敢私藏，故与大家分享小小心得。上次与大家介绍过 <a href="http://agenge.com/cloud-computing/make_openstack-centos-image.html">制作OpenStack CentOS 6.3 镜像</a></p>
+
+<p>本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作：</p>
+
+<ol>
+<li>下载Virtio总线驱动</li>
+</ol>
+
+
+<p> 由于OpenStack只支持Virtio总线的磁盘，所以我们需要在安装之前下载virtio驱动：</p>
+
+<pre><code>    wget http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/virtio-win-0.1-59.iso
+</code></pre>
+
+<ol>
+<li>准备一个Windows Server 2008的ISO文件。</li>
+</ol>
+
+
+<p> 除了Virtio总线驱动，您还需要准备一个Windows Server 2008的ISO，为安装操作系统做准备。
+3. 创建虚拟磁盘文件：</p>
+
+<pre><code>    qemu-img create -f qcow2 winserver2008.img 20G
+</code></pre>
+
+<p> 对于虚拟磁盘文件的各种磁盘格式区别与对比，可以参考 <a href="http://blog.prajnagarden.com/?p=248">qcow2、raw、vmdk等镜像格式</a></p>
+
+<ol>
+<li><p>创建虚拟机，使用kvm或virt-install均可，本次安装使用的virt-install</p>
+
+<pre><code> virt-install --connect qemu:///system -n winserver2008 --vcpus=1 -r 2048 \
+   --disk path=/path/to/winserver2008.img,size=60,format=qcow2,bus=virtio,cache=none \
+   -c /path/iso/windows_server_2008.iso \
+   --vnc --vncport=5909 --vnclisten=0.0.0.0  \
+   --os-type windows --os-variant=win2k8 --accelerate \
+   --network=bridge:br0,model=virtio  \
+   --disk path=/path/to/win_driver/virtio-win-0.1-59.iso,device=cdrom,perms=ro&lt;br /&gt;
+</code></pre></li>
+</ol>
+
+
+<p> 以上参数有点多，不过这里不一一解释，后期偶会专门写一篇介绍KVM相关知识点，这里只是描述几个重要的参数：</p>
+
+<pre><code>- -n  虚拟机的名称
+- --disk  虚拟磁盘存放的路径，即第一步qemu-img创建的虚拟磁盘。&lt;/span&gt;&lt;/li&gt;
+- -c  ISO的路径 &lt;/span&gt;&lt;/li&gt;
+- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。&lt;/span&gt;&lt;/li&gt;
+- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
+</code></pre>
+
+<p> 使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a></p>
+
+<p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/02.png"><img class="alignnone size-full wp-image-716" alt="02" src="http://agenge.com/wp-content/uploads/2013/07/02.png" width="621" height="489" /></a></p>
+
+<p> 点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/03.png"><img class="alignnone size-full wp-image-717" alt="03" src="http://agenge.com/wp-content/uploads/2013/07/03.png" width="337" height="319" /></a></p>
+
+<p> 点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/04.png"><img class="alignnone size-full wp-image-718" alt="04" src="http://agenge.com/wp-content/uploads/2013/07/04.png" width="597" height="449" /></a></p>
+
+<p> 安装之后并关机，进入下一步操作。</p>
+
+<ol>
+<li>上传镜像</li>
+</ol>
+
+
+<p> 最后一步就是要将刚才的虚拟磁盘文件上传到云平台中心:</p>
+
+<pre><code>    glance image-create --name Win-2008-x86_64-cloud --is-public true --container-format ovf --disk-format qcow2 &lt; /home/agen/winserver2008.img
+</code></pre>
+
+<p> 通过以上的步骤，希望新手能够成功制作一份完美的镜像文件，如果在制作过程中有任何疑问，请留言，最好是邮件，偶在有时间的情况下肯定会第一时间解答。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-20T00:00:00+08:00" pubdate data-updated="true">Jul 20<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<p>距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
+OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
+
+<ol>
+<li><p>准备一个镜像文件，即ISO文件，本示例所使用的为：</p>
+
+<pre><code> CentOS-6.3-i386-minimal.iso
+</code></pre></li>
+</ol>
+
+
+<p> <em>注：无论您是内部测试环境还是生产环境，偶都强烈推荐使用64位操作系统。</em></p>
+
+<ol>
+<li><p>引导并安装系统</p>
+
+<pre><code> virt-install -n CentOS63 -r 2048 --cpu host \
+   -c /data/iso/CentOS-6.3-i386-minimal.iso \
+   --disk path=/data/kvm_data/centos6.3-openstack.img,device=disk,bus=virtio,size=10,format=qcow2 \
+   --vnc --vncport=5908 --vnclisten=0.0.0.0 -v \
+   --network bridge=br0
+</code></pre></li>
+</ol>
+
+
+<p> 这些参数的就请您先自行查找手册，后期有时间偶会补上关于KVM的相关实践手册。</p>
+
+<ol>
+<li>镜像相关设置（此处根据你的需求进行个性化定制，尽量保持简洁）：</li>
+<li><p>分区全部给根分区，防火墙和SELinux禁止.</p>
+
+<pre><code>     chkconfig iptables off
+</code></pre></li>
+</ol>
+
+
+<p> 将/etc/selinux/config 中的 SELINUX=enforcing修改成 SELINUX=disabled
+ * 修改分区表：</p>
+
+<pre><code>        vi /etc/fstab
+        # 将UUID=这一行注释，加入：
+        LABEL=cec-rootfs                           / ext4 defaults&lt;b&gt; 0 0&lt;/b&gt;
+</code></pre>
+
+<ul>
+<li><p>修改网络配置：</p>
+
+<pre><code>     vi /etc/sysconfig/network-scripts/ifcfg-eth0
+     #将HWADDR=这行删除或注释即可，并且设置成BOOTPROTO=dhcp
+</code></pre></li>
+<li><p>删除网络规则，因为Centos6之后70-persistent-net.rules这个文件会自动添加除eth0之外的其他网络接口，</p>
+
+<pre><code>     rm -rf /etc/udev/rules.d/70-persistent-net.rules
+</code></pre></li>
+<li>还要把另外一个文件删除，不然上面这个文件还会自动创建滴：
+         mv /lib/udev/write_net_rules{,.bak}</li>
+<li><p>上传镜像</p>
+
+<pre><code> glance image-create --name centos63Image --is-public true --container-format ovf --disk-format qcow2 &amp;lt; /home/agen/centos63.img
+</code></pre></li>
+</ul>
+
+
+<p> 至此，所有操作已经完成，如果一切正常，你所创建的实例访问正常。如网络还存在问题，可能
+和您的OpenStack网络设置有关，不过这已经超出本文的范畴。假如您对OpenStack的环境搭建不是很熟悉的话，建议您再多看看这篇文章：<a title="Openstack安装与部署(Folsom)" href="http://agenge.com/cloud-computing/openstack_install_with_deploy_for_folsom.html">Openstack安装与部署(Folsom)</a>。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/12/openstack_install_with_deploy_for_folsom/">Openstack安装与部署(Folsom)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-12T00:00:00+08:00" pubdate data-updated="true">Jun 12<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<p>近2、3年来，云计算是一个比较热门的话题，无论是国外还是国内，众多计算机厂商开始涉足云计算，未来IaaS、SaaS及PaaS都可能将IT行业又推上到一个新的台阶。云计算谈得最多的IaaS要数 OpenStack，本文主要记录偶试
+验的安装步骤，当然，参考了N多网友的博文，具有代表性的可能就是 <a href="http://www.stacklab.org/">stacklab</a> 的安装教程，以下就是具体安装步骤：</p>
+
+<h2>环境准备</h2>
+
+<p> ### 资源列表</p>
+
+<table width="582" border="0" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">IP
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">主机名
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">OS
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">CPU
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">内存
+</td>
+<td nowrap="nowrap" width="168">
+<p align="center">备注
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.73
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">control-01
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+<td nowrap="nowrap" width="168">
+<p align="center">keystone、glance、cinder、nova-api、nova-scheduler
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.74
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">compute-01
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+<td rowspan="3" nowrap="nowrap" width="168">
+<p align="center">nova-compute、nova-network、nova-api-metadata
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.75
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">compute-02
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117"></td>
+<td nowrap="nowrap" width="88"></td>
+<td nowrap="nowrap" width="87"></td>
+<td nowrap="nowrap" width="70"></td>
+<td nowrap="nowrap" width="52"></td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>网络配置</h3>
+
+<ol>
+<li><p>在配置之前需要注意，如果你的网卡名称有叫非ethX，例如p1p1，就得按以下步骤修改：</p>
+
+<pre><code> cd /etc/udev/rules.d/
+ cp 70-persistent-net.rules 70-persistent-net.rules.bak
+ ip a
+</code></pre>
+
+<p>可看到p1p1的MAC地址，如<strong>d4:3d:7e:57:a4:d4</strong>，将文件70-persistent-net.rules的：
+     ATTR{address}==&ldquo;ec:88:8f:ea:c4:eb&rdquo;
+修改为：
+     ATTR{address}==&ldquo;d4:3d:7e:57:a4:d4&rdquo;</p></li>
+</ol>
+
+
+<p> NAME=&ldquo;eth1&rdquo; 修改为:NAME=&ldquo;eth2&rdquo; 或 NAME=&ldquo;eth0&#8221;，只要不和已存在的冲突即可，例如此示例中，本身已经存在一块叫： eth1的网卡，那另外一块就改成eth2。修改之后需要重启服务器。
+所有节点配置如下（需要修改每个节点对应的IP）：</p>
+
+<pre><code>    cat /etc/network/interfaces
+    # This file describes the network interfaces available on your system
+    # and how to activate them. For more information, see interfaces(5).
+    # The loopback network interface
+    auto lo
+    iface lo inet loopback
+
+    # The primary network interface
+    auto eth1
+    iface eth1 inet static
+    address 192.168.30.75
+    netmask 255.255.255.0
+    network 192.168.30.0
+    broadcast 192.168.30.255
+    gateway 192.168.30.1
+    # dns-* options are implemented by the resolvconf package, if installed
+    dns-nameservers 218.201.4.3
+
+    auto eth2
+    iface eth2 inet static
+    address 10.10.0.75
+    netmask 255.255.0.0
+</code></pre>
+
+<p> 上面2个IP地址需要根据您的具体情况修改。
+2. 重启网络</p>
+
+<pre><code>     /etc/init.d/networking restart
+</code></pre>
+
+<ol>
+<li><p>IP转发</p>
+
+<pre><code> sudo su -
+ sed -i -r 's/^s*#(net.ipv4.ip_forward=1.*)/1/' /etc/sysctl.conf
+ echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+ sysctl -p
+ net.ipv4.ip_forward = 1
+</code></pre></li>
+<li>更新源</li>
+</ol>
+
+
+<p> 在所有节点的/etc/apt/source.list 加入以下信息：</p>
+
+<pre><code>    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+</code></pre>
+
+<p> 然后执行：</p>
+
+<pre><code>    gpg --keyserver keyserver.ubuntu.com --recv EC4926EA
+    gpg --export --armor EC4926EA | sudo apt-key add -
+    sudo apt-get update
+</code></pre>
+
+<p> 如果报错，请参考<a href="http://blog.csdn.net/wche1990/article/details/6759422">这里</a>.</p>
+
+<h3>主机名设置</h3>
+
+<p>在所有节点的/etc/hosts加入以下信息（需要修改每个节点对应的IP）：</p>
+
+<pre><code>    192.168.30.73  control-01
+    192.168.30.74  compute-01
+    192.168.30.75  compute-02
+</code></pre>
+
+<h3>Mysql和rabbitmq安装</h3>
+
+<p>在所有节点执行，密码统一设置为”123456”(你也可以设置为其他较安全的密码)：</p>
+
+<pre><code>    sudo apt-get install -y mysql-server python-mysqldb
+    sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
+    sudo /etc/init.d/mysql restart
+    sudo apt-get install -y rabbitmq-server
+</code></pre>
+
+<h3>时间同步</h3>
+
+<p>在所有节点执行：</p>
+
+<pre><code>    sudo apt-get install -y ntp
+    sudo sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.comnserver 127.127.1.0nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
+    sudo /etc/init.d/ntp restart
+</code></pre>
+
+<hr />
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/06/12/openstack_install_with_deploy_for_folsom/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li class='category'><a href='/blog/categories/blog-博客-/'>Blog[博客] (1)</a></li>
+<li class='category'><a href='/blog/categories/github/'>Github (1)</a></li>
+<li class='category'><a href='/blog/categories/云计算/'>云计算 (3)</a></li>
+<li class='category'><a href='/blog/categories/流媒体/'>流媒体 (1)</a></li>
+<li class='category'><a href='/blog/categories/运维/'>运维 (1)</a></li>
+ 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

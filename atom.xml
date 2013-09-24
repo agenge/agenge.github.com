@@ -1,0 +1,3860 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[TaurusHome]]></title>
+  <link href="http://agenge.github.io/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-09-24T15:44:41+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[利用GitHub搭建免费的个人blog]]></title>
+    <link href="http://agenge.github.io/blog/2013/09/12/write-blog-octopress-with-github/"/>
+    <updated>2013-09-12T22:18:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/09/12/write-blog-octopress-with-github</id>
+    <content type="html"><![CDATA[<h1>前言</h1>
+
+<h2>为啥写篇文章</h2>
+
+<ol>
+<li><p>熟悉WordPress的或许都明白，为了写作，你要学习很多东西，例如Linux、Apache/Nginx、Mysql以及各种中间件；</p></li>
+<li><p>你要花钱买VPS/虚拟主机，你要自己优化Web Server和Mysql，你要定期备份Mysql；</p></li>
+<li><p>WordPress官方已经被墙（对于合格的IT屌丝，这点不是问题）；</p></li>
+</ol>
+
+
+<p>你可能已经在心理产生疑问：“你说这么多费话，无非就是想让我放弃WP，难道你有解决上述问题的完美方案？”
+虽不敢说完美解决，但至少有这么一个blog平台：</p>
+
+<ul>
+<li>无须数据库</li>
+<li>无须Web Server</li>
+<li>无须备份且数据永不丢失（相对自己备份而言）</li>
+<li>所有操作均有版本记录</li>
+</ul>
+
+
+<p>看了之后是不是很“鸡动”？没错，这个平台就是Github，结合jekyll/Octopress就完全可以专心写作，
+不过相对WP，功能确实要少些，图片和视频功能实在太弱。</p>
+
+<h2>Jekyll/Octopress是啥</h2>
+
+<p>Jekyll即是一个轻量级Blog系统，而且还是一个强大的静态网站生成系统，具体的介绍请参考以下链接：</p>
+
+<p>1、<a href="http://calefy.org/2012/03/03/my-process-of-building-jekyll-blog.html">Jekyll建站之旅</a></p>
+
+<p>2、<a href="http://www.cnblogs.com/purediy/archive/2013/03/07/2948892.html">通过GitHub Pages建立个人站点（详细步骤）</a></p>
+
+<p>3、<a href="http://ztpala.com/2011/09/12/jekyll-and-github-pages/">Jekyll介绍</a></p>
+
+<p>Octopress其实就是一个基于Jekyll实现的静态网站系统，具体介绍如下（引用）：</p>
+
+<ul>
+<li><p>使用 Markdown 标记语言书写源文件， 通过 Markdown 解析器转换为 HTML 文件</p></li>
+<li><p>通过 Octopress 提供的站点模板提供所需的 Web 资产文件 （Javascript、CSS、image 等）</p></li>
+<li><p>只包含静态网页，无需数据库支持，对系统要求低且迁移方便</p></li>
+<li><p>以编写程序的方式编制网站，便于实现版本控制</p></li>
+<li><p>Octopress / Jekyll 使用简洁的Ruby框架实现。</p>
+
+<ul>
+<li><p>Octopress 以 rake 任务的形式实现静态站点页面生成, 操作十分简单</p></li>
+<li><p>Octopress 以 rake 任务的形式实现到普通网站和 Github 的发布</p></li>
+<li><p>Octopress 与 Github 完美结合，你无需学习过多的 git 命令语法，使非专业人士的使用成为可能</p></li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h1>准备工具</h1>
+
+<p>说一堆费话，现在说说要准备些什么工具</p>
+
+<ol>
+<li><p>Git for Windows(如果你是Linux/Mac就更方便，不过这篇文章主要是为了Windows下的用户)</p>
+
+<p> 猛撮 <a href="https://code.google.com/p/msysgit/downloads/list">下载Git</a> 下最新版本。
+偶是下载的 Git-1.8.3-preview20130601.exe</p></li>
+<li><p>安装Ruby环境</p>
+
+<p> 猛撮 <a href="https://rubyforge.org/frs/?group_id=167">下载RubyInstaller</a></p>
+
+<ul>
+<li>如果你是Octopress，请下载 rubyinstaller-1.9.2-p290</li>
+<li>如果你是Jekyll，请下载 rubyinstaller-1.9.1-p430</li>
+</ul>
+</li>
+</ol>
+
+
+<p> 安装之后确保C:\Ruby193\bin 在系统的环境变量中。</p>
+
+<ol>
+<li>安装DevKit</li>
+</ol>
+
+
+<p>  ruby 的模块工具 gem 在生成本地模块时可能需要用到编译环境，通常有2种选择：</p>
+
+<p> <a href="http://www.mingw.org/">MinGW and MSYS</a> 或 <a href="https://github.com/oneclick/rubyinstaller/wiki/development-kit">RubyInstaller DevKit</a></p>
+
+<p> 偶是使用的 DevKit-tdm-32-4.5.2-20111229-1559-sfx.exe
+ , 在”Start Command Prompt with Ruby”命令行中进入DevKit解压缩的目录：</p>
+
+<pre><code>    ruby dk.rb init 
+
+    ruby dk.rb install
+    gem install rdiscount --platform=ruby
+</code></pre>
+
+<p> 如果没问题，会提示如下信息：</p>
+
+<pre><code>    Fetching: rdiscount-2.1.6.gem (100%)
+    Temporarily enhancing PATH to include DevKit...
+    Building native extensions.  This could take a while...
+    Successfully installed rdiscount-2.1.6
+    1 gem installed
+    Installing ri documentation for rdiscount-2.1.6...
+    Installing RDoc documentation for rdiscount-2.1.6...
+</code></pre>
+
+<ol>
+<li>安装Python for Windows</li>
+</ol>
+
+
+<p> 最后还要安装Python，相对Ruby环境，安装Python就简单许多，下载python-2.7.5.amd64.msi即可。</p>
+
+<ol>
+<li>配置环境变量
+环境变量需要在两个地址设置： Windows系统与Git Bash</li>
+<li><p>在你的Windows系统创建两个新的环境变量</p>
+
+<ul>
+<li>LANG 环境变量，值设置为：zh_CN.UTF-8</li>
+<li>LC_ALL 环境变量，值设置为: zh_CN.UTF-8</li>
+</ul>
+</li>
+<li><p>打开Git Bash</p>
+
+<ul>
+<li><code>$ echo "export LANG LC_ALL" &gt; ~/.bash_profile</code></li>
+<li><code>$ echo "alias ll='ls -l --color=tty'" &gt;&gt; ~/.bash_profile</code></li>
+<li><code>$ echo "alias ls='ls --color=tty'" &gt;&gt; ~/.bash_profile</code></li>
+</ul>
+</li>
+<li><p>准备一个文本编辑器，只要能保存UTF-8无BOM格式的即可，例如UltraEdit.</p></li>
+<li><p>设置无密码登录github</p>
+
+<pre><code> ssh-keygen -C "username@email.com" -t rsa
+</code></pre></li>
+</ol>
+
+
+<p> username@email.com换成你的github注册时的邮箱。</p>
+
+<ul>
+<li>创建成功后，在你的C:\Users\%username%.ssh 目录会生成一个 id_rsa.pub公钥文件。</li>
+<li>登录github.com（如果没有就注册一个），在“Account Settings”->“SSH Keys”，点击右侧的“Add SSH Key”。</li>
+<li><p>将id_rsa.pub文件中的内容复制到“Key”中并保存。</p></li>
+<li><p>测试：</p>
+
+<pre><code> ssh -T git@github.com
+</code></pre></li>
+</ul>
+
+
+<p> 如果没有任何问题，提示如下：</p>
+
+<pre><code>    Hi agenge! You've successfully authenticated, but GitHub does not provide shell access.
+</code></pre>
+
+<h1>初始化Ruby环境</h1>
+
+<h2>gem源的问题</h2>
+
+<p>作为天朝的屌丝，有时候你总得多墙外的人多做些工作，gem的更新源也要墙？还好还好，国内有良心的企业还是有的（虽然不多），对于gem源，直接使用淘宝的吧。</p>
+
+<pre><code>gem sources --remove https://rubygems.org/
+gem sources -a http://ruby.taobao.org
+</code></pre>
+
+<p>如果你觉得不放心，还可以确认是否设置正确：</p>
+
+<pre><code>gem sources -l
+</code></pre>
+
+<h2>安装bundler(必须) 和 rdoc(非必须)</h2>
+
+<pre><code>gem install bundler rdoc
+bundle install
+</code></pre>
+
+<h1>安装Octopress</h1>
+
+<pre><code>git clone git://github.com/imathis/octopress.git octopress
+cd octopress
+rake install
+</code></pre>
+
+<h1>配置Octopress</h1>
+
+<h2>修改_config.yml</h2>
+
+<p>你可以根据这个文件你的以下信息：</p>
+
+<ul>
+<li>title: 网站名称</li>
+<li>subtitle: 网站子名称</li>
+<li>author: 作者名称</li>
+</ul>
+
+
+<p>除了这3个以外，把Twitter相关全部注释，更多的选项你可以看下注释或Google搜索。</p>
+
+<h2>发表文章</h2>
+
+<p>激动人心的时刻即将到来，终于到了发表文章的这一天，octopress居然把写作与发表文件变得如此简单。</p>
+
+<pre><code>rake new_post[“tile”]  # 创建一个新文章
+</code></pre>
+
+<p>执行这条命令之后，会在octopress\source_posts目录下生成一个&#8221;YYYY-MM-DD-title.markdown&#8221;的文件</p>
+
+<p>在生成静态页面之前，我们需要解决Windows下中文编码的问题，有两个地方需要注意：</p>
+
+<ol>
+<li>.markdown文件有中文的话必须保存：UTF-8无BOM</li>
+<li><p>编辑C:\Ruby193\lib\ruby\gems\1.9.1\gems\jekyll-0.12.0\lib\jekyll\convertible.rb第28行，修改为：</p>
+
+<p> self.content = File.read(File.join(base, name), :encoding => &lsquo;utf-8&rsquo;)</p></li>
+</ol>
+
+
+<p>生成静态页面</p>
+
+<pre><code>rake generate           # 生成新的静态页面
+</code></pre>
+
+<p>在本地预览文章效果：</p>
+
+<pre><code>rake preview
+</code></pre>
+
+<p> 如果成功的话，访问: <a href="http://localhost:4000">http://localhost:4000</a> 就能看到效果。</p>
+
+<h1>设置本地仓库与远程仓库关联</h1>
+
+<ul>
+<li><p>创建git账号与仓库</p>
+
+<ul>
+<li>用户名：username</li>
+<li>仓库名：username.github.com</li>
+</ul>
+</li>
+<li><p>关联github仓库</p>
+
+<ul>
+<li>rake setup_github_pages</li>
+</ul>
+</li>
+</ul>
+
+
+<p>提示输入远程仓库地址，请输入：</p>
+
+<pre><code>git@github.com:username/username.github.com.git
+</code></pre>
+
+<p>表示将blog与 username.github.com仓库关联.</p>
+
+<h2>部署Blog到Github</h2>
+
+<pre><code>rake deploy
+</code></pre>
+
+<p>这条命令表示发布文件到github。</p>
+
+<h2>将Octopress源文件推送到 Github的 source 分支</h2>
+
+<pre><code>git add .
+git commit -m “comment”
+git push origin source
+</code></pre>
+
+<h2>访问Blog</h2>
+
+<p>打开浏览器输入：username.github.com</p>
+
+<p>如果一切正常，就能看到你的文章。</p>
+
+<h1>rake常用命令</h1>
+
+<pre><code>$ rake -T
+rake clean                     # Clean out caches: .pygments-cache, .gist-c...
+rake copydot[source,dest]      # copy dot files for deployment
+rake deploy                    # Default deploy task
+rake gen_deploy                # Generate website and deploy
+rake generate                  # Generate jekyll site
+rake install[theme]            # Initial setup for Octopress: copies the de...
+rake integrate                 # Move all stashed posts back into the posts...
+rake isolate[filename]         # Move all other posts than the one currentl...
+rake list                      # list tasks
+rake new_page[filename]        # Create a new page in source/(filename)/ind...
+rake new_post[title]           # Begin a new post in source/_posts
+rake preview                   # preview the site in a web browser
+rake push                      # deploy public directory to github pages
+rake rsync                     # Deploy website via rsync
+rake set_root_dir[dir]         # Update configurations to support publishin...
+rake setup_github_pages[repo]  # Set up _deploy folder and deploy branch fo...
+rake update_source[theme]      # Move source to source.old, install source ...
+rake update_style[theme]       # Move sass to sass.old, install sass theme ...
+rake watch                     # Watch the site and regenerate when it changes
+</code></pre>
+
+<p>Edit By <a href="http://agenge.github.com">agenge</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[DRBD+Heartbeat+Mysql高可用配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha/"/>
+    <updated>2013-08-09T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha</id>
+    <content type="html"><![CDATA[<h2>介绍</h2>
+
+<p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
+
+<p>DRBD工作需要在两个节点上同时准备一块一模一样的分区组成镜像，这就是为什么它叫做分布式复制块设备，它主要通过复制数据来实现文件同步（备份），主要用于集群文件共享， 我们通过它的工作原理来了解块复制和文件复制的不同。</p>
+
+<p>首先，您需要知道，DRBD是工作在系统内核空间，而不是用户空间，它直接复制的是二进制数据，这是它速度快的根本原因。其次，DRBD至少需要两个节点来工作，一主一次。</p>
+
+<p>DRBD的文件同步过程和普通复制过程的不同：</p>
+
+<p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
+
+<h2>准备工作</h2>
+
+<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
+
+<table class="table table-bordered table-striped table-condensed">
+    <tr>
+        <td valign="top" width="180"></td>
+        <td valign="top" width="182">主节点(Primary Node)</td>
+        <td valign="top" width="183">次节点(Secondary Node)</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">主机名</td>
+        <td valign="top" width="182">drbd-01.i.12582.com</td>
+        <td valign="top" width="183">drbd-02.i.12582.com</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">操作系统</td>
+        <td valign="top" width="182">CentOS 6.3 x86_64位</td>
+        <td valign="top" width="183">CentOS 6.3 x86_64位</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">硬盘分区</td>
+        <td valign="top" width="182">/dev/sdb  8G</td>
+        <td valign="top" width="183">/dev/sdb  8G</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">IP地址</td>
+        <td valign="top" width="182">192.168.30.234</td>
+        <td valign="top" width="183">192.168.30.235</td>
+    </tr>
+</table>
+
+
+<p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+<!--more-->
+
+
+<h2>初始化设置</h2>
+
+<p>1  所有节点关闭iptables和SELinux</p>
+
+<p>2  在所有节点/etc/hosts加入以下内容：</p>
+
+<pre><code>192.168.30.234  drbd-01.i.12582.com drbd-01
+192.168.30.235  drbd-02.i.12582.com drbd-02
+</code></pre>
+
+<p>3  所有节点创建独立分区：</p>
+
+<pre><code>fdisk /dev/sdbDevice contains neither a valid DOS partition table, nor Sun, SGI or OSF disklabelBuilding a new DOS disklabel with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
+After that, of course, the previous content won't be recoverable.
+Warning: invalid flag 0x0000 of partition table 4 will be corrected by w(rite)
+WARNING: DOS-compatible mode is deprecated. It's strongly recommended to
+switch off the mode (command 'c') and change display units to
+sectors (command 'u').
+
+Command (m for help): p
+Disk /dev/sdb: 8589 MB, 8589934592 bytes
+255 heads, 63 sectors/track, 1044 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x46b64833
+
+Device Boot    Start        End        Blocks    Id    System
+
+Command (m for help): n
+Command action
+e   extended
+p   primary partition (1-4)
+p
+Partition number (1-4): 1
+First cylinder (1-1044, default 1):
+Using default value 1
+Last cylinder, +cylinders or +size{K,M,G} (1-1044, default 1044):
+Using default value 1044
+
+Command (m for help): w
+The partition table has been altered!
+Calling ioctl() to re-read partition table.
+Syncing disks.
+</code></pre>
+
+<h2>安装Hearbeat</h2>
+
+<pre><code>wget ftp://mirror.switch.ch/pool/1/mirror/scientificlinux/6rolling/i386/os/Packages/epel-release-6-5.noarch.rpm
+rpm -ivUh epel-release-6-5.noarch.rpm
+yum --enablerepo=epel install heartbeat -y
+</code></pre>
+
+<h2>安装DRBD</h2>
+
+<p>1  安装依赖包</p>
+
+<pre><code>yum -y install gcc kernel-devel kernel-headers flex
+</code></pre>
+
+<p>2  安装DRBD</p>
+
+<pre><code>wget http://oss.linbit.com/drbd/8.4/drbd-8.4.3.tar.gz
+tar zxvf drbd-8.4.3.tar.gz
+cd drbd-8.4.3
+./configure --prefix=/usr/local/drbd --with-km --with-heartbeat
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+make install
+cp -R /usr/local/drbd/etc/ha.d/resource.d/drbd* /etc/ha.d/resource.d/
+</code></pre>
+
+<p>3  其他设置</p>
+
+<pre><code>mkdir -p /usr/local/drbd/var/run/drbd
+cp /usr/local/drbd/etc/rc.d/init.d/drbd /etc/rc.d/init.d/
+chkconfig --add drbdchkconfig drbd on
+</code></pre>
+
+<h2>安装DRBD模块</h2>
+
+<pre><code>cd drbdmake 
+clean
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+cp drbd.ko /lib/modules/`uname -r`/kernel/lib/
+depmod
+</code></pre>
+
+<p>以上操作请在所有节点操作一次。</p>
+
+<hr />
+
+<h2>设置DRBD</h2>
+
+<p><strong>配置drbd.conf</strong></p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/global_common.conf
+global {
+    minor-count 64;
+    usage-count yes;
+    # minor-count dialog-refresh disable-ip-verification
+}
+
+
+common {
+    syncer { rate 1000M; }
+    handlers {
+        # These are EXAMPLE handlers only.
+        # They may have severe implications,
+        # like hard resetting the node under certain circumstances.
+        # Be careful when chosing your poison.
+
+        pri-on-incon-degr "/usr/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        pri-lost-after-sb "/usr/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        local-io-error "/usr/lib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-emergency-shutdown.sh; echo o &amp;gt; /proc/sysrq-trigger ; halt -f";
+        fence-peer "/usr/lib/drbd/crm-fence-peer.sh";
+        pri-lost "/usr/local/drbd/lib/drbd/notify-pri-lost.sh; /usr/local/drbd/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt;/proc/sysrq-trigger ; reboot -f";
+        split-brain "/usr/lib/drbd/notify-split-brain.sh root";
+        out-of-sync "/usr/lib/drbd/notify-out-of-sync.sh root";
+        # before-resync-target "/usr/lib/drbd/snapshot-resync-target-lvm.sh -p 15 -- -c 16k";
+        # after-resync-target /usr/lib/drbd/unsnapshot-resync-target-lvm.sh;
+    }
+
+    startup {
+
+        # wfc-timeout degr-wfc-timeout outdated-wfc-timeout wait-after-sb
+        wfc-timeout 60;
+        degr-wfc-timeout 120;
+        outdated-wfc-timeout 2;
+    }
+
+    options {
+        # cpu-mask on-no-data-accessible
+        }
+
+    disk {
+        # size max-bio-bvecs on-io-error fencing disk-barrier disk-flushes
+        # disk-drain md-flushes resync-rate resync-after al-extents
+        # c-plan-ahead c-delay-target c-fill-target c-max-rate
+        # c-min-rate disk-timeout
+        on-io-error detach;
+        fencing resource-only;
+    }
+
+    net {
+        # protocol timeout max-epoch-size max-buffers unplug-watermark
+        # connect-int ping-int sndbuf-size rcvbuf-size ko-count
+        # allow-two-primaries cram-hmac-alg shared-secret after-sb-0pri
+        # after-sb-1pri after-sb-2pri always-asbp rr-conflict
+        # ping-timeout data-integrity-alg tcp-cork on-congestion
+        # congestion-fill congestion-extents csums-alg verify-alg
+        # use-rle
+        protocol C;
+    }
+}
+</code></pre>
+
+<p>设置资源文件</p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/r0.res
+resource r0 {
+    on drbd-01.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.234:7788;
+        meta-disk       internal;
+    }
+
+    on drbd-02.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.235:7788;
+        meta-disk       internal;
+    }
+}
+</code></pre>
+
+<hr />
+
+<h3>设置权限</h3>
+
+<pre><code>chgrp haclient /sbin/drbdsetup
+chmod o-x /sbin/drbdsetup
+chmod u+s /sbin/drbdsetup
+chgrp haclient /sbin/drbdmeta
+chmod o-x /sbin/drbdmeta
+chmod u+s /sbin/drbdmeta
+</code></pre>
+
+<p>加载DRBD模块与建立resource</p>
+
+<pre><code>modprobe drbd
+lsmod | grep drbd
+drbd                  328626  0
+libcrc32c               1246  1 drbd
+</code></pre>
+
+<p>写入一些数据到/dev/sdb1</p>
+
+<pre><code>dd if=/dev/zero of=/dev/sdb1 bs=1M count=100
+</code></pre>
+
+<p>建立Resource</p>
+
+<pre><code>drbdadm create-md r0
+Writing meta data...
+initializing activity log
+NOT initializing bitmap
+New drbd meta data block successfully created.
+success
+</code></pre>
+
+<h3>启动DRBD</h3>
+
+<pre><code>/etc/init.d/drbd start
+Starting DRBD resources: [
+      create res: r0
+    prepare disk: r0
+     adjust disk: r0
+     adjust net: r0
+]
+degr-wfc-timeout has to be shorter than wfc-timeout
+degr-wfc-timeout implicitly set to wfc-timeout (60s)
+..........
+***************************************************************
+DRBD's startup script waits for the peer node(s) to appear.
+- In case this node was already a degraded cluster before the
+reboot the timeout is 120 seconds. [degr-wfc-timeout]
+- If the peer was available before the reboot the timeout will
+expire after 60 seconds. [wfc-timeout]
+(These values are for resource 'r0'; 0 sec -&amp;gt; wait forever)
+To abort waiting enter 'yes' [  49]:yes
+
+.
+</code></pre>
+
+<p>节点2按以上操作执行一次。</p>
+
+<h3>DRBD状态查看</h3>
+
+<ol>
+<li><p>Secondary/Unknown：若drbd-01服务启动而drbd-02尚未启动,则ro会出现Secondary/Unknown</p>
+
+<pre><code> /init.d/drbd status
+ drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs        ro                 ds                 p   mounted
+ fstype
+ 0:r0   WFConnection  Secondary/Unknown  Inconsistent/DUnknown  C
+</code></pre>
+
+<p>查看drbd</p>
+
+<pre><code>  cat /proc/drbd
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:WFConnection ro:Secondary/Unknown ds:Inconsistent/DUnknown C r----s
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre></li>
+<li><p>Inconsistent/Inconsistent：ds出現Inconsistent表示兩台node資料尚未同步。</p>
+
+<pre><code> drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs         ro                   ds                         p  mounted  
+ fstype
+ 0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre>
+
+<p>查看内核</p>
+
+<pre><code>  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r-----
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre>
+
+<p>3  SyncSource：cs出現SyncTarget表示正在同步中，可看到目前同步時的進度．</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs          ro                 ds                     p  mounted  
+  fstype
+  ...    sync'ed:    26.1%              (6056/8188)M
+  0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>4  Secondary/Secondary：表示尚未設定Primary Node。</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs         ro                   ds                         p  mounted  
+  fstype
+  0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre></li>
+</ol>
+
+
+<h3>设置主节点(Primary Node)</h3>
+
+<p>在drbd-01进行以下操作:</p>
+
+<pre><code>drbdadm -- --overwrite-data-of-peer primary r0
+</code></pre>
+
+<p>再查看下状态:</p>
+
+<pre><code>/etc/init.d/drbd status
+drbd driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+m:res  cs          ro                 ds                     p  mounted  fstype
+...    sync'ed:    13.1%              (7124/8188)M
+0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>在drbd-02查看下状态：</p>
+
+<pre><code>driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-02.i.12582.com, 2013-08-08 14:16:07
+m:res  cs         ro                 ds                 p  mounted  fstype
+0:r0   Connected  Secondary/Primary  UpToDate/UpToDate  C
+</code></pre>
+
+<p>格式化（drbd-01）</p>
+
+<pre><code>mkfs.ext4 /dev/drbd0
+</code></pre>
+
+<p>挂载到文件系统：</p>
+
+<pre><code>mkdir /datamount /dev/drbd0 /data
+</code></pre>
+
+<h2>测试DRBD</h2>
+
+<h3>测试同步</h3>
+
+<ol>
+<li><p>在主节点（Primary Node）复制一些数据到/data</p>
+
+<pre><code> cp -r drbd-8.4.3 /data/
+</code></pre></li>
+<li><p>在次节点（Secondary Node）执行以下步骤：</p>
+
+<pre><code> drbdadm down r0
+</code></pre>
+
+<p>注：次节点在DRBD启动状态下是无法mount /data的，所以必须先手动停止才能mount。</p>
+
+<pre><code>  mkdir /datamount -t ext4 /dev/sdb1 /datals -l
+</code></pre>
+
+<p>就可以看到数据已经全部同步过来。</p></li>
+</ol>
+
+
+<h2>Heartbeat配置</h2>
+
+<p>主节点操作：</p>
+
+<pre><code>vim /etc/ha.d/ha.cf
+debugfile /var/log/ha-debug   # 打开错误日志报告
+
+keepalive 2    # 2秒检测一次心跳线连接
+deadtime 10    # 10秒测试不到 主节点心跳线就认为有问题
+
+warntime 6    # 警告时间（建议在2－10之间）
+
+initdead 120   # 初始化启动时 120秒无连接视为正常，或指定heartbeat 在启动时，
+
+# 需要等待120秒才去启动任何资源
+
+udpport 694     # 用udp的694端口连接，netstat -antulp | grep 694
+
+ucast eth0 192.168.30.235      # 单播方式连接（主、从都是写对方的IP连接）
+
+node  drbd-01.i.12582.com  # 声明主节点（uname -n）
+
+node  drbd-02.i.12582.com  # 声明次节点（uname -n）
+
+auto_failback on                    # 自动切换（主节点恢复后会自动切换回来）
+
+respawn hacluster /usr/lib64/heartbeat/ipfail  #监控ipfail进程是否挂掉，否则重启它
+</code></pre>
+
+<p>&nbsp;</p>
+
+<p>vim /etc/ha.d/authkeysauth 11 sha1 MySecret&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>chmod 600 /etc/ha.d/authkeys</p>
+
+<p>&nbsp;</p>
+
+<p>vim /etc/ha.d/haresourcesdrbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0 drbddisk::r0 Filesystem::/dev/drbd0::/data::ext4</p>
+
+<p>&nbsp;</p>
+
+<p>drbd-01.i.12582.com   主节点的主机名</p>
+
+<p>IPaddr::192.168.30.229/24/eth0    设置虚拟IP</p>
+
+<p>drbddisk::r0                  管理资源r0</p>
+
+<p>Filesystem::/dev/drbd0::/data::ext4   执行umount和mount操作</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>次节点操作：</p>
+
+<p>将ha.cf中的192.168.30.235改成192.168.30.234</p>
+
+<p>&nbsp;</p>
+
+<h3>DRBD主从自动切换测试</h3>
+
+<p>1）    首先在 drbd-01启动heartbeat：</p>
+
+<p>/etc/init.d/heartbeat  start</p>
+
+<p>2）    接着在 drbd-02 启动heartbear:</p>
+
+<p>/etc/init.d/heartbeat  start</p>
+
+<p>&nbsp;</p>
+
+<p>在drbd-01输入：</p>
+
+<p>ip a</p>
+
+<p>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 16436 qdisc noqueue state UNKNOWN</p>
+
+<p>link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</p>
+
+<p>inet 127.0.0.1/8 scope host lo</p>
+
+<p>inet6 ::1/128 scope host</p>
+
+<p>valid_lft forever preferred_lft forever</p>
+
+<p>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</p>
+
+<p>link/ether 08:00:27:98:a2:6c brd ff:ff:ff:ff:ff:ff</p>
+
+<p>inet 192.168.30.234/24 brd 192.168.30.255 scope global eth0</p>
+
+<p>inet <b>192.168.30.229</b>/24 brd 192.168.30.255 scope global secondary eth0:0</p>
+
+<p>inet6 fe80::a00:27ff:fe98:a26c/64 scope link</p>
+
+<p>valid_lft forever preferred_lft forever</p>
+
+<p>从结果可以看出，VIP已经出现。</p>
+
+<p>&nbsp;</p>
+
+<p>3）    停止drbd-01的heartbeat服务或将网线断掉，同时监控drbd-02的DRBD状态，</p>
+
+<p>drbd-02操作：</p>
+
+<p>watch -n 1 /etc/init.d/drbd status</p>
+
+<p>如果一切正常，可以看到状态在不断变化。</p>
+
+<p>4）    恢复drbd-01的heartbeat服务或将网线接上，同时监控drbd-02的DRBD状态，如果正常drbd-01又变为主节点（auto_failback on 决定）了。</p>
+
+<p>&nbsp;</p>
+
+<h2>Mysql+DRBD+Heartbeat配置</h2>
+
+<h3>Mysql安装</h3>
+
+<p><b>安装Mysql</b><b>依赖包</b></p>
+
+<p>yum -y install gcc gcc-c++ ncurses-devel libtool zlib-devel bison</p>
+
+<p>&nbsp;</p>
+
+<p><b>创建用户与组</b></p>
+
+<p>groupadd mysqluseradd -g mysql mysql</p>
+
+<p><b>设置内核参数</b></p>
+
+<p>vi /etc/security/limits.confmysql              soft    nproc   2047mysql              hard    nproc   16384mysql              soft    nofile  1024</p>
+
+<p>mysql              hard    nofile  65536</p>
+
+<p>&nbsp;</p>
+
+<p><b>安装Mysql</b></p>
+
+<p>由于源码安装Mysql5.6需要依赖cmake，必须先安装cmake：</p>
+
+<p>mkdir ~/software; cd ~/softwarewget <a href="ftp://192.168.30.211/pub/Tools/mysql/cmake-2.8.4.tar.gztar">ftp://192.168.30.211/pub/Tools/mysql/cmake-2.8.4.tar.gztar</a> zxvf cmake-2.8.4.tar.gzcd cmake-2.8.4</p>
+
+<p>./configure</p>
+
+<p>gmake &amp;&amp; make install</p>
+
+<p>&nbsp;</p>
+
+<p>开始安装Mysql</p>
+
+<p>cd ~/softwarewget <a href="ftp://192.168.30.211/pub/Tools/mysql/mysql-5.6.5-m8.tar.gztar">ftp://192.168.30.211/pub/Tools/mysql/mysql-5.6.5-m8.tar.gztar</a> zxvf mysql-5.6.5-m8.tar.gzcd mysql-5.6.5-m8</p>
+
+<p>cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \</p>
+
+<p>-DDEFAULT_CHARSET=utf8 \</p>
+
+<p>-DDEFAULT_COLLATION=utf8_general_ci \</p>
+
+<p>-DENABLED_LOCAL_INFILE=ON \</p>
+
+<p>-DWITH_INNOBASE_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_FEDERATED_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_PARTITION_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_PERFSCHEMA_STORAGE_ENGINE=1 \</p>
+
+<p>-DCOMPILATION_COMMENT=&lsquo;agenge for mysql&rsquo; \</p>
+
+<p>-DWITH_READLINE=ON \</p>
+
+<p>-DMYSQL_UNIX_ADDR=/data/mysqldata/3306/mysql.sock \</p>
+
+<p>-DSYSCONFDIR=/data/mysqldata/3306</p>
+
+<p>make &amp;&amp; make install</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<h3>Mysql设置</h3>
+
+<p>设置权限</p>
+
+<p>chown -R mysql:mysql /usr/local/mysql</p>
+
+<p>设置环境变量</p>
+
+<p>vi /etc/profileexport PATH=/usr/local/mysql/bin:$PATH</p>
+
+<p>使环境变量马上生效</p>
+
+<p>source /etc/profile</p>
+
+<p>设置相关存储路径</p>
+
+<p>cd /datamkdir -p mysqldata/3306/{data,binlog,tmp,innodb_ts,innodb_log}cd /data/mysqldata/mkdir script backup</p>
+
+<p>chown -R mysql:mysql /data/mysqldata/</p>
+
+<p>&nbsp;</p>
+
+<p>创建my.cnf</p>
+
+<p>vi /data/mysqldata/3306/my.cnf[client]port = 3306socket = /data/mysqldata/3306/mysql.sock</p>
+
+<p>&nbsp;</p>
+
+<h1>Here follows entries for some specific programs</h1>
+
+<p>&nbsp;</p>
+
+<h1>The MySQL server</h1>
+
+<p>[mysqld]</p>
+
+<p>port     = 3306</p>
+
+<p>user     = mysql</p>
+
+<p>socket   = /data/mysqldata/3306/mysql.sock</p>
+
+<p>pid-file = /tmp/mysql.pid</p>
+
+<p>basedir  = /usr/local/mysql</p>
+
+<p>datadir  = /data/mysqldata/3306/data</p>
+
+<p>tmpdir   = /data/mysqldata/3306/tmp</p>
+
+<p>open_files_limit    = 10240</p>
+
+<p>server-id = 333306</p>
+
+<p>lower_case_table_names = 1</p>
+
+<p>character-set-server = utf8</p>
+
+<p>skip-name-resolve</p>
+
+<p>&nbsp;</p>
+
+<p>max_connections = 1000</p>
+
+<p>max_connect_errors = 100000</p>
+
+<p>max_allowed_packet = 512M</p>
+
+<p>max_heap_table_size = 1024M</p>
+
+<p>max_length_for_sort_data = 4096</p>
+
+<p>back_log=100</p>
+
+<p>interactive_timeout = 28800</p>
+
+<p>wait_timeout = 28800</p>
+
+<p>&nbsp;</p>
+
+<p>default-storage-engine = InnoDB</p>
+
+<p>&nbsp;</p>
+
+<p>net_buffer_length = 8K</p>
+
+<p>sort_buffer_size = 2M</p>
+
+<p>join_buffer_size = 4M</p>
+
+<p>read_buffer_size = 2M</p>
+
+<p>read_rnd_buffer_size = 16M</p>
+
+<p>&nbsp;</p>
+
+<p>query_cache_size = 128M</p>
+
+<p>query_cache_limit = 2M</p>
+
+<p>query_cache_min_res_unit = 2k</p>
+
+<p>&nbsp;</p>
+
+<p>thread_cache_size = 300</p>
+
+<p>table_open_cache = 1024</p>
+
+<p>tmp_table_size = 256M</p>
+
+<p>&nbsp;</p>
+
+<h1><strong><strong><strong><strong><strong><em>  Logs related settings </em></strong></strong></strong></strong></strong></h1>
+
+<p>log-bin  = ../binlog/mysql-bin</p>
+
+<p>relay-log = ../binlog/mysql-relay-bin</p>
+
+<p>binlog_format=mixed</p>
+
+<p>binlog_cache_size=32m</p>
+
+<p>max_binlog_cache_size=512m</p>
+
+<p>max_binlog_size=512m</p>
+
+<p>long_query_time = 1</p>
+
+<p>log_output = FILE</p>
+
+<p>log-error =  ../mysql-error.log</p>
+
+<p>slow_query_log = 1</p>
+
+<p>slow_query_log_file = ../slow_statement.log</p>
+
+<h1>log_queries_not_using_indexes</h1>
+
+<p>general_log = 0</p>
+
+<p>general_log_file = ../general_statement.log</p>
+
+<p>expire-logs-days = 14</p>
+
+<p>&nbsp;</p>
+
+<h1><strong><strong><strong><strong><strong><em> MyISAM Specific options </em></strong></strong></strong></strong></strong></h1>
+
+<p>key_buffer_size = 32M</p>
+
+<p>bulk_insert_buffer_size = 64M</p>
+
+<p>myisam_sort_buffer_size = 128M</p>
+
+<p>myisam_max_sort_file_size = 10G</p>
+
+<p>myisam_repair_threads = 1</p>
+
+<p>myisam_recover</p>
+
+<p>&nbsp;</p>
+
+<h1><strong><strong><strong><strong><strong><em> INNODB Specific options </em></strong></strong></strong></strong></strong></h1>
+
+<p>innodb_file_per_table = 1</p>
+
+<p>transaction-isolation = READ-COMMITTED</p>
+
+<p>&nbsp;</p>
+
+<p>innodb_additional_mem_pool_size = 16M</p>
+
+<p>innodb_buffer_pool_size = 1192M</p>
+
+<p>innodb_data_home_dir = ../innodb_ts</p>
+
+<p>innodb_data_file_path = ibdata1:2048M:autoextend</p>
+
+<p>&nbsp;</p>
+
+<p>innodb_file_io_threads = 4</p>
+
+<p>innodb_thread_concurrency = 8</p>
+
+<p>innodb_log_buffer_size = 128M</p>
+
+<p>innodb_log_file_size = 256M</p>
+
+<p>innodb_log_files_in_group = 3</p>
+
+<p>&nbsp;</p>
+
+<p>innodb_log_group_home_dir = ../innodb_log</p>
+
+<p>innodb_flush_log_at_trx_commit = 2</p>
+
+<p>innodb_max_dirty_pages_pct = 80</p>
+
+<p>innodb_lock_wait_timeout = 120</p>
+
+<p>innodb_flush_method=O_DIRECT</p>
+
+<p>performance_schema</p>
+
+<p>&nbsp;</p>
+
+<p>[mysqldump]</p>
+
+<p>quick</p>
+
+<p>max_allowed_packet = 512M</p>
+
+<p>&nbsp;</p>
+
+<p>[mysql]</p>
+
+<p>no-auto-rehash</p>
+
+<h1>Remove the next comment character if you are not familiar with SQL</h1>
+
+<h1>safe-updates</h1>
+
+<p>&nbsp;</p>
+
+<p>[myisamchk]</p>
+
+<p>key_buffer_size = 32M</p>
+
+<p>sort_buffer_size = 20M</p>
+
+<p>read_buffer_size = 2M</p>
+
+<p>write_buffer_size = 2M</p>
+
+<p>&nbsp;</p>
+
+<p>[mysqlhotcopy]</p>
+
+<p>interactive-timeout</p>
+
+<p>&nbsp;</p>
+
+<p>[mysqld_safe]</p>
+
+<p>open-files-limit = 8192</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>安装mysql database，并启动Myql：</p>
+
+<p>/usr/local/mysql/scripts/mysql_install_db \</p>
+
+<p>&mdash;datadir=/data/mysqldata/3306/data \</p>
+
+<p>&mdash;defaults-file=/data/mysqldata/3306/my.cnf \</p>
+
+<p>&mdash;basedir=/usr/local/mysql &mdash;user=mysql</p>
+
+<p>mysqld_safe &mdash;defaults-file=/data/mysqldata/3306/my.cnf &amp;</p>
+
+<p>mysqladmin -uroot password &lsquo;new_password&rsquo; -S /data/mysqldata/3306/mysql.sock</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>mysql -uroot -p123456</p>
+
+<p>mysql&gt; select user,host from mysql.user;</p>
+
+<p>mysql&gt; delete from mysql.user where (user,host) not in (select &lsquo;root&rsquo;,&lsquo;localhost&rsquo;);</p>
+
+<p>mysql&gt; delete from mysql.proxies_priv where host=&lsquo;localhost.localdomain&rsquo;;</p>
+
+<p>mysql&gt; delete from mysql.db;</p>
+
+<p>mysql&gt; flush privileges;</p>
+
+<p>mysql&gt; quit</p>
+
+<p>mysqladmin -uroot -p123456 shutdownrm -f /data/mysqldata/3306/mysql-error.logmysqld_safe &mdash;defaults-file=/data/mysqldata/3306/my.cnf &amp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>启动Mysql脚本</p>
+
+<p>cp support-files/mysql.server  /etc/init.d/mysqldchmod +x /etc/init.d/mysqld</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>修改ha.cf</p>
+
+<p>由于现在是管理Mysql，故要将mysqld由heartbeat管理（2个节点都执行）</p>
+
+<p>cat /etc/ha.d/haresourcesdrbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0:0  drbddisk::r0 Filesystem::/dev/drbd0::/data::ext4 mysqld</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>测试</p>
+
+<p>1）  准备Mysql数据（节点1操作）</p>
+
+<p>mysql -uroot -pEnter password:Welcome to the MySQL monitor.  Commands end with ; or \g.Your MySQL connection id is 2</p>
+
+<p>Server version: 5.6.5-m8-log agenge for mysql</p>
+
+<p>&nbsp;</p>
+
+<p>Copyright &copy; 2000, 2012, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>&nbsp;</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its</p>
+
+<p>affiliates. Other names may be trademarks of their respective</p>
+
+<p>owners.</p>
+
+<p>&nbsp;</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; create database mydb;</p>
+
+<p>Query OK, 1 row affected (0.02 sec)</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; use mydb;</p>
+
+<p>Database changed</p>
+
+<p>mysql&gt; create table t_1( id  int not null, name varchar(10));</p>
+
+<p>Query OK, 0 rows affected (0.14 sec)</p>
+
+<p>mysql&gt; insert into t_1 values(1,&lsquo;aaa&rsquo;);</p>
+
+<p>Query OK, 1 row affected (0.00 sec)</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; commit;</p>
+
+<p>Query OK, 0 rows affected (0.00 sec)</p>
+
+<p>mysql&gt; quit;</p>
+
+<p>Bye</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>2）  切换主、次节点，同时监控drbd-02服务器的日志</p>
+
+<p>watch -n 1 /etc/init.d/drbd status</p>
+
+<p>如果一切正常，可以看到ro的状态从“Secondary/Primary”变成“Primary/Secondary”。</p>
+
+<p>例如偶切换成的状态如下：</p>
+
+<p>drbd driver loaded OK; device status:</p>
+
+<p>version: 8.4.3 (api:1/proto:86-101)</p>
+
+<p>GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by root@<b>drbd-02.i.12582.com</b>, 2013-08-08 16:46:23</p>
+
+<p>m:res  cs         ro                 ds                 p  mounted  fstype</p>
+
+<p>0:r0   Connected  <b>Primary/Secondary</b>  UpToDate/UpToDate  C  /data    ext4</p>
+
+<p>3）  查询数据是否丢失（drbd-02操作）</p>
+
+<p>mysql -uroot -p</p>
+
+<p>Enter password:</p>
+
+<p>Welcome to the MySQL monitor.  Commands end with ; or \g.</p>
+
+<p>Your MySQL connection id is 2</p>
+
+<p>Server version: 5.6.5-m8-log agenge for mysql</p>
+
+<p>&nbsp;</p>
+
+<p>Copyright &copy; 2000, 2012, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>&nbsp;</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its</p>
+
+<p>affiliates. Other names may be trademarks of their respective</p>
+
+<p>owners.</p>
+
+<p>&nbsp;</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; use mydb;</p>
+
+<p>Database changed</p>
+
+<p>mysql&gt; select * from t_1;</p>
+
+<p>+&mdash;&mdash;+&mdash;&mdash;&mdash;+</p>
+
+<p>| id | name |</p>
+
+<p>+&mdash;&mdash;+&mdash;&mdash;&mdash;+</p>
+
+<p>|  1 | aaa  |</p>
+
+<p>+&mdash;&mdash;+&mdash;&mdash;&mdash;+</p>
+
+<p>1 row in set (0.00 sec)</p>
+
+<h2>从结果可以看到在drbd-02上数据已经有了。</h2>
+
+<p>layout: post
+title: DRBD+Heartbeat+Mysql高可用配置
+categories:
+&ndash; 运维
+tags:
+&ndash; drbd
+&ndash; heartbeat
+&ndash; mysql
+&ndash; 集群
+&ndash; 高可用
+published: true</p>
+
+<h2>comments: true</h2>
+
+<h2>介绍</h2>
+
+<p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
+
+<p>DRBD工作需要在两个节点上同时准备一块一模一样的分区组成镜像，这就是为什么它叫做分布式复制块设备，它主要通过复制数据来实现文件同步（备份），主要用于集群文件共享， 我们通过它的工作原理来了解块复制和文件复制的不同。</p>
+
+<p>首先，您需要知道，DRBD是工作在系统内核空间，而不是用户空间，它直接复制的是二进制数据，这是它速度快的根本原因。其次，DRBD至少需要两个节点来工作，一主一次。</p>
+
+<p>DRBD的文件同步过程和普通复制过程的不同：</p>
+
+<p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
+
+<!--more-->
+
+
+<h2>准备工作</h2>
+
+<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
+
+<p>主节点(Primary Node)
+次节点(Secondary Node)
+主机名
+drbd-01.i.12582.com
+drbd-02.i.12582.com
+操作系统
+CentOS 6.3 x86_64位
+CentOS 6.3 x86_64位
+硬盘分区
+/dev/sdb  8G
+/dev/sdb  8G
+IP地址
+192.168.30.234
+192.168.30.235</p>
+
+<p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+<h2>初始化设置</h2>
+
+<p>1  所有节点关闭iptables和SELinux</p>
+
+<p>2  在所有节点/etc/hosts加入以下内容：</p>
+
+<pre><code>192.168.30.234  drbd-01.i.12582.com drbd-01
+192.168.30.235  drbd-02.i.12582.com drbd-02
+</code></pre>
+
+<p>3  所有节点创建独立分区：</p>
+
+<pre><code>fdisk /dev/sdbDevice contains neither a valid DOS partition table, nor Sun, SGI or OSF disklabelBuilding a new DOS disklabel with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
+After that, of course, the previous content won't be recoverable.
+Warning: invalid flag 0x0000 of partition table 4 will be corrected by w(rite)
+WARNING: DOS-compatible mode is deprecated. It's strongly recommended to
+switch off the mode (command 'c') and change display units to
+sectors (command 'u').
+
+Command (m for help): p
+Disk /dev/sdb: 8589 MB, 8589934592 bytes
+255 heads, 63 sectors/track, 1044 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x46b64833
+
+Device Boot    Start        End        Blocks    Id    System
+
+Command (m for help): n
+Command action
+e   extended
+p   primary partition (1-4)
+p
+Partition number (1-4): 1
+First cylinder (1-1044, default 1):
+Using default value 1
+Last cylinder, +cylinders or +size{K,M,G} (1-1044, default 1044):
+Using default value 1044
+
+Command (m for help): w
+The partition table has been altered!
+Calling ioctl() to re-read partition table.
+Syncing disks.
+</code></pre>
+
+<h2>安装Hearbeat</h2>
+
+<pre><code>wget ftp://mirror.switch.ch/pool/1/mirror/scientificlinux/6rolling/i386/os/Packages/epel-release-6-5.noarch.rpm
+rpm -ivUh epel-release-6-5.noarch.rpm
+yum --enablerepo=epel install heartbeat -y
+</code></pre>
+
+<h2>安装DRBD</h2>
+
+<p>1  安装依赖包</p>
+
+<pre><code>yum -y install gcc kernel-devel kernel-headers flex
+</code></pre>
+
+<p>2  安装DRBD</p>
+
+<pre><code>wget http://oss.linbit.com/drbd/8.4/drbd-8.4.3.tar.gz
+tar zxvf drbd-8.4.3.tar.gz
+cd drbd-8.4.3
+./configure --prefix=/usr/local/drbd --with-km --with-heartbeat
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+make install
+cp -R /usr/local/drbd/etc/ha.d/resource.d/drbd* /etc/ha.d/resource.d/
+</code></pre>
+
+<p>3  其他设置</p>
+
+<pre><code>mkdir -p /usr/local/drbd/var/run/drbd
+cp /usr/local/drbd/etc/rc.d/init.d/drbd /etc/rc.d/init.d/
+chkconfig --add drbdchkconfig drbd on
+</code></pre>
+
+<h2>安装DRBD模块</h2>
+
+<pre><code>cd drbdmake 
+clean
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+cp drbd.ko /lib/modules/`uname -r`/kernel/lib/
+depmod
+</code></pre>
+
+<p>以上操作请在所有节点操作一次。</p>
+
+<hr />
+
+<h2>设置DRBD</h2>
+
+<p><strong>配置drbd.conf</strong></p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/global_common.conf
+global {
+    minor-count 64;
+    usage-count yes;
+    # minor-count dialog-refresh disable-ip-verification
+}
+
+
+common {
+    syncer { rate 1000M; }
+    handlers {
+        # These are EXAMPLE handlers only.
+        # They may have severe implications,
+        # like hard resetting the node under certain circumstances.
+        # Be careful when chosing your poison.
+
+        pri-on-incon-degr "/usr/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        pri-lost-after-sb "/usr/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        local-io-error "/usr/lib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-emergency-shutdown.sh; echo o &amp;gt; /proc/sysrq-trigger ; halt -f";
+        fence-peer "/usr/lib/drbd/crm-fence-peer.sh";
+        pri-lost "/usr/local/drbd/lib/drbd/notify-pri-lost.sh; /usr/local/drbd/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt;/proc/sysrq-trigger ; reboot -f";
+        split-brain "/usr/lib/drbd/notify-split-brain.sh root";
+        out-of-sync "/usr/lib/drbd/notify-out-of-sync.sh root";
+        # before-resync-target "/usr/lib/drbd/snapshot-resync-target-lvm.sh -p 15 -- -c 16k";
+        # after-resync-target /usr/lib/drbd/unsnapshot-resync-target-lvm.sh;
+    }
+
+    startup {
+
+        # wfc-timeout degr-wfc-timeout outdated-wfc-timeout wait-after-sb
+        wfc-timeout 60;
+        degr-wfc-timeout 120;
+        outdated-wfc-timeout 2;
+    }
+
+    options {
+        # cpu-mask on-no-data-accessible
+        }
+
+    disk {
+        # size max-bio-bvecs on-io-error fencing disk-barrier disk-flushes
+        # disk-drain md-flushes resync-rate resync-after al-extents
+        # c-plan-ahead c-delay-target c-fill-target c-max-rate
+        # c-min-rate disk-timeout
+        on-io-error detach;
+        fencing resource-only;
+    }
+
+    net {
+        # protocol timeout max-epoch-size max-buffers unplug-watermark
+        # connect-int ping-int sndbuf-size rcvbuf-size ko-count
+        # allow-two-primaries cram-hmac-alg shared-secret after-sb-0pri
+        # after-sb-1pri after-sb-2pri always-asbp rr-conflict
+        # ping-timeout data-integrity-alg tcp-cork on-congestion
+        # congestion-fill congestion-extents csums-alg verify-alg
+        # use-rle
+        protocol C;
+    }
+}
+</code></pre>
+
+<p>设置资源文件</p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/r0.res
+resource r0 {
+    on drbd-01.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.234:7788;
+        meta-disk       internal;
+    }
+
+    on drbd-02.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.235:7788;
+        meta-disk       internal;
+    }
+}
+</code></pre>
+
+<hr />
+
+<h3>设置权限</h3>
+
+<pre><code>chgrp haclient /sbin/drbdsetup
+chmod o-x /sbin/drbdsetup
+chmod u+s /sbin/drbdsetup
+chgrp haclient /sbin/drbdmeta
+chmod o-x /sbin/drbdmeta
+chmod u+s /sbin/drbdmeta
+</code></pre>
+
+<p>加载DRBD模块与建立resource</p>
+
+<pre><code>modprobe drbd
+lsmod | grep drbd
+drbd                  328626  0
+libcrc32c               1246  1 drbd
+</code></pre>
+
+<p>写入一些数据到/dev/sdb1</p>
+
+<pre><code>dd if=/dev/zero of=/dev/sdb1 bs=1M count=100
+</code></pre>
+
+<p>建立Resource</p>
+
+<pre><code>drbdadm create-md r0
+Writing meta data...
+initializing activity log
+NOT initializing bitmap
+New drbd meta data block successfully created.
+success
+</code></pre>
+
+<h3>启动DRBD</h3>
+
+<pre><code>/etc/init.d/drbd start
+Starting DRBD resources: [
+      create res: r0
+    prepare disk: r0
+     adjust disk: r0
+     adjust net: r0
+]
+degr-wfc-timeout has to be shorter than wfc-timeout
+degr-wfc-timeout implicitly set to wfc-timeout (60s)
+..........
+***************************************************************
+DRBD's startup script waits for the peer node(s) to appear.
+- In case this node was already a degraded cluster before the
+reboot the timeout is 120 seconds. [degr-wfc-timeout]
+- If the peer was available before the reboot the timeout will
+expire after 60 seconds. [wfc-timeout]
+(These values are for resource 'r0'; 0 sec -&amp;gt; wait forever)
+To abort waiting enter 'yes' [  49]:yes
+
+.
+</code></pre>
+
+<p>节点2按以上操作执行一次。</p>
+
+<h3>DRBD状态查看</h3>
+
+<ol>
+<li><p>Secondary/Unknown：若drbd-01服务启动而drbd-02尚未启动,则ro会出现Secondary/Unknown</p>
+
+<pre><code> /init.d/drbd status
+ drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs        ro                 ds                 p   mounted
+ fstype
+ 0:r0   WFConnection  Secondary/Unknown  Inconsistent/DUnknown  C
+</code></pre>
+
+<p>查看drbd</p>
+
+<pre><code>  cat /proc/drbd
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:WFConnection ro:Secondary/Unknown ds:Inconsistent/DUnknown C r----s
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre></li>
+<li><p>Inconsistent/Inconsistent：ds出現Inconsistent表示兩台node資料尚未同步。</p>
+
+<pre><code> drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs         ro                   ds                         p  mounted  
+ fstype
+ 0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre>
+
+<p>查看内核</p>
+
+<pre><code>  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r-----
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre>
+
+<p>3  SyncSource：cs出現SyncTarget表示正在同步中，可看到目前同步時的進度．</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs          ro                 ds                     p  mounted  
+  fstype
+  ...    sync'ed:    26.1%              (6056/8188)M
+  0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>4  Secondary/Secondary：表示尚未設定Primary Node。</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs         ro                   ds                         p  mounted  
+  fstype
+  0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre></li>
+</ol>
+
+
+<h3>设置主节点(Primary Node)</h3>
+
+<p>在drbd-01进行以下操作:</p>
+
+<pre><code>drbdadm -- --overwrite-data-of-peer primary r0
+</code></pre>
+
+<p>再查看下状态:</p>
+
+<pre><code>/etc/init.d/drbd status
+drbd driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+m:res  cs          ro                 ds                     p  mounted  fstype
+...    sync'ed:    13.1%              (7124/8188)M
+0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>在drbd-02查看下状态：</p>
+
+<pre><code>driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-02.i.12582.com, 2013-08-08 14:16:07
+m:res  cs         ro                 ds                 p  mounted  fstype
+0:r0   Connected  Secondary/Primary  UpToDate/UpToDate  C
+</code></pre>
+
+<p>格式化（drbd-01）</p>
+
+<pre><code>mkfs.ext4 /dev/drbd0
+</code></pre>
+
+<p>挂载到文件系统：</p>
+
+<pre><code>mkdir /datamount /dev/drbd0 /data
+</code></pre>
+
+<h2>测试DRBD</h2>
+
+<h3>测试同步</h3>
+
+<ol>
+<li><p>在主节点（Primary Node）复制一些数据到/data</p>
+
+<pre><code> cp -r drbd-8.4.3 /data/
+</code></pre></li>
+<li><p>在次节点（Secondary Node）执行以下步骤：</p>
+
+<pre><code> drbdadm down r0
+</code></pre>
+
+<p>注：次节点在DRBD启动状态下是无法mount /data的，所以必须先手动停止才能mount。</p>
+
+<pre><code>  mkdir /datamount -t ext4 /dev/sdb1 /datals -l
+</code></pre>
+
+<p>就可以看到数据已经全部同步过来。</p></li>
+</ol>
+
+
+<h2>Heartbeat配置</h2>
+
+<ol>
+<li><p>主节点操作：</p>
+
+<pre><code> vim /etc/ha.d/ha.cf
+ debugfile /var/log/ha-debug   # 打开错误日志报告
+
+ keepalive 2    # 2秒检测一次心跳线连接
+ deadtime 10    # 10秒测试不到 主节点心跳线就认为有问题
+ warntime 6    # 警告时间（建议在2－10之间）
+ initdead 120   # 初始化启动时 120秒无连接视为正常，或指定heartbeat 在启动时，
+ # 需要等待120秒才去启动任何资源
+
+ udpport 694     # 用udp的694端口连接，netstat -antulp | grep 694
+ ucast eth0 192.168.30.235      # 单播方式连接（主、从都是写对方的IP连接）
+ node  drbd-01.i.12582.com  # 声明主节点（uname -n）
+ node  drbd-02.i.12582.com  # 声明次节点（uname -n）
+ auto_failback on                    # 自动切换（主节点恢复后会自动切换回来）
+ respawn hacluster /usr/lib64/heartbeat/ipfail  #监控ipfail进程是否挂掉，否则重启它
+</code></pre></li>
+<li><p>编辑认证文件</p>
+
+<pre><code> vim /etc/ha.d/authkeys
+ auth 1
+ 1 sha1 MySecret&amp;nbsp;
+</code></pre></li>
+<li><p>权限</p>
+
+<pre><code> chmod 600 /etc/ha.d/authkeys
+</code></pre></li>
+<li><p>编辑资源文件</p>
+
+<pre><code> vim /etc/ha.d/haresources
+ drbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0 drbddisk::r0 
+ Filesystem::/dev/drbd0::/data::ext4
+</code></pre>
+
+<p> drbd-01.i.12582.com   主节点的主机名</p>
+
+<p> IPaddr::192.168.30.229/24/eth0    设置虚拟IP</p>
+
+<p> drbddisk::r0                  管理资源r0</p>
+
+<p> Filesystem::/dev/drbd0::/data::ext4   执行umount和mount操作</p></li>
+<li><p>次节点操作：</p>
+
+<p> 将ha.cf中的192.168.30.235改成192.168.30.234</p></li>
+</ol>
+
+
+<h3>DRBD主从自动切换测试</h3>
+
+<ol>
+<li><p>首先在 drbd-01启动heartbeat：</p>
+
+<pre><code> /etc/init.d/heartbeat  start
+</code></pre></li>
+<li><p>接着在 drbd-02 启动heartbear:</p>
+
+<pre><code> /etc/init.d/heartbeat  start
+</code></pre></li>
+<li><p>在drbd-01输入：</p>
+
+<pre><code> ip a
+
+ 1: lo: &amp;lt;LOOPBACK,UP,LOWER_UP&amp;gt; mtu 16436 qdisc noqueue state UNKNOWN
+     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+     inet 127.0.0.1/8 scope host lo
+     inet6 ::1/128 scope host
+         valid_lft forever preferred_lft forever
+ 2: eth0: &amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
+     link/ether 08:00:27:98:a2:6c brd ff:ff:ff:ff:ff:ff
+     inet 192.168.30.234/24 brd 192.168.30.255 scope global eth0
+     inet &lt;b&gt;192.168.30.229&lt;/b&gt;/24 brd 192.168.30.255 scope global secondary eth0:0
+     inet6 fe80::a00:27ff:fe98:a26c/64 scope link
+         valid_lft forever preferred_lft forever
+</code></pre>
+
+<p>从结果可以看出，VIP已经出现。</p></li>
+<li><p>停止drbd-01的heartbeat服务或将网线断掉，同时监控drbd-02的DRBD状态.</p></li>
+<li><p>drbd-02操作：</p>
+
+<pre><code> watch -n 1 /etc/init.d/drbd status
+</code></pre>
+
+<p>如果一切正常，可以看到状态在不断变化。</p></li>
+<li><p>恢复drbd-01的heartbeat服务或将网线接上，同时监控drbd-02的DRBD状态，如果正常drbd-01又变为主节点（auto_failback on 决定）了。</p></li>
+</ol>
+
+
+<h2>Mysql+DRBD+Heartbeat配置</h2>
+
+<h3>Mysql安装</h3>
+
+<p><strong>安装Mysql依赖包</strong></p>
+
+<pre><code>yum -y install gcc gcc-c++ ncurses-devel libtool zlib-devel bison
+</code></pre>
+
+<p><b>创建用户与组</b></p>
+
+<pre><code>groupadd mysqluseradd -g mysql mysql
+</code></pre>
+
+<p><b>设置内核参数</b></p>
+
+<pre><code>vi /etc/security/limits.conf
+mysql              soft    nproc   2047
+mysql              hard    nproc   16384
+mysql              soft    nofile  1024
+mysql              hard    nofile  65536
+</code></pre>
+
+<p><b>安装Mysql</b></p>
+
+<p>由于源码安装Mysql5.6需要依赖cmake，必须先安装cmake：</p>
+
+<pre><code>mkdir ~/software; cd ~/software
+wget ftp://192.168.30.211/pub/Tools/mysql/cmake-2.8.4.tar.gz
+tar zxvf cmake-2.8.4.tar.gz
+cd cmake-2.8.4
+./configure
+gmake &amp;&amp;  make install
+</code></pre>
+
+<p>开始安装Mysql</p>
+
+<pre><code>cd ~/software
+wget ftp://192.168.30.211/pub/Tools/mysql/mysql-5.6.5-m8.tar.gz
+tar zxvf mysql-5.6.5-m8.tar.gz
+cd mysql-5.6.5-m8
+
+cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
+  -DDEFAULT_CHARSET=utf8 \
+  -DDEFAULT_COLLATION=utf8_general_ci \
+  -DENABLED_LOCAL_INFILE=ON \
+  -DWITH_INNOBASE_STORAGE_ENGINE=1 \
+  -DWITH_FEDERATED_STORAGE_ENGINE=1 \
+  -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+  -DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
+  -DWITH_PARTITION_STORAGE_ENGINE=1 \
+  -DWITH_PERFSCHEMA_STORAGE_ENGINE=1 \
+  -DCOMPILATION_COMMENT='agenge for mysql' \
+  -DWITH_READLINE=ON \
+  -DMYSQL_UNIX_ADDR=/data/mysqldata/3306/mysql.sock \
+  -DSYSCONFDIR=/data/mysqldata/3306
+  make &amp;&amp; make install
+</code></pre>
+
+<h3>Mysql设置</h3>
+
+<ul>
+<li><p>设置权限</p>
+
+<pre><code>  chown -R mysql:mysql /usr/local/mysql
+</code></pre></li>
+<li><p>设置环境变量</p>
+
+<pre><code>  vi /etc/profileexport PATH=/usr/local/mysql/bin:$PATH
+</code></pre></li>
+<li><p>使环境变量马上生效</p>
+
+<pre><code>  source /etc/profile
+</code></pre></li>
+<li><p>设置相关存储路径</p>
+
+<pre><code>  cd /data
+  mkdir -p mysqldata/3306/{data,binlog,tmp,innodb_ts,innodb_log}
+  cd /data/mysqldata/mkdir script backup
+  chown -R mysql:mysql /data/mysqldata/
+</code></pre></li>
+<li><p>创建my.cnf</p>
+
+<pre><code>  vi /data/mysqldata/3306/my.cnf
+  [client]
+  port = 3306
+  socket = /data/mysqldata/3306/mysql.sock
+
+  # Here follows entries for some specific programs
+
+  # The MySQL server
+  [mysqld]
+  port     = 3306
+  user     = mysql
+  socket   = /data/mysqldata/3306/mysql.sock
+  pid-file = /tmp/mysql.pid
+  basedir  = /usr/local/mysql
+  datadir  = /data/mysqldata/3306/data
+  tmpdir   = /data/mysqldata/3306/tmp
+  open_files_limit    = 10240
+  server-id = 333306
+  lower_case_table_names = 1
+  character-set-server = utf8
+  skip-name-resolve
+  max_connections = 1000
+  max_connect_errors = 100000
+  max_allowed_packet = 512M
+  max_heap_table_size = 1024M
+  max_length_for_sort_data = 4096
+  back_log=100
+  interactive_timeout = 28800
+  wait_timeout = 28800
+
+  default-storage-engine = InnoDB
+
+  net_buffer_length = 8K
+  sort_buffer_size = 2M
+  join_buffer_size = 4M
+  read_buffer_size = 2M
+  read_rnd_buffer_size = 16M
+
+  query_cache_size = 128M
+  query_cache_limit = 2M
+  query_cache_min_res_unit = 2k
+
+  thread_cache_size = 300
+  table_open_cache = 1024
+  tmp_table_size = 256M
+
+  #***********  Logs related settings ***********
+  log-bin  = ../binlog/mysql-bin
+  relay-log = ../binlog/mysql-relay-bin
+  binlog_format=mixed
+  binlog_cache_size=32m
+  max_binlog_cache_size=512m
+  max_binlog_size=512m
+  long_query_time = 1
+  log_output = FILE
+  log-error =  ../mysql-error.log
+  slow_query_log = 1
+  slow_query_log_file = ../slow_statement.log
+  #log_queries_not_using_indexes
+  general_log = 0
+  general_log_file = ../general_statement.log
+  expire-logs-days = 14
+
+  #*********** MyISAM Specific options ***********
+  key_buffer_size = 32M
+  bulk_insert_buffer_size = 64M
+  myisam_sort_buffer_size = 128M
+  myisam_max_sort_file_size = 10G
+  myisam_repair_threads = 1
+  myisam_recover
+
+  #*********** INNODB Specific options ***********
+  innodb_file_per_table = 1
+  transaction-isolation = READ-COMMITTED
+
+  innodb_additional_mem_pool_size = 16M
+  innodb_buffer_pool_size = 1192M
+  innodb_data_home_dir = ../innodb_ts
+  innodb_data_file_path = ibdata1:2048M:autoextend
+
+  innodb_file_io_threads = 4
+  innodb_thread_concurrency = 8
+  innodb_log_buffer_size = 128M
+  innodb_log_file_size = 256M
+  innodb_log_files_in_group = 3
+
+  innodb_log_group_home_dir = ../innodb_log
+  innodb_flush_log_at_trx_commit = 2
+  innodb_max_dirty_pages_pct = 80
+  innodb_lock_wait_timeout = 120
+  innodb_flush_method=O_DIRECT
+  performance_schema
+
+  [mysqldump]
+  quick
+  max_allowed_packet = 512M
+
+  [mysql]
+  no-auto-rehash
+  # Remove the next comment character if you are not familiar with SQL
+  #safe-updates
+
+  [myisamchk]
+  key_buffer_size = 32M
+  sort_buffer_size = 20M
+  read_buffer_size = 2M
+  write_buffer_size = 2M
+
+  [mysqlhotcopy]
+  interactive-timeout
+
+  [mysqld_safe]
+  open-files-limit = 8192
+</code></pre></li>
+<li><p>安装mysql database，并启动Myql：</p>
+
+<pre><code>  /usr/local/mysql/scripts/mysql_install_db \
+    --datadir=/data/mysqldata/3306/data \
+    --defaults-file=/data/mysqldata/3306/my.cnf \
+    --basedir=/usr/local/mysql --user=mysql
+  mysqld_safe --defaults-file=/data/mysqldata/3306/my.cnf &amp;amp;
+  mysqladmin -uroot password 'new_password' -S /data/mysqldata/3306/mysql.sock
+
+  mysql -uroot -p123456
+  mysql&gt; select user,host from mysql.user;
+  mysql&gt; delete from mysql.user where (user,host) not in (select 'root','localhost');
+  mysql&gt; delete from mysql.proxies_priv where host='localhost.localdomain';
+  mysql&gt; delete from mysql.db;
+  mysql&gt; flush privileges;
+  mysql&gt; quit
+  mysqladmin -uroot -p123456 shutdownrm -f /data/mysqldata/3306/mysql-error.logmysqld_safe --defaults-file=/data/mysqldata/3306/my.cnf &amp;amp;
+</code></pre></li>
+<li><p>启动Mysql脚本</p>
+
+<pre><code>  cp support-files/mysql.server  /etc/init.d/mysqld
+  chmod +x /etc/init.d/mysqld
+</code></pre></li>
+<li><p>修改ha.cf</p></li>
+</ul>
+
+
+<p> 由于现在是管理Mysql，故要将mysqld由heartbeat管理（2个节点都执行）</p>
+
+<pre><code>    cat /etc/ha.d/haresources
+    drbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0:0  drbddisk::r0 
+    Filesystem::/dev/drbd0::/data::ext4 mysqld
+</code></pre>
+
+<ul>
+<li><p>测试</p>
+
+<ol>
+<li><p> 准备Mysql数据（节点1操作）</p>
+
+<pre><code>  mysql -uroot -p
+  Enter password:
+  Welcome to the MySQL monitor.  Commands end with ; or \g.
+  Your MySQL connection id is 2
+  Server version: 5.6.5-m8-log agenge for mysql
+
+  Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
+
+  Oracle is a registered trademark of Oracle Corporation and/or its
+  affiliates. Other names may be trademarks of their respective
+  owners.
+
+  Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+  mysql&gt; create database mydb;
+  Query OK, 1 row affected (0.02 sec)
+
+  mysql&gt; use mydb;
+  Database changed
+  mysql&gt; create table t_1( id  int not null, name varchar(10));
+  Query OK, 0 rows affected (0.14 sec)
+  mysql&gt; insert into t_1 values(1,'aaa');
+  Query OK, 1 row affected (0.00 sec)
+
+  mysql&gt; commit;
+  Query OK, 0 rows affected (0.00 sec)
+  mysql&gt; quit;
+  Bye
+</code></pre></li>
+<li><p> 切换主、次节点，同时监控drbd-02服务器的日志</p>
+
+<pre><code>  watch -n 1 /etc/init.d/drbd status
+</code></pre></li>
+</ol>
+
+
+<p>  如果一切正常，可以看到ro的状态从“Secondary/Primary”变成“Primary/Secondary”。</p>
+
+<p>  例如偶切换成的状态如下：</p>
+
+<pre><code>      drbd driver loaded OK; device status:
+      version: 8.4.3 (api:1/proto:86-101)
+      GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by root@&lt;b&gt;drbd-02.i.12582.com&lt;/b&gt;, 2013-08-08 16:46:23
+      m:res  cs         ro                 ds                 p  mounted  fstype
+      0:r0   Connected  &lt;b&gt;Primary/Secondary&lt;/b&gt;  UpToDate/UpToDate  C  /data    ext4
+</code></pre>
+
+<ol>
+<li><p> 查询数据是否丢失（drbd-02操作）</p>
+
+<pre><code>  mysql -uroot -p
+  Enter password:
+  Welcome to the MySQL monitor.  Commands end with ; or \g.
+  Your MySQL connection id is 2
+  Server version: 5.6.5-m8-log agenge for mysql
+
+  Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
+
+  Oracle is a registered trademark of Oracle Corporation and/or its
+  affiliates. Other names may be trademarks of their respective
+  owners.
+
+  Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+  mysql&gt; use mydb;
+  Database changed
+  mysql&gt; select * from t_1;
+  +----+------+
+  | id | name |
+  +----+------+
+  |  1 | aaa  |
+  +----+------+
+  1 row in set (0.00 sec)
+</code></pre></li>
+</ol>
+
+
+<p>  以看到在drbd-02上数据已经有了。</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[视频编解码术语概念介绍]]></title>
+    <link href="http://agenge.github.io/blog/2013/07/28/video-decoder-intro/"/>
+    <updated>2013-07-28T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/07/28/video-decoder-intro</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>最近有幸接触到流媒体领域，这可是偶之前一直灰常弱的一方面，可以说完全没有任何概念，经过Google的N次方搜索之后，头脑中总算有个概念，以下文章均来自互联网，偶就不一一帖出原链接，如果有语句或解释，很可能是偶借鉴您的文章，希望不要介意。当然，有些是偶自己写的，您就凑合着看，对于新手来讲，我相信收获肯定不少。</p>
+
+<h3>阅读对象</h3>
+
+<ol>
+<li>流媒体新手或渴望了解流媒体</li>
+<li>这篇文章合适有耐心的人，如果您觉得没那么多时间看这些”费话“，请直接关闭当前标签页
+会更好。</li>
+<li>永远追求上进的学习爱好者。</li>
+<li><strong>不适合</strong>流媒体的牛逼人物。</li>
+</ol>
+
+
+<hr />
+
+<h2>视频扫盲</h2>
+
+<h3>什么是编解码？什么是codec？</h3>
+
+<p>所谓编解码，就是codec。 <strong>CODEC</strong>= <strong>CO</strong>de（编码）+<strong>DEC</strong>ode（解码）.假设显示器的设置是：每秒刷新60次，也就是刷新率为60Hz，1024 * 768的分辨率，那么此时显卡每秒要处理的数据量是 60 * 1024 * 768 个像素点，可想而知，视频文件的大小是很恐怖的。如果不用任何方法压缩，就单纯的存储视频文件，那么1GB的文件，也只能存储37秒左右的视频内容。所以，咱们需要一个方式来压缩（code,编码）它，再存储起来，要播放的时候，再解压缩（decode,解码）。这样牺牲一些时间，来换取很大一部分空间，这是值得的，并且咱们的硬件设备也有这个能力做到。</p>
+
+<h3>屏幕比例与分辨率的联系</h3>
+
+<p>4:3、16:9、16:10，还有5:4，1920x1024、1280x720、1024x768、640x480等，已经被这些比例和分辨率搞得头昏脑涨？目前市场上针对比例和分辨率还比较混乱，下面的扫盲<strong>仅限于</strong>常见的几种。其实我们最常见的屏幕比例无非上面提到的4:3、16:9、16:10这三种，而5:4只是一个特殊比例，每种比例都算是一个家庭，其中4:3是最最常见的，也是历史最久的比例，它所对应的最高分辨率为：640x480，更小的分辨率此处不再一一列出。16:9 主要用于HD电视领域，也就是我们经常听到的720p、1080p，两个比例对应的分辨率：</p>
+
+<ul>
+<li>720p   1280x720</li>
+<li>1080p 1920x1080</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h3>延升阅读</h3>
+
+<p>16:9是指显示器长宽比例，根据<strong>人体工程学</strong>的研究，发现人的两只眼睛的视野范围是一个长宽比例为16：9的长方形，所以电视、显示器行业根据这个的黄金比例尺寸设计产品。</p>
+
+<h4>Container（容器），Stream（流），Frame（帧），Codec（编解码器），mux/demux(复用/解复用)。</h4>
+
+<ul>
+<li><strong>Container</strong>：           一个container就是一个文件，一种container就是一种文件格式，举例：xxx.flv 和 yyy.mkv是两个文件，我们可以说他们是两个容器，并且是两种不同的容器。</li>
+<li><strong>Stream</strong>：    一个容器中包括音频流(audio stream)、视频流(video stream)、字幕流(subtitlestream )等。
+
+<ul>
+<li>例1：xxx.flv文件，假设里面包含两种stream，一种是音频流(audio stream)，另一种是视频流(video stream)，并且以flv规定的格式把这两个流封装在.flv容器里面。</li>
+<li>例2：yyy.mkv文件，假设里面包含三种stream，一种是音频流(audio stream)，另一种是视频流(video stream)，还有一种流是字幕流(subtitle stream)，并且以mkv规定的格式把这三种流封装在.mkv的容器里面。</li>
+</ul>
+</li>
+</ul>
+
+
+<p> 上面讲了容器和流的关系，那把不同的流按照某种容器的规则从那种容器（文件）中解析（或者说抽出来）出来，这种行为叫做解复用（demux），使用解复用器（demuxer），那反过来，把不同的流按照某种容器的规则放入那种容器（最后肯定生成了某种格式的文件），这种行为叫做<strong>复用</strong>（mux），使用复用器（muxer）。</p>
+
+<ul>
+<li><strong>Frame</strong>：     包含在Stream里面，当从容器中得到一个流以后，或者说不管你怎么弄的，反正你得到了一个流，那这个流就认为是被某种编码器 编码过后生成的，你需要把这个流里面的帧去解码。</li>
+</ul>
+
+
+<p><strong>那什么又是影片捏？</strong></p>
+
+<p>影片其实就是一组（很多张）图片，时间间隔很小的连续展示出来，人们就觉得画面中的人物在动，这就是影片。那电影的实质就是N多张图片的集合。那每张图片和帧又有什么关系呢？事实上，如果一部影片里面的图片，我们原封不动的全部存起来，空间会很大很大很大，但是如果通过一定的算法（这里不讲相关算法），把每一张图片压缩（编码_encode）一下，变成帧(Frame)。再把帧连起来变成流，再把不同的流放到某个容器里面，这就是我们平常看见的电影文件了，比如这个文件 《碟中谍4.H264.ACC.mkv》，他为什么要这样命名呢？mkv表达了它的容器是.mkv的，且包含至少两个流，h264的视频流，ACC的音频流。这是一种典型的牺牲时间来换取空间的做法。当得到一个流之后，就得设法找出里面的帧，然后使用解码器/decoder 把帧还原，然后再去播放，也可以再去使用另一个编码器/encoder编码压缩成另一种格式的帧（这就是所谓的转格式软件要完成的一个步骤）。</p>
+
+<hr />
+
+<h2>视频编码简介</h2>
+
+<h3>MPEG视频编码</h3>
+
+<h4>MPEG-2简介</h4>
+
+<ol>
+<li><p>MPEG-2编码的DVD
+MPEG-2制定于1994年，设计目标是高级工业标准的图象质量以及更高的传输率。MPEG-2所能提供的传输率在3-10Mbits/sec间，其在 NTSC制式下的分辨率可达720X486，MPEG-2也可提供并能够提供广播级的视像和CD级的音质。MPEG-2的音频编码可提供左右中及两个环绕 声道,以及一个加重低音声道，和多达7个伴音声道(这就是DVD可有8种语言配音的原因)。由于MPEG-2的出色性能表现，已能适用于高清视频，使得原打算为高清视频设计的MPEG-3，还没出世就被抛弃了。MPEG-3要求传输速率在20Mbits/sev-40Mbits/sec间，但这将使画面有轻度扭曲。</p></li>
+<li><p>MPEG-2 TS编码的高清视频
+MPEG-2高清视频采用的编码是MPEG-2 TS格式，其英文全称是(MPEG-2 Transport Stream)，这是一种视频流格式，主要用于实时传送节目，目前已经成为数字电视领域中普遍应用的系统层编码标准。</p></li>
+</ol>
+
+
+<p> MPEG-2 TS格式的高清视频文件一般采用mpg、tp、ts为后缀。采用MPEG-2 TS格式压缩后的高清视频文件通常都相当大，以一部90分钟的电影为例，文件大小通常都在8GB以上，有的甚至超过15GB。在播放以tp和ts为后缀的高清视频文件时也比较麻烦，因为文件中分别包含有AC’3音频信息和MPEG-2视频信息，需要使用专门的软件来进行播放。</p>
+
+<h4>MPEG-4简介</h4>
+
+<p>MPEG-4制定于1998年，MPEG-4是为了播放流式媒体的高质量视频而专门设计的，它可利用很窄的带度，通过帧重建技术，压缩和传输数据，以求使用最少的数据获得最佳的图像质量。这种编码方式多用于HDTV-Rip上，它把原有的高清视频文件按照比例缩小到一定的尺寸，以减少文件的大小，同时画面效果不差于DVD效果，以此来寻求一个画面效果和文件尺寸的平衡。相对于高清视频来说，MPEG-4格式 还显得有点不够用，因此它也不是主流的高清视频信号来源。这种视频格式的文件扩展名包括.asf、.mov和DivX 、AVI等。</p>
+
+<h3>H.264视频编码</h3>
+
+<p>H.264是一种高性能的视频编解码技术。目前国际上制定视频编解码技术的组织有两个: 一个是“国际电联（ITU-T）”，它制定的标准有H.261、H.263、H.263+等，另一个是“国际标准化组织（ISO）”它制定的标准有MPEG-1、MPEG-2、MPEG-4等。而H.264则是由两个组织联合组建的联合视频组（JVT）共同制定的新数字视频编码标准，所以它既是ITU-T的H.264，又是ISO/IEC的MPEG-4高级视频编码（Advanced Video Coding，AVC），而且它将成为MPEG-4标准的第10部分。因此，不论是MPEG-4 AVC、MPEG-4 Part 10，还是ISO/IEC 14496-10，都是指H.264。</p>
+
+<p>H.264最具价值的部分是更高的数据压缩比，在同等的图像质量，H.264的数据压缩比能比DVD系统中使用的 MPEG-2高2～3倍，比MPEG-4高1.5～2倍。举个例子，原始文件的大小如果为100GB，采用MPEG-2压缩标准压缩后变成4GB，压缩比25∶1，而采用H.264压缩标准压缩后变为1GB，从100GB到1GB，H.264的压缩比达到惊人的100∶1。尤其值得一提的是，H.264在具有高压缩比的同时还拥有高质量流畅的图像。正因为如此，经过H.264压缩的视频数据，在网络传输过程中所需要的带宽更少，也更加经济。
+在MPEG-2需要6Mbps的传输速率匹配时，H.264只需要1Mbps～2Mbps的传输速率。
+H.264格式的文件一般采用mkv后缀，mkv是一种新兴的多媒体封装格式，可以将各类视频编
+码、16条或以上不同格式的音频和语言不同的字幕封装在一个文件内，它具有开放源代码、音视
+频编码丰富等优势，已经得到众多视频压制组和玩家的支持，正逐渐成为高清视频的主流格式。</p>
+
+<h3>WMV-HD/VC-1视频编码</h3>
+
+<p>WMV-HD是由软件业的巨头微软公司所创立的一种视频压缩格式。其压缩率远高于MPEG-2标准，同样是2小时的HDTV节目，如果使用MPEG-2最多只能压缩至30GB，而使用WMV-HD这样的高压缩率编码器，在画质丝毫不降的前提下都可压缩到15GB以下。虽然WMV-HD是微软的独有标准，在开放性和兼容性上没有其他几种格式好，但由于目前大家都在使用微软的操作系统，因此推出之后仍然迅速普及。</p>
+
+<p>除了WMV-HD以外，微软WMV第九版(WMV9)编码技术叫做VC-1，2003年正式提出，于2006年正式成为国际标准，是微软开发的视频压缩技术系列中的最新版本。VC-1结合几种编码格式的优点于一身，在压缩比率上介于H.264与MPEG-2之间，画质表现方面与H.264接近，且在编码算法的复杂度上只为H.264的一半，处于一个中间的平衡点位置，对硬件要求较低、高压缩率、高画质、低耗时等特点使得VC-1成为一种比较理想的编码方式，发展前景较为可观。</p>
+
+<p>WMV-HD及VC-1编码的视频文件一般采用wmv为后缀，wmv文件通常包括了WMV格式编码的视频和WMA编码的音频。</p>
+
+<h3>RMVB视频编码</h3>
+
+<p>当前在网络上见的最多的，肯定是RMVB视频，RMVB之所以这么流行，主要是RMVB在图像质量与文件大小之间取得了最好的平衡。一部720P的电影如果采用H.264编码，一般会有4G的大小，但如果改成RMVB格式，1G大小就可以了。目前国内的家庭宽带一般只有2M～4M，假如4M带宽，下载1G文件大概需要1个小时，下载4G文件最少在4个小时以上，因此很多人都会选择下载RMVB
+文件。虽然RMVB文件的清晰度比不上H.264，但是基本上可以满足大部分人的要求了。RMVB之所以可以图像质量与文件大小之间取得最好的平衡，主要是使用了可变比特率的编码。RMVB中的VB指VBR，Variable Bit Rate(可改变之比特率)，RMVB打破了原先RM格式那种平均压缩采样的方式，在保证平均压缩比的基础上，采用浮动比特率编码的方式，将较高的比特率用于复杂的动态画面（如歌舞、飞车、战争等），而在静态画面中则灵活地转为较低的采样率，从而合理地利用了比特率资源，使RMVB最大限度地压缩了影片的大小，最终拥有了近乎完美的接近于H.264品质的视听效果。</p>
+
+<p>虽然RMVB表现出色，可以达到720P以上的分别率，但在大屏幕的电视上观看，会有比较明显的
+色块，始终算不上是高清视频。但它最大的优点是文件体积较小，在国内的互联网带宽没有大幅度提升之前，估计还会流行很长的一度时间。</p>
+
+<h3>视频编码总结</h3>
+
+<p>总的来说，MPEG2由于压缩比例较小，视频所占空间太大，目前已经基本处于了被淘汰的边缘。目前比较流行的高清编码是H.264与微软的VC-1。但就压缩的比率来看 H.264 > VC-1 > MPEG-2；对于低分辨率的视频文件，MPEG-2的画质表现还是不错的，但基于720P以上则明显略低于H.264和VC-1的效果；而VC-1与H.264相比，由于无明显编码优势，而且限于Windows平台使用、标准推出较晚，因此给微软VC-1编码的应用前景带来了较大的不确定性，能否跟H.264一较高下，尚需实践检验。另外不得不提的是RMVB视频，由于目前国内家庭宽带的速度不高，很多人都不愿意下载大容量H.264的视频，从而给了RMVB很大的发展空间，目前国内互联网上的视频仍然是RMVB占的比例最高。</p>
+
+<hr />
+
+<h2>H.264和MPEG-4区别</h2>
+
+<p>H.264是一种高性能的视频编解码技术。目前国际上制定视频编解码技术的组织有两个，一个是“<strong>国际电联（ITU-T）</strong>”，它制定的标准有H.261、H.263、H.263+等，另一个是“<strong>国际标准化组织（ISO）</strong>”，它制定的标准有MPEG-1、MPEG-2、MPEG-4等。而H.264则是由两个组织联合组建的联合视频组（JVT）共同制定的新数字视频编码标准，所以它既是ITU-T的H.264，又是ISO/IEC的MPEG-4高级视频编码（Advanced Video Coding，AVC），而且它将成为MPEG-4标准的第10部分。因此，不论是MPEG-4 AVC、MPEG-4 Part 10，还是ISO/IEC 14496-10，都是指H.264。</p>
+
+<hr />
+
+<h2>H.264与X264区别</h2>
+
+<h3>X264简介</h3>
+
+<p>X264是基于H.264标准的免费开源视频编码器，开头的字母“X”表示“software”的意思，压缩能力强大，画质效果优秀，早已获得广泛应用。特征是编码速度相当快，但解码很慢且相当耗费CPU处理能力，X264不支援硬件加速,是和RMVB一样的强解码类型(同一机型GeForce7300和GeForce9600播放H264时CPU会有巨大的差异但播放RMVB和X264二者无异),X264不支持de-block(区域马赛克弱化换算) 技术。</p>
+
+<p>简单来讲就是：</p>
+
+<ul>
+<li>h264是一种视频编码方式，x264是基于h264的开源编码解码器。</li>
+<li>h.264是一种视频编码标准，x264是一种采用这种标准的具体实现。</li>
+</ul>
+
+
+<p>x264是一个采用GPL授权的视频编码自由软件。x264的主要功能在于进行H.264/MPEG-4 AVC的.</p>
+
+<p><strong>视频编码</strong>，而不是作为解码器（decoder）之用。</p>
+
+<hr />
+
+<h2>H264与AVC1区别</h2>
+
+<ol>
+<li>AVC1属于H.264的一种，是苹果开发的符合H.264/AVC的编码。</li>
+<li>AVC1 描述: H.264 bitstream without start codes.一般通过ffmpeg转码生成的视频，是不带起始码0×00000001的。</li>
+<li>H264 描述: H.264 bitstream with start codes.一般对于一下HDVD等电影的压制格式，是带有起始码0×00000001的。</li>
+</ol>
+
+
+<p> 即：H264=AVC， H264 != AVC1</p>
+
+<hr />
+
+<h2>DivX、XviD、AVC、AAC与MPEG-4联系</h2>
+
+<p>MPEG-4是一种标准，共分成21个部分，其中这21个部分就包括了DivX、XviD、AVC、AAC等，
+可参考：<a href="http://zh.wikipedia.org/zh-cn/MPEG-4">http://zh.wikipedia.org/zh-cn/MPEG-4</a></p>
+
+<p>例如：</p>
+
+<p><strong>第二部分 ISO/IEC 14496-2: </strong></p>
+
+<ul>
+<li>视频：定义了一个对各种视觉信息（包括自然视频、静止纹理、计算机合成图形等等）的编解码器。（例如<strong>XviD</strong>编码就属于MPEG-4 Part 2）。</li>
+</ul>
+
+
+<p><strong>第三部分 ISO/IEC 14496-3: </strong></p>
+
+<ul>
+<li>音频：定义了一个对各种音频信号进行编码的编解码器的集合。包括高级音频编码（Advanced Audio Coding，缩写为<strong>AAC</strong>）的若干变形和其他一些音频/语音编码工具。</li>
+</ul>
+
+
+<p><strong>第十部分 ISO/IEC 14496-10: </strong></p>
+
+<ul>
+<li>高级视频编码或称高级视频编码（Advanced Video Coding，缩写为<strong>AVC</strong>）：定义了一个视频编解码器（codec）。AVC和XviD都属于MPEG-4编码，但由于AVC
+属于MPEG-4 Part 10，在技术特性上比属于MPEG-4 Part2的XviD要先进。另外，它和ITU-T H.264标准是一致的，故又称为H.264。</li>
+</ul>
+
+
+<p><strong>第十五部分 ISO/IEC 14496-15: </strong></p>
+
+<ul>
+<li>AVC 文件格式：定义了基于第十二部分的用于存储第十部分的视频内容的文件格式。</li>
+</ul>
+
+
+<h3>什么是DivX、XviD？</h3>
+
+<ol>
+<li><p><strong>DivX</strong>，是DivX公司（前身是DivX Networks公司）的著名品牌，是一种MPEG-4技术视频编解码器（codec），2007年秋以2200万美元收购德国Main Concept。2010年10月，DivX公司被Sonic Solutions收购。并于2011年2月，因Sonic Solutions被Rovi公司收购而成为旗下企业。</p></li>
+<li><p><strong>Xvid</strong>（旧称为<strong>XviD</strong>）是一个开放源代码的MPEG-4视频编解码器，它是基于OpenDivX而编写的。Xvid是由一群原OpenDivX义务开发者在OpenDivX于2001年7月停止开发后自行开发的。Xvid是在<strong>GNU GPL v2</strong>下发布的，但因为某些国家如美国，日本有软件专利法，使得其在该地区可能出现法律纠纷。因此，Xvid官方网站只提供源代码下载，至于安装文件可能需要大家去搜索。</p></li>
+</ol>
+
+
+<p>  Xvid的主要竞争对手是DivX。但Xvid是开放源代码的，而DivX则只有<strong>免费</strong>（不是<strong>自由</strong>）的版本和商用版本。所以，具体用哪个，相信您肯定能一眼看出。</p>
+
+<hr />
+
+<h2>PAL、NTSC、SECAM区别</h2>
+
+<ol>
+<li>PAL<strong>逐行倒相</strong>，Phase Alternating Line的缩写，PAL制式是电视广播中色彩调频的一种方法，主要应用于中国、香港、中东地区和欧洲等地区；</li>
+<li>NTSC<strong>美国全国电视标准委员会</strong>，是指National Television System Committee的缩写，主要应用于美国、日本、加拿大、墨西哥、韩国、菲律宾等地区；</li>
+</ol>
+
+
+<p> 另外，NTSC属于同时制，<strong>隔行扫描</strong>，画面比例为4：3.
+3. SECAM （顺序传送与存储彩色电视系统，法国采用的一种电视制式，（SEquential CouleurAvec Memoire）PAL和NTSC都属于便于两大主要的电视广播制式，但是由于系统投射颜色影响的频率有所不同。两种制式相互之前不兼容。</p>
+
+<p>PAL和NTSC的分辨率不所不同，PAL制式使用720x576，约40万像素，故PAL制式的数码摄像机的CCD大小为40万的倍数或半倍数；NTSC使用的是760x480，约37万像素，故NTSC制式的数据摄像机的CCD一般为34万的倍数或半倍数。</p>
+
+<ul>
+<li><strong>NTSC 制式优缺点</strong></li>
+</ul>
+
+
+<p> 属于同时制，帧频为<strong>每秒29.97</strong>，扫描线为525，隔行扫描，画面比例为4：3，分辨率为640x480，这种制式的色度信号调制包括了<strong>平衡调制</strong>和<strong>正交调制</strong>两种，解决了彩色与黑白电视广播兼容性问题，但存在相位容易失真、色彩不太稳定的缺点。</p>
+
+<ul>
+<li><strong>PAL制式优缺点</strong></li>
+</ul>
+
+
+<p> 帧频为每秒25.
+  * 对相位失真不敏感，因此，对传输设备和接收机设备的技术指标要求，PAL制式比NTSC制式要低。
+  * 比NTSC制抗多径接收性能好。
+  * PAL制相对NTSC制而言，色度信号的正交失真不敏感，并且对色度信号部分抑制边带而引起的失真也不敏感。
+  * PAL接收机中采用梳状滤波器，可使亮度串色的幅度下降3dB，并且可以提高彩色信噪比。</p>
+
+<ul>
+<li><strong>PAL制有下列缺点：</strong></li>
+<li>由于PAL制色信号逐行倒相，传输及解码中产生的误差(例如微分相位等)，将在图象上产生爬行及半帧频闪烁现象。</li>
+<li>PAL信号不利于信号处理(包括数字信号处理，亮度信号的彻底分离等)，这是因为它的色度信号逐行倒相，色副载波相位8场一循环引起的。</li>
+<li>与NTSC制一样，彩色接收机图象的水平清晰度比黑白电视机的低。</li>
+<li>垂直彩色清晰度PAL制比NTSC制低。</li>
+<li>由于要有高精度和高稳定度的延时线及附属电路，PAL制接收机比NTSC制接收机复杂，成本稍高，对于录像机也是如此。</li>
+</ul>
+
+
+<h3>各制式分布图</h3>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/07/pte.png"><img class="alignnone size-full wp-image-727" alt="pte" src="http://agenge.com/wp-content/uploads/2013/07/pte.png" width="685" height="344" /></a></p>
+
+<hr />
+
+<h2>视频编码工具</h2>
+
+<h3>FFmpeg</h3>
+
+<ul>
+<li>官方网站：<a href="www.ffmpeg.org">http://www.ffmpeg.org</a></li>
+</ul>
+
+
+<p> FFmpeg是一个自由软件，可以运行音频和视频多种格式的录影、转档、流功能[1]，包含了libavcodec ─这是一个用于多个专案中音频和视频的解码器库，以及 libavformat ——一个音频与视频格式转换库。</p>
+
+<p> 另外，&#8221;FFmpeg&#8221;这个单词中的 &ldquo;FF&rdquo; 指的是 &ldquo;<strong>Fast Forward</strong>&#8220;，相信很多同学是不知道滴。</p>
+
+<h3>Libav</h3>
+
+<ul>
+<li>官方网站：<a href="http://libav.org">http://libav.org/</a></li>
+</ul>
+
+
+<p> 基于FFmpeg开发的一个开源分支，后来又从FFmpeg中独立出来。它是一个完整的、跨平台的用于音频和视频录制、转换的解决方案，包含 libavcodec 编码器。</p>
+
+<hr />
+
+<p>每个领导发言之后，总得来个总结，偶也装下逼，不过此处省略3000字，看最后几句话：</p>
+
+<h1>如果以上有涉嫌抄袭您的文章，请第一时间通知，偶定会明确标识.</h1>
+
+<p>以上所有扫盲知识，偶只是汇总下而已。。。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[制作OpenStack Windows Server 2008 镜像]]></title>
+    <link href="http://agenge.github.io/blog/2013/07/24/make_openstack-windows2008-image/"/>
+    <updated>2013-07-24T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/07/24/make_openstack-windows2008-image</id>
+    <content type="html"><![CDATA[<h1>前言</h1>
+
+<p>对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
+不敢私藏，故与大家分享小小心得。上次与大家介绍过 <a href="http://agenge.com/cloud-computing/make_openstack-centos-image.html">制作OpenStack CentOS 6.3 镜像</a></p>
+
+<p>本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作：</p>
+
+<ol>
+<li>下载Virtio总线驱动</li>
+</ol>
+
+
+<p> 由于OpenStack只支持Virtio总线的磁盘，所以我们需要在安装之前下载virtio驱动：</p>
+
+<pre><code>    wget http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/virtio-win-0.1-59.iso
+</code></pre>
+
+<ol>
+<li>准备一个Windows Server 2008的ISO文件。</li>
+</ol>
+
+
+<p> 除了Virtio总线驱动，您还需要准备一个Windows Server 2008的ISO，为安装操作系统做准备。
+3. 创建虚拟磁盘文件：</p>
+
+<pre><code>    qemu-img create -f qcow2 winserver2008.img 20G
+</code></pre>
+
+<p> 对于虚拟磁盘文件的各种磁盘格式区别与对比，可以参考 <a href="http://blog.prajnagarden.com/?p=248">qcow2、raw、vmdk等镜像格式</a></p>
+
+<ol>
+<li><p>创建虚拟机，使用kvm或virt-install均可，本次安装使用的virt-install</p>
+
+<pre><code> virt-install --connect qemu:///system -n winserver2008 --vcpus=1 -r 2048 \
+   --disk path=/path/to/winserver2008.img,size=60,format=qcow2,bus=virtio,cache=none \
+   -c /path/iso/windows_server_2008.iso \
+   --vnc --vncport=5909 --vnclisten=0.0.0.0  \
+   --os-type windows --os-variant=win2k8 --accelerate \
+   --network=bridge:br0,model=virtio  \
+   --disk path=/path/to/win_driver/virtio-win-0.1-59.iso,device=cdrom,perms=ro&lt;br /&gt;
+</code></pre></li>
+</ol>
+
+
+<p> 以上参数有点多，不过这里不一一解释，后期偶会专门写一篇介绍KVM相关知识点，这里只是描述几个重要的参数：</p>
+
+<pre><code>- -n  虚拟机的名称
+- --disk  虚拟磁盘存放的路径，即第一步qemu-img创建的虚拟磁盘。&lt;/span&gt;&lt;/li&gt;
+- -c  ISO的路径 &lt;/span&gt;&lt;/li&gt;
+- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。&lt;/span&gt;&lt;/li&gt;
+- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
+</code></pre>
+
+<p> 使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a></p>
+
+<p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/02.png"><img class="alignnone size-full wp-image-716" alt="02" src="http://agenge.com/wp-content/uploads/2013/07/02.png" width="621" height="489" /></a></p>
+
+<p> 点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/03.png"><img class="alignnone size-full wp-image-717" alt="03" src="http://agenge.com/wp-content/uploads/2013/07/03.png" width="337" height="319" /></a></p>
+
+<p> 点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/04.png"><img class="alignnone size-full wp-image-718" alt="04" src="http://agenge.com/wp-content/uploads/2013/07/04.png" width="597" height="449" /></a></p>
+
+<p> 安装之后并关机，进入下一步操作。</p>
+
+<ol>
+<li>上传镜像</li>
+</ol>
+
+
+<p> 最后一步就是要将刚才的虚拟磁盘文件上传到云平台中心:</p>
+
+<pre><code>    glance image-create --name Win-2008-x86_64-cloud --is-public true --container-format ovf --disk-format qcow2 &lt; /home/agen/winserver2008.img
+</code></pre>
+
+<p> 通过以上的步骤，希望新手能够成功制作一份完美的镜像文件，如果在制作过程中有任何疑问，请留言，最好是邮件，偶在有时间的情况下肯定会第一时间解答。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[制作OpenStack CentOS 6.3 镜像]]></title>
+    <link href="http://agenge.github.io/blog/2013/07/20/make_openstack-centos-image/"/>
+    <updated>2013-07-20T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/07/20/make_openstack-centos-image</id>
+    <content type="html"><![CDATA[<h1>前言</h1>
+
+<p>距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
+OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
+
+<ol>
+<li><p>准备一个镜像文件，即ISO文件，本示例所使用的为：</p>
+
+<pre><code> CentOS-6.3-i386-minimal.iso
+</code></pre></li>
+</ol>
+
+
+<p> <em>注：无论您是内部测试环境还是生产环境，偶都强烈推荐使用64位操作系统。</em></p>
+
+<ol>
+<li><p>引导并安装系统</p>
+
+<pre><code> virt-install -n CentOS63 -r 2048 --cpu host \
+   -c /data/iso/CentOS-6.3-i386-minimal.iso \
+   --disk path=/data/kvm_data/centos6.3-openstack.img,device=disk,bus=virtio,size=10,format=qcow2 \
+   --vnc --vncport=5908 --vnclisten=0.0.0.0 -v \
+   --network bridge=br0
+</code></pre></li>
+</ol>
+
+
+<p> 这些参数的就请您先自行查找手册，后期有时间偶会补上关于KVM的相关实践手册。</p>
+
+<ol>
+<li>镜像相关设置（此处根据你的需求进行个性化定制，尽量保持简洁）：</li>
+<li><p>分区全部给根分区，防火墙和SELinux禁止.</p>
+
+<pre><code>     chkconfig iptables off
+</code></pre></li>
+</ol>
+
+
+<p> 将/etc/selinux/config 中的 SELINUX=enforcing修改成 SELINUX=disabled
+ * 修改分区表：</p>
+
+<pre><code>        vi /etc/fstab
+        # 将UUID=这一行注释，加入：
+        LABEL=cec-rootfs                           / ext4 defaults&lt;b&gt; 0 0&lt;/b&gt;
+</code></pre>
+
+<ul>
+<li><p>修改网络配置：</p>
+
+<pre><code>     vi /etc/sysconfig/network-scripts/ifcfg-eth0
+     #将HWADDR=这行删除或注释即可，并且设置成BOOTPROTO=dhcp
+</code></pre></li>
+<li><p>删除网络规则，因为Centos6之后70-persistent-net.rules这个文件会自动添加除eth0之外的其他网络接口，</p>
+
+<pre><code>     rm -rf /etc/udev/rules.d/70-persistent-net.rules
+</code></pre></li>
+<li>还要把另外一个文件删除，不然上面这个文件还会自动创建滴：
+         mv /lib/udev/write_net_rules{,.bak}</li>
+<li><p>上传镜像</p>
+
+<pre><code> glance image-create --name centos63Image --is-public true --container-format ovf --disk-format qcow2 &amp;lt; /home/agen/centos63.img
+</code></pre></li>
+</ul>
+
+
+<p> 至此，所有操作已经完成，如果一切正常，你所创建的实例访问正常。如网络还存在问题，可能
+和您的OpenStack网络设置有关，不过这已经超出本文的范畴。假如您对OpenStack的环境搭建不是很熟悉的话，建议您再多看看这篇文章：<a title="Openstack安装与部署(Folsom)" href="http://agenge.com/cloud-computing/openstack_install_with_deploy_for_folsom.html">Openstack安装与部署(Folsom)</a>。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Openstack安装与部署(Folsom)]]></title>
+    <link href="http://agenge.github.io/blog/2013/06/12/openstack_install_with_deploy_for_folsom/"/>
+    <updated>2013-06-12T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/06/12/openstack_install_with_deploy_for_folsom</id>
+    <content type="html"><![CDATA[<h1>前言</h1>
+
+<p>近2、3年来，云计算是一个比较热门的话题，无论是国外还是国内，众多计算机厂商开始涉足云计算，未来IaaS、SaaS及PaaS都可能将IT行业又推上到一个新的台阶。云计算谈得最多的IaaS要数 OpenStack，本文主要记录偶试
+验的安装步骤，当然，参考了N多网友的博文，具有代表性的可能就是 <a href="http://www.stacklab.org/">stacklab</a> 的安装教程，以下就是具体安装步骤：</p>
+
+<h2>环境准备</h2>
+
+<p> ### 资源列表</p>
+
+<table width="582" border="0" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">IP
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">主机名
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">OS
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">CPU
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">内存
+</td>
+<td nowrap="nowrap" width="168">
+<p align="center">备注
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.73
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">control-01
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+<td nowrap="nowrap" width="168">
+<p align="center">keystone、glance、cinder、nova-api、nova-scheduler
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.74
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">compute-01
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+<td rowspan="3" nowrap="nowrap" width="168">
+<p align="center">nova-compute、nova-network、nova-api-metadata
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.75
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">compute-02
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117"></td>
+<td nowrap="nowrap" width="88"></td>
+<td nowrap="nowrap" width="87"></td>
+<td nowrap="nowrap" width="70"></td>
+<td nowrap="nowrap" width="52"></td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>网络配置</h3>
+
+<ol>
+<li><p>在配置之前需要注意，如果你的网卡名称有叫非ethX，例如p1p1，就得按以下步骤修改：</p>
+
+<pre><code> cd /etc/udev/rules.d/
+ cp 70-persistent-net.rules 70-persistent-net.rules.bak
+ ip a
+</code></pre>
+
+<p>可看到p1p1的MAC地址，如<strong>d4:3d:7e:57:a4:d4</strong>，将文件70-persistent-net.rules的：
+     ATTR{address}==&ldquo;ec:88:8f:ea:c4:eb&rdquo;
+修改为：
+     ATTR{address}==&ldquo;d4:3d:7e:57:a4:d4&rdquo;</p></li>
+</ol>
+
+
+<p> NAME=&ldquo;eth1&rdquo; 修改为:NAME=&ldquo;eth2&rdquo; 或 NAME=&ldquo;eth0&#8221;，只要不和已存在的冲突即可，例如此示例中，本身已经存在一块叫： eth1的网卡，那另外一块就改成eth2。修改之后需要重启服务器。
+所有节点配置如下（需要修改每个节点对应的IP）：</p>
+
+<pre><code>    cat /etc/network/interfaces
+    # This file describes the network interfaces available on your system
+    # and how to activate them. For more information, see interfaces(5).
+    # The loopback network interface
+    auto lo
+    iface lo inet loopback
+
+    # The primary network interface
+    auto eth1
+    iface eth1 inet static
+    address 192.168.30.75
+    netmask 255.255.255.0
+    network 192.168.30.0
+    broadcast 192.168.30.255
+    gateway 192.168.30.1
+    # dns-* options are implemented by the resolvconf package, if installed
+    dns-nameservers 218.201.4.3
+
+    auto eth2
+    iface eth2 inet static
+    address 10.10.0.75
+    netmask 255.255.0.0
+</code></pre>
+
+<p> 上面2个IP地址需要根据您的具体情况修改。
+2. 重启网络</p>
+
+<pre><code>     /etc/init.d/networking restart
+</code></pre>
+
+<ol>
+<li><p>IP转发</p>
+
+<pre><code> sudo su -
+ sed -i -r 's/^s*#(net.ipv4.ip_forward=1.*)/1/' /etc/sysctl.conf
+ echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+ sysctl -p
+ net.ipv4.ip_forward = 1
+</code></pre></li>
+<li>更新源</li>
+</ol>
+
+
+<p> 在所有节点的/etc/apt/source.list 加入以下信息：</p>
+
+<pre><code>    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+</code></pre>
+
+<p> 然后执行：</p>
+
+<pre><code>    gpg --keyserver keyserver.ubuntu.com --recv EC4926EA
+    gpg --export --armor EC4926EA | sudo apt-key add -
+    sudo apt-get update
+</code></pre>
+
+<p> 如果报错，请参考<a href="http://blog.csdn.net/wche1990/article/details/6759422">这里</a>.</p>
+
+<h3>主机名设置</h3>
+
+<p>在所有节点的/etc/hosts加入以下信息（需要修改每个节点对应的IP）：</p>
+
+<pre><code>    192.168.30.73  control-01
+    192.168.30.74  compute-01
+    192.168.30.75  compute-02
+</code></pre>
+
+<h3>Mysql和rabbitmq安装</h3>
+
+<p>在所有节点执行，密码统一设置为”123456”(你也可以设置为其他较安全的密码)：</p>
+
+<pre><code>    sudo apt-get install -y mysql-server python-mysqldb
+    sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
+    sudo /etc/init.d/mysql restart
+    sudo apt-get install -y rabbitmq-server
+</code></pre>
+
+<h3>时间同步</h3>
+
+<p>在所有节点执行：</p>
+
+<pre><code>    sudo apt-get install -y ntp
+    sudo sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.comnserver 127.127.1.0nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
+    sudo /etc/init.d/ntp restart
+</code></pre>
+
+<hr />
+
+<!-- more -->
+
+
+<h2>控制节点安装</h2>
+
+<h3>安装OpenStack组件</h3>
+
+<ol>
+<li><p>在控制节点执行：</p>
+
+<pre><code> os_keystone="keystone python-keystone python-keystoneclient"
+ os_glance="glance glance-api python-glanceclient glance-common"
+ os_nova="nova-api nova-cert nova-common  nova-scheduler python-nova python-novaclient nova-consoleauth novnc   nova-novncproxy "
+ os_horizon="apache2 libapache2-mod-wsgi openstack-dashboard memcached python-memcache"
+ os_cinder="cinder-api cinder-scheduler cinder-volume iscsitarget  open-iscsi iscsitarget-dkms python-cinderclient"
+ os_swift="python-swift swift swift-proxy swift-account swift-container swift-object python-memcache"
+ sudo apt-get install -y $os_keystone $os_glance $os_nova $os_horizon $os_cinder $os_swift
+
+ 大概要下载241M的文件。
+</code></pre></li>
+</ol>
+
+
+<h3>初始化数据库</h3>
+
+<ol>
+<li><p>在控制节点执行，创建keystone, nova,cinder,glance数据库：</p>
+
+<pre><code> mysql -uroot –p
+ mysql&gt; CREATE DATABASE keystone;
+ mysql&gt; CREATE DATABASE nova;
+ mysql&gt; CREATE DATABASE cinder;
+ mysql&gt; CREATE DATABASE glance;
+ mysql&gt; GRANT ALL ON keystone.* TO openstack@'%' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON nova.* TO openstack@'%' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON cinder.* TO openstack@'%' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON glance.* TO openstack@'%' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON keystone.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON nova.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON nova.* TO openstack@'192.168.30.74' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON nova.* TO openstack@'192.168.30.75' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON cinder.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
+ mysql&gt; GRANT ALL ON glance.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
+ mysql&gt; flush privileges;
+</code></pre></li>
+</ol>
+
+
+<h3>Keystone配置</h3>
+
+<ul>
+<li><p>在控制节点修改/etc/keystone/keystone.conf配置文件，注释第57行：</p>
+
+<pre><code>  connection = sqlite:////var/lib/keystone/keystone.db
+</code></pre>
+
+<p>加入：</p>
+
+<pre><code>   connection = mysql://openstack:openstack@192.168.30.73/keystone
+</code></pre>
+
+<p>重启keystone后，初始化数据库：</p>
+
+<pre><code>   sudo /etc/init.d/keystone restart
+   sudo keystone-manage db_sync
+</code></pre></li>
+<li><p>创建tenant、user、role，脚本keystone_basic.sh内容如下：</p>
+
+<pre><code>     #!/bin/sh
+     #
+     # Keystone basic configuration
+
+     # Mainly inspired by https://github.com/openstack/keystone/blob/master/tools/sample_data.sh
+
+     # Modified by Bilel Msekni / Institut Telecom
+     #
+     # Support: openstack@lists.launchpad.net
+     # License: Apache Software License (ASL) 2.0
+     #
+     #节点的IP地址
+     HOST_IP=192.168.30.73
+     ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin_pass}
+     SERVICE_PASSWORD=${SERVICE_PASSWORD:-service_pass}
+     export SERVICE_TOKEN="ADMIN"
+     export SERVICE_ENDPOINT="http://${HOST_IP}:35357/v2.0"
+     SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
+
+     get_id () {
+         echo `$@ | awk '/ id / { print $4 }'`
+     }
+
+     # Tenants
+     ADMIN_TENANT=$(get_id keystone tenant-create --name=admin)
+     SERVICE_TENANT=$(get_id keystone tenant-create --name=$SERVICE_TENANT_NAME)
+
+
+     # Users
+     ADMIN_USER=$(get_id keystone user-create --name=admin --pass="$ADMIN_PASSWORD" --email=admin@domain.com)
+
+
+     # Roles
+     ADMIN_ROLE=$(get_id keystone role-create --name=admin)
+     KEYSTONEADMIN_ROLE=$(get_id keystone role-create --name=KeystoneAdmin)
+     KEYSTONESERVICE_ROLE=$(get_id keystone role-create --name=KeystoneServiceAdmin)
+
+     # Add Roles to Users in Tenants
+     keystone user-role-add --user-id $ADMIN_USER --role-id $ADMIN_ROLE --tenant-id $ADMIN_TENANT
+     keystone user-role-add --user-id $ADMIN_USER --role-id $KEYSTONEADMIN_ROLE --tenant-id $ADMIN_TENANT
+     keystone user-role-add --user-id $ADMIN_USER --role-id $KEYSTONESERVICE_ROLE --tenant-id $ADMIN_TENANT
+
+     # The Member role is used by Horizon and Swift
+     MEMBER_ROLE=$(get_id keystone role-create --name=Member)
+
+     # Configure service users/roles
+     NOVA_USER=$(get_id keystone user-create --name=nova --pass="$SERVICE_PASSWORD" --tenant-id $SERVICE_TENANT --email=nova@domain.com)
+     keystone user-role-add --tenant-id $SERVICE_TENANT --user-id $NOVA_USER --role-id $ADMIN_ROLE
+
+     GLANCE_USER=$(get_id keystone user-create --name=glance --pass="$SERVICE_PASSWORD" --tenant-id $SERVICE_TENANT --email=glance@domain.com)
+     keystone user-role-add --tenant-id $SERVICE_TENANT --user-id $GLANCE_USER --role-id $ADMIN_ROLE
+
+     CINDER_USER=$(get_id keystone user-create --name=cinder --pass="$SERVICE_PASSWORD" --tenant-id $SERVICE_TENANT --email=cinder@domain.com)
+     keystone user-role-add --tenant-id $SERVICE_TENANT --user-id $CINDER_USER --role-id $ADMIN_ROLE
+</code></pre></li>
+<li><p>创建endpoint，脚本keystone_endpoints_basic.sh内容如下:</p>
+
+<pre><code>     #!/bin/sh
+     #
+     # Keystone basic Endpoints
+
+     # Mainly inspired by https://github.com/openstack/keystone/blob/master/tools/sample_data.sh
+
+     # Modified by Bilel Msekni / Institut Telecom
+     #
+     # Support: openstack@lists.launchpad.net
+     # License: Apache Software License (ASL) 2.0
+     #
+
+     # Host address
+     #节点的manage network的IP地址
+     HOST_IP=192.168.30.73
+     #节点的public network的IP地址
+     EXT_HOST_IP=192.168.30.73
+
+     # MySQL definitions
+     MYSQL_USER=openstack
+     MYSQL_DATABASE=keystone
+     MYSQL_HOST=$HOST_IP
+     MYSQL_PASSWORD=openstack
+
+     # Keystone definitions
+     KEYSTONE_REGION=RegionOne
+     export SERVICE_TOKEN=ADMIN
+     export SERVICE_ENDPOINT="http://${HOST_IP}:35357/v2.0"
+
+     while getopts "u:D:p:m:K:R:E:T:vh" opt; do
+     case $opt in
+         u)
+           MYSQL_USER=$OPTARG
+           ;;
+         D)
+           MYSQL_DATABASE=$OPTARG
+           ;;
+         p)
+           MYSQL_PASSWORD=$OPTARG
+           ;;
+         m)
+           MYSQL_HOST=$OPTARG
+           ;;
+         K)
+           MASTER=$OPTARG
+           ;;
+         R)
+           KEYSTONE_REGION=$OPTARG
+           ;;
+         E)
+           export SERVICE_ENDPOINT=$OPTARG
+           ;;
+         T)
+           export SERVICE_TOKEN=$OPTARG
+           ;;
+         v)
+           set -x
+           ;;
+         h)
+           cat &lt;&lt;EOF
+     Usage: $0 [-m mysql_hostname] [-u mysql_username] [-D mysql_database] [-p mysql_password]
+     [-K keystone_master ] [ -R keystone_region ] [ -E keystone_endpoint_url ]
+     [ -T keystone_token ]
+     Add -v for verbose mode, -h to display this message.
+     EOF
+           exit 0
+           ;;
+         \?)
+           echo "Unknown option -$OPTARG" &gt;&amp;2
+           exit 1
+           ;;
+         :)
+           echo "Option -$OPTARG requires an argument" &gt;&amp;2
+           exit 1
+           ;;
+       esac
+     done
+
+     if [ -z "$KEYSTONE_REGION" ]; then
+     echo "Keystone region not set. Please set with -R option or set KEYSTONE_REGION variable." &gt;&amp;2
+       missing_args="true"
+     fi
+
+     if [ -z "$SERVICE_TOKEN" ]; then
+     echo "Keystone service token not set. Please set with -T option or set SERVICE_TOKEN variable." &gt;&amp;2
+       missing_args="true"
+     fi
+
+     if [ -z "$SERVICE_ENDPOINT" ]; then
+     echo "Keystone service endpoint not set. Please set with -E option or set SERVICE_ENDPOINT variable." &gt;&amp;2
+       missing_args="true"
+     fi
+
+     if [ -z "$MYSQL_PASSWORD" ]; then
+     echo "MySQL password not set. Please set with -p option or set MYSQL_PASSWORD variable." &gt;&amp;2
+       missing_args="true"
+     fi
+
+     if [ -n "$missing_args" ]; then
+     exit 1
+     fi
+     keystone service-create --name nova --type compute --description 'OpenStack Compute Service'
+     keystone service-create --name cinder --type volume --description 'OpenStack Volume Service'
+     keystone service-create --name glance --type image --description 'OpenStack Image Service'
+     keystone service-create --name keystone --type identity --description 'OpenStack Identity'
+     keystone service-create --name ec2 --type ec2 --description 'OpenStack EC2 service'
+
+     create_endpoint () {
+       case $1 in
+         compute)
+         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':8774/v2/$(tenant_id)s' --adminurl 'http://'"$HOST_IP"':8774/v2/$(tenant_id)s' --internalurl 'http://'"$HOST_IP"':8774/v2/$(tenant_id)s'
+         ;;
+         volume)
+         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':8776/v1/$(tenant_id)s' --adminurl 'http://'"$HOST_IP"':8776/v1/$(tenant_id)s' --internalurl 'http://'"$HOST_IP"':8776/v1/$(tenant_id)s'
+         ;;
+         image)
+         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':9292/v2' --adminurl 'http://'"$HOST_IP"':9292/v2' --internalurl 'http://'"$HOST_IP"':9292/v2'
+         ;;
+         identity)
+         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':5000/v2.0' --adminurl 'http://'"$HOST_IP"':35357/v2.0' --internalurl 'http://'"$HOST_IP"':5000/v2.0'
+         ;;
+         ec2)
+         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':8773/services/Cloud' --adminurl 'http://'"$HOST_IP"':8773/services/Admin' --internalurl 'http://'"$HOST_IP"':8773/services/Cloud'
+         ;;
+       esac
+     }
+
+     for i in compute volume image object-store identity ec2; do
+     id=`mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -ss -e "SELECT id FROM service WHERE type='"$i"';"` || exit 1
+       create_endpoint $i $id
+     done
+</code></pre></li>
+<li><p>依次执行：</p>
+
+<pre><code>  sudo chmod +x keystone_*.sh
+  sudo ./keystone_basic.sh
+  sudo ./keystone_endpoints_basic.sh
+</code></pre></li>
+<li><p>创建openrc文件（环境变量）</p>
+
+<pre><code>  export OS_TENANT_NAME=admin
+  export OS_USERNAME=admin
+  export OS_PASSWORD=admin_password
+  export OS_AUTH_URL=http://192.168.30.73:5000/v2.0/
+  export EC2_URL=$(keystone catalog --service ec2 | awk '/ publicURL / { print $4 }')
+  export CREDS=$(keystone ec2-credentials-create)
+  export EC2_ACCESS_KEY=$(echo "$CREDS" | awk '/ access / { print $4 }')
+  export EC2_SECRET_KEY=$(echo "$CREDS" | awk '/ secret / { print $4 }')
+</code></pre></li>
+<li><p>使环境变量生效：</p>
+
+<pre><code>  source openrc
+</code></pre></li>
+<li><p>测试keystone</p>
+
+<pre><code>  keystone user-list
+</code></pre></li>
+</ul>
+
+
+<p>如果没问题，输出内容类似下图：</p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/06/01.png"><img class="alignnone size-full wp-image-702" alt="01" src="http://agenge.com/wp-content/uploads/2013/06/01.png" width="678" height="117" /></a></p>
+
+<hr />
+
+<h3>Glance配置</h3>
+
+<h4>更新配置文件</h4>
+
+<ol>
+<li><p>更新glance配置文件：</p>
+
+<pre><code> sudo vi /etc/glance/glance-api-paste.in
+</code></pre></li>
+</ol>
+
+
+<p> 将最后三行修改为：</p>
+
+<pre><code>    [filter:authtoken]
+    paste.filter_factory = keystone.middleware.auth_token:filter_factory
+    auth_host = 192.168.30.73
+    auth_port = 35357
+    auth_protocol = http
+    admin_tenant_name = service
+    admin_user = glance
+    admin_password = service_password
+</code></pre>
+
+<ol>
+<li><p>更新glance配置文件：</p>
+
+<pre><code> sudo vi /etc/glance/glance-registry-paste.ini
+</code></pre></li>
+</ol>
+
+
+<p> 将最后三行修改为：</p>
+
+<pre><code>    [filter:authtoken]
+    paste.filter_factory = keystone.middleware.auth_token:filter_factory
+    auth_host = 192.168.30.73
+    auth_port = 35357
+    auth_protocol = http
+    admin_tenant_name = service
+    admin_user = glance
+    admin_password = service_password
+</code></pre>
+
+<ol>
+<li><p>更新glance配置文件：</p>
+
+<pre><code> sudo vim /etc/glance/glance-api.conf
+</code></pre>
+
+<p> 将49行注释，并加入：</p>
+
+<pre><code> sql_connection = mysql://openstack:openstack@192.168.30.73/glance
+</code></pre>
+
+<p> 在[paste_deploy]（一般在最后几行）节点加入：</p>
+
+<pre><code> flavor = keystone
+</code></pre></li>
+<li><p>更新glance配置文件：</p>
+
+<pre><code> sudo vim /etc/glance/glance-registry.conf
+</code></pre>
+
+<p> 将28行注释，并加入：</p>
+
+<pre><code> sql_connection = mysql://openstack:openstack@192.168.30.73/glance
+ [paste_deploy]
+ flavor = keystone
+</code></pre></li>
+<li><p>重启glance服务</p>
+
+<pre><code> /etc/init.d/glance-api restart
+ sudo /etc/init.d/glance-registry restart
+</code></pre></li>
+<li><p>同步数据库</p>
+
+<pre><code> sudo glance-manage db_sync
+</code></pre>
+
+<p> 并再次重启glance服务：</p>
+
+<pre><code> sudo /etc/init.d/glance-api restart
+ sudo /etc/init.d/glance-registry restart
+</code></pre></li>
+</ol>
+
+
+<h4>上传镜像文件</h4>
+
+<pre><code>wget https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img
+source openrc
+glance image-create --name myFirstVM --is-public true --container-format bare --disk-format qcow2 &amp;lt; cirros-0.3.0-x86_64-disk.img
+</code></pre>
+
+<p>如果一切正常，会输出类似以下内容：</p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/06/02.png"><img class="alignnone size-full wp-image-703" alt="02" src="http://agenge.com/wp-content/uploads/2013/06/02.png" width="536" height="300" /></a></p>
+
+<hr />
+
+<h3>Cinder配置</h3>
+
+<h4>配置iscsi</h4>
+
+<ol>
+<li><p>配置iscsitarget：</p>
+
+<pre><code> sudo sed -i 's/false/true/g' /etc/default/iscsitarget
+ sudo /etc/init.d/iscsitarget restart
+ sudo /etc/init.d/open-iscsi restart
+</code></pre></li>
+<li><p>更新配置文件/etc/cinder/api-paste.ini（47行）：</p>
+
+<pre><code> [filter:authtoken]
+ paste.filter_factory = keystone.middleware.auth_token:filter_factory
+ service_protocol = http
+ service_host = 192.168.30.73
+ service_port = 5000
+ auth_host = 192.168.30.73
+ auth_port = 35357
+ auth_protocol = http
+ admin_tenant_name = service
+ admin_user = cinder
+ admin_password = service_password
+</code></pre></li>
+<li><p>更新配置文件/etc/cinder/cinder.conf：</p>
+
+<pre><code> [DEFAULT]
+ rootwrap_config = /etc/cinder/rootwrap.conf
+ sql_connection = mysql://openstack:openstack@192.168.30.73/cinder
+ api_paste_confg = /etc/cinder/api-paste.ini
+ iscsi_helper = tgtadm
+ volume_name_template = volume-%s
+ volume_group = cinder-volumes
+ verbose = True
+ auth_strategy = keystone
+ state_path = /var/lib/cinder
+ volumes_dir = /var/lib/cinder/volumes
+</code></pre></li>
+<li><p>同步数据库：</p>
+
+<pre><code> sudo cinder-manage db sync
+</code></pre></li>
+</ol>
+
+
+<h4>创建VG</h4>
+
+<ol>
+<li><p>没有独立的硬盘或分区按以下操作：</p>
+
+<p> sudo mkdir -p /opt/data/cinder
+ cd /opt/data/cinder
+ sudo truncate -s 2G vgfile
+ sudo losetup -f &mdash;show vgfile</p></li>
+</ol>
+
+
+<p> 如果正常，会输出以下内容：</p>
+
+<pre><code>    /dev/loop0
+</code></pre>
+
+<p> 接下来开始创建vg：</p>
+
+<pre><code>    sudo vgcreate cinder-volumes /dev/loop0
+</code></pre>
+
+<p> 如果正常，会输出以下内容：</p>
+
+<pre><code>    No physical volume label read from /dev/loop0
+    Writing physical volume data to disk "/dev/loop0"
+    Physical volume "/dev/loop0" successfully created
+    Volume group "cinder-volumes" successfully created
+</code></pre>
+
+<ol>
+<li><p>有独立的硬盘或分区按以下操作(<strong>以/dev/sda7</strong><strong>为例，以下操作有数据丢失风险，请谨慎操作</strong>)：</p>
+
+<pre><code> pvcreate /dev/sda7
+ vgcreate cinder-volumes /dev/sda7
+ lvcreate -L 1T -n instance-lv data-vg
+ mkfs.ext4 /dev/data-vg/instance-lv
+ echo "/dev/data-vg/instance-lv        /var/lib/nova/instances ext4    defaults        0 0" &gt;&gt; /etc/fstab
+ mount -a
+</code></pre></li>
+</ol>
+
+
+<p> 重启cinder所有相关服务：</p>
+
+<pre><code>    sudo /etc/init.d/cinder-api restart
+    sudo /etc/init.d/cinder-scheduler restart
+    sudo /etc/init.d/cinder-volume restart
+</code></pre>
+
+<hr />
+
+<h3>Nova配置</h3>
+
+<ol>
+<li><p>更新配置文件/etc/nova/api-paste.ini（最后几行）：</p>
+
+<pre><code> [filter:authtoken]
+ paste.filter_factory = keystone.middleware.auth_token:filter_factory
+ auth_host = 192.168.30.73
+ auth_port = 35357
+ auth_protocol = http
+ admin_tenant_name = service
+ admin_user = nova
+ admin_password = service_password
+ signing_dir = /tmp/keystone-signing-nova
+</code></pre></li>
+<li><p>更新配置文件/etc/nova/nova.conf</p>
+
+<pre><code> [DEFAULT]
+ dhcpbridge_flagfile=/etc/nova/nova.conf
+ dhcpbridge=/usr/bin/nova-dhcpbridge
+ logdir=/var/log/nova
+ state_path=/var/lib/nova
+ lock_path=/var/lock/nova
+ force_dhcp_release=True
+ iscsi_helper=tgtadm
+ libvirt_use_virtio_for_bridges=True
+ connection_type=libvirt
+ root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
+ verbose=True
+ ec2_private_dns_show_ip=True
+ api_paste_config=/etc/nova/api-paste.ini
+ volumes_path=/var/lib/nova/volumes
+
+ # AUTHENTICATION
+ auth_strategy=keystone
+
+ # SCHEDULER
+ scheduler_driver=nova.scheduler.multi.MultiScheduler
+ compute_scheduler_driver=nova.scheduler.filter_scheduler.FilterScheduler
+
+ # CINDER
+ volume_api_class=nova.volume.cinder.API
+
+ # DATABASE
+ sql_connection=mysql://openstack:openstack@192.168.30.73/nova
+
+ # COMPUTE
+ # kvm or QUME
+ libvirt_type=kvm  
+ libvirt_use_virtio_for_bridges=True
+ start_guests_on_host_boot=True
+ resume_guests_state_on_host_boot=True
+ api_paste_config=/etc/nova/api-paste.ini
+ allow_admin_api=True
+ use_deprecated_auth=False
+ nova_url=http://192.168.30.73:8774/v1.1/
+ root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
+
+ # APIS
+ ec2_host=192.168.30.73
+ ec2_url=http://192.168.30.73:8773/services/Cloud
+ keystone_ec2_url=http://192.168.30.73:5000/v2.0/ec2tokens
+ s3_host=192.168.30.73
+ cc_host=192.168.30.73
+ metadata_host=192.168.30.73
+ enabled_apis=ec2,osapi_compute,metadata
+
+ # RABBITMQ
+ rabbit_host=192.168.30.73
+
+ # GLANCE
+ image_service=nova.image.glance.GlanceImageService
+ glance_api_servers=192.168.30.73:9292
+
+ # NETWORK
+ network_manager=nova.network.manager.FlatDHCPManager
+ force_dhcp_release=True
+ dhcpbridge_flagfile=/etc/nova/nova.conf
+ dhcpbridge=/usr/bin/nova-dhcpbridge
+ firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+ public_interface=eth0    
+ flat_interface=eth1     
+ flat_network_bridge=br100
+ fixed_range=10.10.0.0/24   
+ network_size=256
+ flat_injected=False
+ connection_type=libvirt
+ multi_host=True
+
+ # NOVNC CONSOLE
+ novnc_enabled=True
+ novncproxy_base_url=http://192.168.30.73:6080/vnc_auto.html
+ vncserver_proxyclient_address=192.168.30.73
+ vncserver_listen=192.168.30.73
+</code></pre></li>
+<li><p>修改配置文件/etc/sudoers，在最后一行追加：</p>
+
+<pre><code> nova ALL=(ALL) NOPASSWD:ALL
+</code></pre></li>
+<li><p>同步数据库</p>
+
+<pre><code> sudo nova-manage db sync
+</code></pre></li>
+<li><p>重启nova相关服务</p>
+
+<pre><code> sudo /etc/init.d/nova-api restart
+ sudo /etc/init.d/nova-cert restart
+ sudo /etc/init.d/nova-consoleauth restart
+ sudo /etc/init.d/nova-novncproxy restart
+ sudo /etc/init.d/nova-scheduler restart
+</code></pre></li>
+<li><p>检查服务状态</p>
+
+<pre><code> sudo nova-manage service list
+</code></pre></li>
+</ol>
+
+
+<p> 如果正常，会输出类似以下信息：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/06/03.png"><img class="alignnone size-full wp-image-704" alt="03" src="http://agenge.com/wp-content/uploads/2013/06/03.png" width="974" height="62" /></a></p>
+
+<ol>
+<li><p>创建fixed_ip（内网虚拟机IP）</p>
+
+<pre><code> sudo nova-manage network create private --fixed_range_v4=10.10.0.0/24 --num_networks=1 --bridge=br100 --bridge_interface=eth2 --network_size=256 --multi_host=T
+</code></pre></li>
+<li><p>创建floating_ip（可以理解为floating_rang，并非一个具体的IP地址），它和公网一个段的IP:</p>
+
+<pre><code> nova-manage floating create 192.168.30.1/24
+</code></pre></li>
+<li><p>设置安全策略</p>
+
+<pre><code> nova secgroup-add-rule default tcp 1 65535 0.0.0.0/0
+ nova secgroup-add-rule default udp 1 65535 0.0.0.0/0
+ nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+</code></pre></li>
+</ol>
+
+
+<hr />
+
+<h2>计算节点安装</h2>
+
+<h3>安装OpenStack组件</h3>
+
+<pre><code>os_nova="nova-common python-nova python-novaclient nova-compute nova-network nova-api-metadata"
+os_other="kvm libvirt-bin pm-utils bridge-utils"
+sudo apt-get install -y $os_nova $os_other
+</code></pre>
+
+<p>大约71M左右。</p>
+
+<h3>Nova配置</h3>
+
+<ol>
+<li><p>更新配置文件/etc/nova/nova.conf</p>
+
+<pre><code> [DEFAULT]
+ logdir=/var/log/nova
+ state_path=/var/lib/nova
+ lock_path=/run/lock/nova
+ verbose=False
+ api_paste_config=/etc/nova/api-paste.ini
+ scheduler_driver=nova.scheduler.simple.SimpleScheduler
+ s3_host=192.168.30.73
+ ec2_host=192.168.30.73
+ ec2_dmz_host=192.168.30.73
+ rabbit_host=192.168.30.73
+ cc_host=192.168.30.73
+ metadata_host=10.0.0.7
+ nova_url=http://192.168.30.73:8774/v1.1/
+ sql_connection=mysql://openstack:openstack@192.168.30.73/nova
+ ec2_url=http://192.168.30.73:8773/services/Cloud
+ root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
+
+ # Auth
+ use_deprecated_auth=false
+ auth_strategy=keystone
+ keystone_ec2_url=http://192.168.30.73:5000/v2.0/ec2tokens
+ # Imaging service
+ glance_api_servers=192.168.30.73:9292
+ image_service=nova.image.glance.GlanceImageService
+
+ # NOVNC CONSOLE
+ novnc_enabled=True
+ novncproxy_base_url=http://192.168.30.73:6080/vnc_auto.html
+ vncserver_proxyclient_address=192.168.30.74
+ vncserver_listen=192.168.30.74
+
+ # Network settings
+ network_manager=nova.network.manager.FlatDHCPManager
+ dhcpbridge_flagfile=/etc/nova/nova.conf
+ dhcpbridge=/usr/bin/nova-dhcpbridge
+ firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+ public_interface=eth0
+ flat_interface=eth1
+ flat_network_bridge=br100
+ fixed_range=10.10.0.1/24
+ floating_range=192.168.30.128/24
+ network_size=250
+ flat_network_dhcp_start=10.0.0.40
+ flat_injected=false
+ force_dhcp_release=true
+ dhcp_lease_time=604800
+ multi_host=true
+ iscsi_helper=tgtadm
+ connection_type=libvirt
+ # Compute #
+ compute_driver=libvirt.LibvirtDriver
+
+ # Cinder #
+ volume_api_class=nova.volume.cinder.API
+ osapi_volume_listen_port=5900
+</code></pre></li>
+<li><p>修改配置文件/etc/nova/nova-compute.conf</p>
+
+<pre><code> [DEFAULT]
+ libvirt_type=kvm
+</code></pre></li>
+</ol>
+
+
+<p> 除了KVM，你还可以修改成其他的，例如QEMU/XEN等。</p>
+
+<ol>
+<li><p>禁用默认的网桥</p>
+
+<pre><code> virsh net-autostart default --disable
+ virsh net-destroy default
+</code></pre></li>
+<li><p>重启nova相关服务</p>
+
+<pre><code> sudo /etc/init.d/nova-api-metadata restart
+ sudo /etc/init.d/nova-compute restart
+ sudo /etc/init.d/nova-network restart
+</code></pre></li>
+</ol>
+
+
+<hr />
+
+<h2>访问OpenStack DashBoard</h2>
+
+<p>在控制节点重启httpd和memcached：</p>
+
+<pre><code>sudo /etc/init.d/apache2 restart
+sudo /etc/init.d/memcached restart
+</code></pre>
+
+<p>访问 <a href="http://192.168.30.73/horizon">http://192.168.30.73/horizon</a>，用户名和密码分别是admin/admin_password</p>
+
+<hr />
+
+<h2>日常管理</h2>
+
+<h3>控制节点管理</h3>
+
+<h4>创建实例</h4>
+
+<h5>创建虚拟机密钥对</h5>
+
+<p>在控制节点执行以下语句：</p>
+
+<pre><code>    root@control-01:~# ssh-keygen 
+    Generating public/private rsa key pair.
+    Enter file in which to save the key (/root/.ssh/id_rsa): 
+    Created directory '/root/.ssh'.
+    Enter passphrase (empty for no passphrase): 
+    Enter same passphrase again: 
+    Your identification has been saved in /root/.ssh/id_rsa.
+    Your public key has been saved in /root/.ssh/id_rsa.pub.
+    The key fingerprint is:
+    6b:6e:2f:b5:b5:73:a6:8e:96:bf:c0:a5:84:7c:c5:92 root@control-01
+    The key's randomart image is:
+    +--[ RSA 2048]----+
+    |                 |
+    |           o     |
+    |          E o    |
+    |       . . o     |
+    |        S o .    |
+    |         =.o.    |
+    |        o.++ .   |
+    |       oo +oo o  |
+    |       ..+oo=*   |
+    +-----------------+
+</code></pre>
+
+<h5>导入密钥</h5>
+
+<pre><code>    nova keypair-add --pub_key .ssh/id_rsa.pub key2
+    nova keypair-list
+    +------+-------------------------------------------------+
+    | Name | Fingerprint                                     |
+    +------+-------------------------------------------------+
+    | key2 | 6b:6e:2f:b5:b5:73:a6:8e:96:bf:c0:a5:84:7c:c5:92 |
+    +------+-------------------------------------------------+
+</code></pre>
+
+<h5>查看镜像</h5>
+
+<pre><code>    nova image-list
+    +--------------------------------------+--------------+--------+--------+
+    | ID                                   | Name         | Status | Server |
+    +--------------------------------------+--------------+--------+--------+
+    | 533457ef-a1fe-41e0-a351-908975d3550b   | myFirstImage   | ACTIVE |        |
+    +--------------------------------------+--------------+--------+--------+
+</code></pre>
+
+<p>镜像的创建方法请见上传镜像文件。</p>
+
+<h5>查看虚拟机配置模板</h5>
+
+<pre><code>    nova flavor-list
+</code></pre>
+
+<h5>创建实例(虚拟机)</h5>
+
+<pre><code>    nova boot --flavor 1 --image 533457ef-a1fe-41e0-a351-908975d3550b --key_name key2 myFirstvm
+</code></pre>
+
+<p>创建一个名叫：myFirstvm的实例。</p>
+
+<ul>
+<li>&mdash;image             表示使用的哪个镜像文件</li>
+<li>&mdash;flavor             使用哪个配置模板，具体见查看虚拟机配置模板</li>
+<li>&mdash;key_name       指定密钥文件</li>
+</ul>
+
+
+<p>在创建之后会输出以下类似信息：</p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/06/04.png"><img class="alignnone size-full wp-image-705" alt="04" src="http://agenge.com/wp-content/uploads/2013/06/04.png" width="996" height="454" /></a></p>
+
+<p>从图中可看出正在创建一个实例。</p>
+
+<h4>配置网络</h4>
+
+<h5>创建与绑定公网</h5>
+
+<ol>
+<li><p>创建一个公网IP，在控制节点执行以下语句：</p>
+
+<pre><code> nova  floating-ip-create
+</code></pre></li>
+<li><p>创建指定的公网IP</p></li>
+</ol>
+
+
+<p> floating-ip-create只是创建一个随机可用（IP池）的可用公网IP，那如何要创建一个指定的IP如何操作？没关系，nova可以做到，请看操作：</p>
+
+<pre><code>    nova add-floating-ip test01 192.168.30.6
+</code></pre>
+
+<ol>
+<li><p>绑定公网IP地址到虚拟机</p>
+
+<pre><code> nova add-floating-ip vm01 192.168.30.1
+</code></pre></li>
+</ol>
+
+
+<p> 表示绑定到vm01这个虚拟机。可通过查看虚拟机状态看到：</p>
+
+<pre><code>    nova show vm01
+</code></pre>
+
+<h5>防火墙设置</h5>
+
+<ol>
+<li><p>允许SSH登录</p>
+
+<pre><code> nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
+</code></pre></li>
+<li><p>允许ICMP Ping</p>
+
+<pre><code> nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+</code></pre></li>
+<li><p>查看防火墙设置</p>
+
+<pre><code> nova secgroup-list-rules default
+</code></pre></li>
+</ol>
+
+
+<h5>删除或解绑floating-ip</h5>
+
+<p>如果某个公网IP不再需要，你可以通过删除或解绑它：</p>
+
+<pre><code>    nova remove-floating-ip test01 192.168.30.6
+</code></pre>
+
+<p>或</p>
+
+<pre><code>    nova floating-ip-delete test01 192.168.30.6
+</code></pre>
+
+<p>删除之后就会从IP池释放出来，以供其他Tenant使用。</p>
+
+<hr />
+
+<h3>Cinder管理</h3>
+
+<ol>
+<li><p>列出当前用户所有资源</p>
+
+<pre><code> cinder absolute-limits
+</code></pre></li>
+<li><p>创建一个Volume</p>
+
+<pre><code> cinder create --display_name cin01 10
+</code></pre></li>
+<li><p>&mdash;display_name为volume名称，后面的数字表示为10G。</p></li>
+<li><p>查看Volume</p>
+
+<pre><code> cinder list
+</code></pre></li>
+</ol>
+
+
+<p> 或者</p>
+
+<pre><code>    nova volume-list
+</code></pre>
+
+<hr />
+
+<h3>计算节点管理</h3>
+
+<h4>KVM驱动</h4>
+
+<p>要启用KVM，只需要在/etc/nova/nova.conf加入：</p>
+
+<pre><code>    libvirt_type=kvm
+    compute_driver=libvirt.LibvirtDriver
+</code></pre>
+
+<p>KVM支持的虚拟机镜像格式：RAW、QCOW2、VMDK</p>
+
+<h4>QEMU驱动</h4>
+
+<p>要启用QEMU，只需要在/etc/nova/nova.conf加入：</p>
+
+<pre><code>    libvirt_type=qemu
+    compute_driver=libvirt.LibvirtDriver
+</code></pre>
+
+<p>QEMU支持的虚拟机镜像格式：RAW、QCOW2、VMDK</p>
+
+<h4>Xen驱动</h4>
+
+<p>要启用Xen，包括Xen, XenAPI, XenServer and XCP，只需要在/etc/nova/nova.conf加入：</p>
+
+<pre><code>    compute_driver=xenapi.XenAPIDriver
+    xenapi_connection_url=http://your_xenapi_management_ip_address
+    xenapi_connection_username=root
+    xenapi_connection_password=your_password
+</code></pre>
+
+<p>XenAPI支持的虚拟机镜像格式：RAW、VHD</p>
+
+<p>如果您的Xen使用的libvirt管理，只需要在/etc/nova/nova.conf加入：</p>
+
+<pre><code>    libvirt_type=xen
+    compute_driver=libvirt.LibvirtDriver
+</code></pre>
+
+<hr />
+
+<h3>Glance管理</h3>
+
+<h4>磁盘格式</h4>
+
+<ul>
+<li><p>raw 此格式支持兼容转换其他格式文件，类似于中间格式，最大的缺点是<strong>不支持虚拟机的快照功能</strong>，使用空间类似于物理磁盘，使用多少空间实际上就是多少空间，可以通过du -h file.raw 来查看它真正的大小，而ls -lh看到的就是整个raw文件大小（包括剩余空间）</p></li>
+<li><p>qcow2 更小的存储空间，du -h 和ls -h看到的大小一样。且支持虚拟机的快照功能，性能接近于 raw 格式的文件。支持AES加密、zlib压缩。</p></li>
+<li><p>vhd 微软的虚拟磁盘文件，不过也兼容其他虚拟软件。</p></li>
+<li><p>vmdk VMware的专有格式，其在自身的虚拟环境中，无论从性能还是功能，都是最强大、最稳定的，其他虚拟化软件较少用到。</p></li>
+<li><p>iso 经典的ISO文件，不多介绍。</p></li>
+<li><p>vdi VirtualBox的专有格式，一般服务器虚拟化也很少用到。</p></li>
+<li><p>aki Amazon内核镜像文件。</p></li>
+<li><p>ari Amazon 内存（ramdisk）镜像文件。</p></li>
+<li><p>ami Amazon机器镜像文件。</p></li>
+</ul>
+
+
+<h4>容器格式</h4>
+
+<p>Glance的container format主要包括以下格式：</p>
+
+<ul>
+<li><p>bare                  表示镜像没有包括container或元数据，如果不知道选哪个格式，就选bare吧。</p></li>
+<li><p>ovf                   开放式虚拟磁盘文件，最初由VMware发起，支持多种虚拟化。</p></li>
+<li><p>aki                    Amazon内核镜像文件，在 磁盘格式设置为 aki 时使用。</p></li>
+<li><p>ari                    Amazon 内存（ramdisk）镜像文件，在 磁盘格式设置为 ari 时使用。</p></li>
+<li><p>ami                   Amazon机器镜像文件，在 磁盘格式设置为 ami 时使用。</p></li>
+</ul>
+
+
+<p>关于安装与部署，偶暂时写到这里，这只是很简单的一个入门例子而已，下次偶会介绍
+如何制作CentOS5.5、CentOS 6.3及Windows Server 2008的镜像，很多同学因镜像而烦恼。</p>
+]]></content>
+  </entry>
+  
+</feed>
