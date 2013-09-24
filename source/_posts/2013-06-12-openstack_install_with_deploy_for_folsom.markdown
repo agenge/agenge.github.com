@@ -171,6 +171,8 @@ comments: true
         sudo apt-get update
 
  如果报错，请参考[这里](http://blog.csdn.net/wche1990/article/details/6759422).
+
+<!-- more -->
  
 ###主机名设置
 在所有节点的/etc/hosts加入以下信息（需要修改每个节点对应的IP）：
@@ -197,7 +199,6 @@ comments: true
 
 ---
 
-<!-- more -->
 ##控制节点安装
 ###安装OpenStack组件
 1. 在控制节点执行：
