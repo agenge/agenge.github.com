@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>制作OpenStack Windows Server 2008 镜像 - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="前言 对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
+不敢私藏，故与大家分享小小心得。上次与大家介绍过 制作OpenStack CentOS 6.3 镜像 本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作： &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/07/24/make_openstack-windows2008-image">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">制作OpenStack Windows Server 2008 镜像</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-24T00:00:00+08:00" pubdate data-updated="true">Jul 24<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>前言</h1>
+
+<p>对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
+不敢私藏，故与大家分享小小心得。上次与大家介绍过 <a href="http://agenge.com/cloud-computing/make_openstack-centos-image.html">制作OpenStack CentOS 6.3 镜像</a></p>
+
+<p>本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作：</p>
+
+<ol>
+<li>下载Virtio总线驱动</li>
+</ol>
+
+
+<p> 由于OpenStack只支持Virtio总线的磁盘，所以我们需要在安装之前下载virtio驱动：</p>
+
+<pre><code>    wget http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/virtio-win-0.1-59.iso
+</code></pre>
+
+<ol>
+<li>准备一个Windows Server 2008的ISO文件。</li>
+</ol>
+
+
+<p> 除了Virtio总线驱动，您还需要准备一个Windows Server 2008的ISO，为安装操作系统做准备。
+3. 创建虚拟磁盘文件：</p>
+
+<pre><code>    qemu-img create -f qcow2 winserver2008.img 20G
+</code></pre>
+
+<p> 对于虚拟磁盘文件的各种磁盘格式区别与对比，可以参考 <a href="http://blog.prajnagarden.com/?p=248">qcow2、raw、vmdk等镜像格式</a></p>
+
+<ol>
+<li><p>创建虚拟机，使用kvm或virt-install均可，本次安装使用的virt-install</p>
+
+<pre><code> virt-install --connect qemu:///system -n winserver2008 --vcpus=1 -r 2048 \
+   --disk path=/path/to/winserver2008.img,size=60,format=qcow2,bus=virtio,cache=none \
+   -c /path/iso/windows_server_2008.iso \
+   --vnc --vncport=5909 --vnclisten=0.0.0.0  \
+   --os-type windows --os-variant=win2k8 --accelerate \
+   --network=bridge:br0,model=virtio  \
+   --disk path=/path/to/win_driver/virtio-win-0.1-59.iso,device=cdrom,perms=ro&lt;br /&gt;
+</code></pre></li>
+</ol>
+
+
+<p> 以上参数有点多，不过这里不一一解释，后期偶会专门写一篇介绍KVM相关知识点，这里只是描述几个重要的参数：</p>
+
+<pre><code>- -n  虚拟机的名称
+- --disk  虚拟磁盘存放的路径，即第一步qemu-img创建的虚拟磁盘。&lt;/span&gt;&lt;/li&gt;
+- -c  ISO的路径 &lt;/span&gt;&lt;/li&gt;
+- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。&lt;/span&gt;&lt;/li&gt;
+- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
+</code></pre>
+
+<p> 使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a></p>
+
+<p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/02.png"><img class="alignnone size-full wp-image-716" alt="02" src="http://agenge.com/wp-content/uploads/2013/07/02.png" width="621" height="489" /></a></p>
+
+<p> 点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/03.png"><img class="alignnone size-full wp-image-717" alt="03" src="http://agenge.com/wp-content/uploads/2013/07/03.png" width="337" height="319" /></a></p>
+
+<p> 点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/07/04.png"><img class="alignnone size-full wp-image-718" alt="04" src="http://agenge.com/wp-content/uploads/2013/07/04.png" width="597" height="449" /></a></p>
+
+<p> 安装之后并关机，进入下一步操作。</p>
+
+<ol>
+<li>上传镜像</li>
+</ol>
+
+
+<p> 最后一步就是要将刚才的虚拟磁盘文件上传到云平台中心:</p>
+
+<pre><code>    glance image-create --name Win-2008-x86_64-cloud --is-public true --container-format ovf --disk-format qcow2 &lt; /home/agen/winserver2008.img
+</code></pre>
+
+<p> 通过以上的步骤，希望新手能够成功制作一份完美的镜像文件，如果在制作过程中有任何疑问，请留言，最好是邮件，偶在有时间的情况下肯定会第一时间解答。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-24T00:00:00+08:00" pubdate data-updated="true">Jul 24<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/yun-ji-suan/'>云计算</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://agenge.github.io/blog/2013/07/24/make_openstack-windows2008-image/" data-via="" data-counturl="http://agenge.github.io/blog/2013/07/24/make_openstack-windows2008-image/" >Tweet</a>
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/07/20/make_openstack-centos-image/" title="Previous Post: 制作OpenStack CentOS 6.3 镜像">&laquo; 制作OpenStack CentOS 6.3 镜像</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/07/28/video-decoder-intro/" title="Next Post: 视频编解码术语概念介绍">视频编解码术语概念介绍 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li class='category'><a href='/blog/categories/blog-博客-/'>Blog[博客] (1)</a></li>
+<li class='category'><a href='/blog/categories/github/'>Github (1)</a></li>
+<li class='category'><a href='/blog/categories/云计算/'>云计算 (3)</a></li>
+<li class='category'><a href='/blog/categories/流媒体/'>流媒体 (1)</a></li>
+<li class='category'><a href='/blog/categories/运维/'>运维 (1)</a></li>
+ 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

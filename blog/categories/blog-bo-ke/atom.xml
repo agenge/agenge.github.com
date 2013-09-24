@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Blog[博客] | TaurusHome]]></title>
+  <link href="http://agenge.github.io/blog/categories/blog-bo-ke/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-09-24T14:19:41+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[利用GitHub搭建免费的个人blog]]></title>
+    <link href="http://agenge.github.io/blog/2013/09/12/write-blog-octopress-with-github/"/>
+    <updated>2013-09-12T22:18:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/09/12/write-blog-octopress-with-github</id>
+    <content type="html"><![CDATA[<h1>前言</h1>
+
+<h2>为啥写篇文章</h2>
+
+<ol>
+<li><p>熟悉WordPress的或许都明白，为了写作，你要学习很多东西，例如Linux、Apache/Nginx、Mysql以及各种中间件；</p></li>
+<li><p>你要花钱买VPS/虚拟主机，你要自己优化Web Server和Mysql，你要定期备份Mysql；</p></li>
+<li><p>WordPress官方已经被墙（对于合格的IT屌丝，这点不是问题）；</p></li>
+</ol>
+
+
+<p>你可能已经在心理产生疑问：“你说这么多费话，无非就是想让我放弃WP，难道你有解决上述问题的完美方案？”
+虽不敢说完美解决，但至少有这么一个blog平台：</p>
+
+<ul>
+<li>无须数据库</li>
+<li>无须Web Server</li>
+<li>无须备份且数据永不丢失（相对自己备份而言）</li>
+<li>所有操作均有版本记录</li>
+</ul>
+
+
+<p>看了之后是不是很“鸡动”？没错，这个平台就是Github，结合jekyll/Octopress就完全可以专心写作，
+不过相对WP，功能确实要少些，图片和视频功能实在太弱。</p>
+
+<h2>Jekyll/Octopress是啥</h2>
+
+<p>Jekyll即是一个轻量级Blog系统，而且还是一个强大的静态网站生成系统，具体的介绍请参考以下链接：</p>
+
+<p>1、<a href="http://calefy.org/2012/03/03/my-process-of-building-jekyll-blog.html">Jekyll建站之旅</a></p>
+
+<p>2、<a href="http://www.cnblogs.com/purediy/archive/2013/03/07/2948892.html">通过GitHub Pages建立个人站点（详细步骤）</a></p>
+
+<p>3、<a href="http://ztpala.com/2011/09/12/jekyll-and-github-pages/">Jekyll介绍</a></p>
+
+<p>Octopress其实就是一个基于Jekyll实现的静态网站系统，具体介绍如下（引用）：</p>
+
+<ul>
+<li><p>使用 Markdown 标记语言书写源文件， 通过 Markdown 解析器转换为 HTML 文件</p></li>
+<li><p>通过 Octopress 提供的站点模板提供所需的 Web 资产文件 （Javascript、CSS、image 等）</p></li>
+<li><p>只包含静态网页，无需数据库支持，对系统要求低且迁移方便</p></li>
+<li><p>以编写程序的方式编制网站，便于实现版本控制</p></li>
+<li><p>Octopress / Jekyll 使用简洁的Ruby框架实现。</p>
+
+<ul>
+<li><p>Octopress 以 rake 任务的形式实现静态站点页面生成, 操作十分简单</p></li>
+<li><p>Octopress 以 rake 任务的形式实现到普通网站和 Github 的发布</p></li>
+<li><p>Octopress 与 Github 完美结合，你无需学习过多的 git 命令语法，使非专业人士的使用成为可能</p></li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h1>准备工具</h1>
+
+<p>说一堆费话，现在说说要准备些什么工具</p>
+
+<ol>
+<li><p>Git for Windows(如果你是Linux/Mac就更方便，不过这篇文章主要是为了Windows下的用户)</p>
+
+<p> 猛撮 <a href="https://code.google.com/p/msysgit/downloads/list">下载Git</a> 下最新版本。
+偶是下载的 Git-1.8.3-preview20130601.exe</p></li>
+<li><p>安装Ruby环境</p>
+
+<p> 猛撮 <a href="https://rubyforge.org/frs/?group_id=167">下载RubyInstaller</a></p>
+
+<ul>
+<li>如果你是Octopress，请下载 rubyinstaller-1.9.2-p290</li>
+<li>如果你是Jekyll，请下载 rubyinstaller-1.9.1-p430</li>
+</ul>
+</li>
+</ol>
+
+
+<p> 安装之后确保C:\Ruby193\bin 在系统的环境变量中。</p>
+
+<ol>
+<li>安装DevKit</li>
+</ol>
+
+
+<p>  ruby 的模块工具 gem 在生成本地模块时可能需要用到编译环境，通常有2种选择：</p>
+
+<p> <a href="http://www.mingw.org/">MinGW and MSYS</a> 或 <a href="https://github.com/oneclick/rubyinstaller/wiki/development-kit">RubyInstaller DevKit</a></p>
+
+<p> 偶是使用的 DevKit-tdm-32-4.5.2-20111229-1559-sfx.exe
+ , 在”Start Command Prompt with Ruby”命令行中进入DevKit解压缩的目录：</p>
+
+<pre><code>    ruby dk.rb init 
+
+    ruby dk.rb install
+    gem install rdiscount --platform=ruby
+</code></pre>
+
+<p> 如果没问题，会提示如下信息：</p>
+
+<pre><code>    Fetching: rdiscount-2.1.6.gem (100%)
+    Temporarily enhancing PATH to include DevKit...
+    Building native extensions.  This could take a while...
+    Successfully installed rdiscount-2.1.6
+    1 gem installed
+    Installing ri documentation for rdiscount-2.1.6...
+    Installing RDoc documentation for rdiscount-2.1.6...
+</code></pre>
+
+<ol>
+<li>安装Python for Windows</li>
+</ol>
+
+
+<p> 最后还要安装Python，相对Ruby环境，安装Python就简单许多，下载python-2.7.5.amd64.msi即可。</p>
+
+<ol>
+<li>配置环境变量
+环境变量需要在两个地址设置： Windows系统与Git Bash</li>
+<li><p>在你的Windows系统创建两个新的环境变量</p>
+
+<ul>
+<li>LANG 环境变量，值设置为：zh_CN.UTF-8</li>
+<li>LC_ALL 环境变量，值设置为: zh_CN.UTF-8</li>
+</ul>
+</li>
+<li><p>打开Git Bash</p>
+
+<ul>
+<li><code>$ echo "export LANG LC_ALL" &gt; ~/.bash_profile</code></li>
+<li><code>$ echo "alias ll='ls -l --color=tty'" &gt;&gt; ~/.bash_profile</code></li>
+<li><code>$ echo "alias ls='ls --color=tty'" &gt;&gt; ~/.bash_profile</code></li>
+</ul>
+</li>
+<li><p>准备一个文本编辑器，只要能保存UTF-8无BOM格式的即可，例如UltraEdit.</p></li>
+<li><p>设置无密码登录github</p>
+
+<pre><code> ssh-keygen -C "username@email.com" -t rsa
+</code></pre></li>
+</ol>
+
+
+<p> username@email.com换成你的github注册时的邮箱。</p>
+
+<ul>
+<li>创建成功后，在你的C:\Users\%username%.ssh 目录会生成一个 id_rsa.pub公钥文件。</li>
+<li>登录github.com（如果没有就注册一个），在“Account Settings”->“SSH Keys”，点击右侧的“Add SSH Key”。</li>
+<li><p>将id_rsa.pub文件中的内容复制到“Key”中并保存。</p></li>
+<li><p>测试：</p>
+
+<pre><code> ssh -T git@github.com
+</code></pre></li>
+</ul>
+
+
+<p> 如果没有任何问题，提示如下：</p>
+
+<pre><code>    Hi agenge! You've successfully authenticated, but GitHub does not provide shell access.
+</code></pre>
+
+<h1>初始化Ruby环境</h1>
+
+<h2>gem源的问题</h2>
+
+<p>作为天朝的屌丝，有时候你总得多墙外的人多做些工作，gem的更新源也要墙？还好还好，国内有良心的企业还是有的（虽然不多），对于gem源，直接使用淘宝的吧。</p>
+
+<pre><code>gem sources --remove https://rubygems.org/
+gem sources -a http://ruby.taobao.org
+</code></pre>
+
+<p>如果你觉得不放心，还可以确认是否设置正确：</p>
+
+<pre><code>gem sources -l
+</code></pre>
+
+<h2>安装bundler(必须) 和 rdoc(非必须)</h2>
+
+<pre><code>gem install bundler rdoc
+bundle install
+</code></pre>
+
+<h1>安装Octopress</h1>
+
+<pre><code>git clone git://github.com/imathis/octopress.git octopress
+cd octopress
+rake install
+</code></pre>
+
+<h1>配置Octopress</h1>
+
+<h2>修改_config.yml</h2>
+
+<p>你可以根据这个文件你的以下信息：</p>
+
+<ul>
+<li>title: 网站名称</li>
+<li>subtitle: 网站子名称</li>
+<li>author: 作者名称</li>
+</ul>
+
+
+<p>除了这3个以外，把Twitter相关全部注释，更多的选项你可以看下注释或Google搜索。</p>
+
+<h2>发表文章</h2>
+
+<p>激动人心的时刻即将到来，终于到了发表文章的这一天，octopress居然把写作与发表文件变得如此简单。</p>
+
+<pre><code>rake new_post[“tile”]  # 创建一个新文章
+</code></pre>
+
+<p>执行这条命令之后，会在octopress\source_posts目录下生成一个"YYYY-MM-DD-title.markdown"的文件</p>
+
+<p>在生成静态页面之前，我们需要解决Windows下中文编码的问题，有两个地方需要注意：</p>
+
+<ol>
+<li>.markdown文件有中文的话必须保存：UTF-8无BOM</li>
+<li><p>编辑C:\Ruby193\lib\ruby\gems\1.9.1\gems\jekyll-0.12.0\lib\jekyll\convertible.rb第28行，修改为：</p>
+
+<p> self.content = File.read(File.join(base, name), :encoding => &lsquo;utf-8&rsquo;)</p></li>
+</ol>
+
+
+<p>生成静态页面</p>
+
+<pre><code>rake generate           # 生成新的静态页面
+</code></pre>
+
+<p>在本地预览文章效果：</p>
+
+<pre><code>rake preview
+</code></pre>
+
+<p> 如果成功的话，访问: <a href="http://localhost:4000">http://localhost:4000</a> 就能看到效果。</p>
+
+<h1>设置本地仓库与远程仓库关联</h1>
+
+<ul>
+<li><p>创建git账号与仓库</p>
+
+<ul>
+<li>用户名：username</li>
+<li>仓库名：username.github.com</li>
+</ul>
+</li>
+<li><p>关联github仓库</p>
+
+<ul>
+<li>rake setup_github_pages</li>
+</ul>
+</li>
+</ul>
+
+
+<p>提示输入远程仓库地址，请输入：</p>
+
+<pre><code>git@github.com:username/username.github.com.git
+</code></pre>
+
+<p>表示将blog与 username.github.com仓库关联.</p>
+
+<h2>部署Blog到Github</h2>
+
+<pre><code>rake deploy
+</code></pre>
+
+<p>这条命令表示发布文件到github。</p>
+
+<h2>将Octopress源文件推送到 Github的 source 分支</h2>
+
+<pre><code>git add .
+git commit -m “comment”
+git push origin source
+</code></pre>
+
+<h2>访问Blog</h2>
+
+<p>打开浏览器输入：username.github.com</p>
+
+<p>如果一切正常，就能看到你的文章。</p>
+
+<h1>rake常用命令</h1>
+
+<pre><code>$ rake -T
+rake clean                     # Clean out caches: .pygments-cache, .gist-c...
+rake copydot[source,dest]      # copy dot files for deployment
+rake deploy                    # Default deploy task
+rake gen_deploy                # Generate website and deploy
+rake generate                  # Generate jekyll site
+rake install[theme]            # Initial setup for Octopress: copies the de...
+rake integrate                 # Move all stashed posts back into the posts...
+rake isolate[filename]         # Move all other posts than the one currentl...
+rake list                      # list tasks
+rake new_page[filename]        # Create a new page in source/(filename)/ind...
+rake new_post[title]           # Begin a new post in source/_posts
+rake preview                   # preview the site in a web browser
+rake push                      # deploy public directory to github pages
+rake rsync                     # Deploy website via rsync
+rake set_root_dir[dir]         # Update configurations to support publishin...
+rake setup_github_pages[repo]  # Set up _deploy folder and deploy branch fo...
+rake update_source[theme]      # Move source to source.old, install source ...
+rake update_style[theme]       # Move sass to sass.old, install sass theme ...
+rake watch                     # Watch the site and regenerate when it changes
+</code></pre>
+
+<p>Edit By <a href="http://agenge.github.com">agenge</a></p>
+]]></content>
+  </entry>
+  
+</feed>

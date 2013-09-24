@@ -1,0 +1,2113 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>DRBD+Heartbeat+Mysql高可用配置 - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="介绍 DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">DRBD+Heartbeat+Mysql高可用配置</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-09T00:00:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>介绍</h2>
+
+<p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
+
+<p>DRBD工作需要在两个节点上同时准备一块一模一样的分区组成镜像，这就是为什么它叫做分布式复制块设备，它主要通过复制数据来实现文件同步（备份），主要用于集群文件共享， 我们通过它的工作原理来了解块复制和文件复制的不同。</p>
+
+<p>首先，您需要知道，DRBD是工作在系统内核空间，而不是用户空间，它直接复制的是二进制数据，这是它速度快的根本原因。其次，DRBD至少需要两个节点来工作，一主一次。</p>
+
+<p>DRBD的文件同步过程和普通复制过程的不同：</p>
+
+<p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
+
+<h2>准备工作</h2>
+
+<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
+
+<table class="table table-bordered table-striped table-condensed">
+    <tr>
+        <td valign="top" width="180"></td>
+        <td valign="top" width="182">主节点(Primary Node)</td>
+        <td valign="top" width="183">次节点(Secondary Node)</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">主机名</td>
+        <td valign="top" width="182">drbd-01.i.12582.com</td>
+        <td valign="top" width="183">drbd-02.i.12582.com</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">操作系统</td>
+        <td valign="top" width="182">CentOS 6.3 x86_64位</td>
+        <td valign="top" width="183">CentOS 6.3 x86_64位</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">硬盘分区</td>
+        <td valign="top" width="182">/dev/sdb  8G</td>
+        <td valign="top" width="183">/dev/sdb  8G</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">IP地址</td>
+        <td valign="top" width="182">192.168.30.234</td>
+        <td valign="top" width="183">192.168.30.235</td>
+    </tr>
+</table>
+
+
+<p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+<!--more-->
+
+
+<h2>初始化设置</h2>
+
+<p>1  所有节点关闭iptables和SELinux</p>
+
+<p>2  在所有节点/etc/hosts加入以下内容：</p>
+
+<pre><code>192.168.30.234  drbd-01.i.12582.com drbd-01
+192.168.30.235  drbd-02.i.12582.com drbd-02
+</code></pre>
+
+<p>3  所有节点创建独立分区：</p>
+
+<pre><code>fdisk /dev/sdbDevice contains neither a valid DOS partition table, nor Sun, SGI or OSF disklabelBuilding a new DOS disklabel with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
+After that, of course, the previous content won't be recoverable.
+Warning: invalid flag 0x0000 of partition table 4 will be corrected by w(rite)
+WARNING: DOS-compatible mode is deprecated. It's strongly recommended to
+switch off the mode (command 'c') and change display units to
+sectors (command 'u').
+
+Command (m for help): p
+Disk /dev/sdb: 8589 MB, 8589934592 bytes
+255 heads, 63 sectors/track, 1044 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x46b64833
+
+Device Boot    Start        End        Blocks    Id    System
+
+Command (m for help): n
+Command action
+e   extended
+p   primary partition (1-4)
+p
+Partition number (1-4): 1
+First cylinder (1-1044, default 1):
+Using default value 1
+Last cylinder, +cylinders or +size{K,M,G} (1-1044, default 1044):
+Using default value 1044
+
+Command (m for help): w
+The partition table has been altered!
+Calling ioctl() to re-read partition table.
+Syncing disks.
+</code></pre>
+
+<h2>安装Hearbeat</h2>
+
+<pre><code>wget ftp://mirror.switch.ch/pool/1/mirror/scientificlinux/6rolling/i386/os/Packages/epel-release-6-5.noarch.rpm
+rpm -ivUh epel-release-6-5.noarch.rpm
+yum --enablerepo=epel install heartbeat -y
+</code></pre>
+
+<h2>安装DRBD</h2>
+
+<p>1  安装依赖包</p>
+
+<pre><code>yum -y install gcc kernel-devel kernel-headers flex
+</code></pre>
+
+<p>2  安装DRBD</p>
+
+<pre><code>wget http://oss.linbit.com/drbd/8.4/drbd-8.4.3.tar.gz
+tar zxvf drbd-8.4.3.tar.gz
+cd drbd-8.4.3
+./configure --prefix=/usr/local/drbd --with-km --with-heartbeat
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+make install
+cp -R /usr/local/drbd/etc/ha.d/resource.d/drbd* /etc/ha.d/resource.d/
+</code></pre>
+
+<p>3  其他设置</p>
+
+<pre><code>mkdir -p /usr/local/drbd/var/run/drbd
+cp /usr/local/drbd/etc/rc.d/init.d/drbd /etc/rc.d/init.d/
+chkconfig --add drbdchkconfig drbd on
+</code></pre>
+
+<h2>安装DRBD模块</h2>
+
+<pre><code>cd drbdmake 
+clean
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+cp drbd.ko /lib/modules/`uname -r`/kernel/lib/
+depmod
+</code></pre>
+
+<p>以上操作请在所有节点操作一次。</p>
+
+<hr />
+
+<h2>设置DRBD</h2>
+
+<p><strong>配置drbd.conf</strong></p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/global_common.conf
+global {
+    minor-count 64;
+    usage-count yes;
+    # minor-count dialog-refresh disable-ip-verification
+}
+
+
+common {
+    syncer { rate 1000M; }
+    handlers {
+        # These are EXAMPLE handlers only.
+        # They may have severe implications,
+        # like hard resetting the node under certain circumstances.
+        # Be careful when chosing your poison.
+
+        pri-on-incon-degr "/usr/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        pri-lost-after-sb "/usr/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        local-io-error "/usr/lib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-emergency-shutdown.sh; echo o &amp;gt; /proc/sysrq-trigger ; halt -f";
+        fence-peer "/usr/lib/drbd/crm-fence-peer.sh";
+        pri-lost "/usr/local/drbd/lib/drbd/notify-pri-lost.sh; /usr/local/drbd/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt;/proc/sysrq-trigger ; reboot -f";
+        split-brain "/usr/lib/drbd/notify-split-brain.sh root";
+        out-of-sync "/usr/lib/drbd/notify-out-of-sync.sh root";
+        # before-resync-target "/usr/lib/drbd/snapshot-resync-target-lvm.sh -p 15 -- -c 16k";
+        # after-resync-target /usr/lib/drbd/unsnapshot-resync-target-lvm.sh;
+    }
+
+    startup {
+
+        # wfc-timeout degr-wfc-timeout outdated-wfc-timeout wait-after-sb
+        wfc-timeout 60;
+        degr-wfc-timeout 120;
+        outdated-wfc-timeout 2;
+    }
+
+    options {
+        # cpu-mask on-no-data-accessible
+        }
+
+    disk {
+        # size max-bio-bvecs on-io-error fencing disk-barrier disk-flushes
+        # disk-drain md-flushes resync-rate resync-after al-extents
+        # c-plan-ahead c-delay-target c-fill-target c-max-rate
+        # c-min-rate disk-timeout
+        on-io-error detach;
+        fencing resource-only;
+    }
+
+    net {
+        # protocol timeout max-epoch-size max-buffers unplug-watermark
+        # connect-int ping-int sndbuf-size rcvbuf-size ko-count
+        # allow-two-primaries cram-hmac-alg shared-secret after-sb-0pri
+        # after-sb-1pri after-sb-2pri always-asbp rr-conflict
+        # ping-timeout data-integrity-alg tcp-cork on-congestion
+        # congestion-fill congestion-extents csums-alg verify-alg
+        # use-rle
+        protocol C;
+    }
+}
+</code></pre>
+
+<p>设置资源文件</p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/r0.res
+resource r0 {
+    on drbd-01.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.234:7788;
+        meta-disk       internal;
+    }
+
+    on drbd-02.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.235:7788;
+        meta-disk       internal;
+    }
+}
+</code></pre>
+
+<hr />
+
+<h3>设置权限</h3>
+
+<pre><code>chgrp haclient /sbin/drbdsetup
+chmod o-x /sbin/drbdsetup
+chmod u+s /sbin/drbdsetup
+chgrp haclient /sbin/drbdmeta
+chmod o-x /sbin/drbdmeta
+chmod u+s /sbin/drbdmeta
+</code></pre>
+
+<p>加载DRBD模块与建立resource</p>
+
+<pre><code>modprobe drbd
+lsmod | grep drbd
+drbd                  328626  0
+libcrc32c               1246  1 drbd
+</code></pre>
+
+<p>写入一些数据到/dev/sdb1</p>
+
+<pre><code>dd if=/dev/zero of=/dev/sdb1 bs=1M count=100
+</code></pre>
+
+<p>建立Resource</p>
+
+<pre><code>drbdadm create-md r0
+Writing meta data...
+initializing activity log
+NOT initializing bitmap
+New drbd meta data block successfully created.
+success
+</code></pre>
+
+<h3>启动DRBD</h3>
+
+<pre><code>/etc/init.d/drbd start
+Starting DRBD resources: [
+      create res: r0
+    prepare disk: r0
+     adjust disk: r0
+     adjust net: r0
+]
+degr-wfc-timeout has to be shorter than wfc-timeout
+degr-wfc-timeout implicitly set to wfc-timeout (60s)
+..........
+***************************************************************
+DRBD's startup script waits for the peer node(s) to appear.
+- In case this node was already a degraded cluster before the
+reboot the timeout is 120 seconds. [degr-wfc-timeout]
+- If the peer was available before the reboot the timeout will
+expire after 60 seconds. [wfc-timeout]
+(These values are for resource 'r0'; 0 sec -&amp;gt; wait forever)
+To abort waiting enter 'yes' [  49]:yes
+
+.
+</code></pre>
+
+<p>节点2按以上操作执行一次。</p>
+
+<h3>DRBD状态查看</h3>
+
+<ol>
+<li><p>Secondary/Unknown：若drbd-01服务启动而drbd-02尚未启动,则ro会出现Secondary/Unknown</p>
+
+<pre><code> /init.d/drbd status
+ drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs        ro                 ds                 p   mounted
+ fstype
+ 0:r0   WFConnection  Secondary/Unknown  Inconsistent/DUnknown  C
+</code></pre>
+
+<p>查看drbd</p>
+
+<pre><code>  cat /proc/drbd
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:WFConnection ro:Secondary/Unknown ds:Inconsistent/DUnknown C r----s
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre></li>
+<li><p>Inconsistent/Inconsistent：ds出現Inconsistent表示兩台node資料尚未同步。</p>
+
+<pre><code> drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs         ro                   ds                         p  mounted  
+ fstype
+ 0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre>
+
+<p>查看内核</p>
+
+<pre><code>  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r-----
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre>
+
+<p>3  SyncSource：cs出現SyncTarget表示正在同步中，可看到目前同步時的進度．</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs          ro                 ds                     p  mounted  
+  fstype
+  ...    sync'ed:    26.1%              (6056/8188)M
+  0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>4  Secondary/Secondary：表示尚未設定Primary Node。</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs         ro                   ds                         p  mounted  
+  fstype
+  0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre></li>
+</ol>
+
+
+<h3>设置主节点(Primary Node)</h3>
+
+<p>在drbd-01进行以下操作:</p>
+
+<pre><code>drbdadm -- --overwrite-data-of-peer primary r0
+</code></pre>
+
+<p>再查看下状态:</p>
+
+<pre><code>/etc/init.d/drbd status
+drbd driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+m:res  cs          ro                 ds                     p  mounted  fstype
+...    sync'ed:    13.1%              (7124/8188)M
+0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>在drbd-02查看下状态：</p>
+
+<pre><code>driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-02.i.12582.com, 2013-08-08 14:16:07
+m:res  cs         ro                 ds                 p  mounted  fstype
+0:r0   Connected  Secondary/Primary  UpToDate/UpToDate  C
+</code></pre>
+
+<p>格式化（drbd-01）</p>
+
+<pre><code>mkfs.ext4 /dev/drbd0
+</code></pre>
+
+<p>挂载到文件系统：</p>
+
+<pre><code>mkdir /datamount /dev/drbd0 /data
+</code></pre>
+
+<h2>测试DRBD</h2>
+
+<h3>测试同步</h3>
+
+<ol>
+<li><p>在主节点（Primary Node）复制一些数据到/data</p>
+
+<pre><code> cp -r drbd-8.4.3 /data/
+</code></pre></li>
+<li><p>在次节点（Secondary Node）执行以下步骤：</p>
+
+<pre><code> drbdadm down r0
+</code></pre>
+
+<p>注：次节点在DRBD启动状态下是无法mount /data的，所以必须先手动停止才能mount。</p>
+
+<pre><code>  mkdir /datamount -t ext4 /dev/sdb1 /datals -l
+</code></pre>
+
+<p>就可以看到数据已经全部同步过来。</p></li>
+</ol>
+
+
+<h2>Heartbeat配置</h2>
+
+<p>主节点操作：</p>
+
+<pre><code>vim /etc/ha.d/ha.cf
+debugfile /var/log/ha-debug   # 打开错误日志报告
+
+keepalive 2    # 2秒检测一次心跳线连接
+deadtime 10    # 10秒测试不到 主节点心跳线就认为有问题
+
+warntime 6    # 警告时间（建议在2－10之间）
+
+initdead 120   # 初始化启动时 120秒无连接视为正常，或指定heartbeat 在启动时，
+
+# 需要等待120秒才去启动任何资源
+
+udpport 694     # 用udp的694端口连接，netstat -antulp | grep 694
+
+ucast eth0 192.168.30.235      # 单播方式连接（主、从都是写对方的IP连接）
+
+node  drbd-01.i.12582.com  # 声明主节点（uname -n）
+
+node  drbd-02.i.12582.com  # 声明次节点（uname -n）
+
+auto_failback on                    # 自动切换（主节点恢复后会自动切换回来）
+
+respawn hacluster /usr/lib64/heartbeat/ipfail  #监控ipfail进程是否挂掉，否则重启它
+</code></pre>
+
+<p>&nbsp;</p>
+
+<p>vim /etc/ha.d/authkeysauth 11 sha1 MySecret&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>chmod 600 /etc/ha.d/authkeys</p>
+
+<p>&nbsp;</p>
+
+<p>vim /etc/ha.d/haresourcesdrbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0 drbddisk::r0 Filesystem::/dev/drbd0::/data::ext4</p>
+
+<p>&nbsp;</p>
+
+<p>drbd-01.i.12582.com   主节点的主机名</p>
+
+<p>IPaddr::192.168.30.229/24/eth0    设置虚拟IP</p>
+
+<p>drbddisk::r0                  管理资源r0</p>
+
+<p>Filesystem::/dev/drbd0::/data::ext4   执行umount和mount操作</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>次节点操作：</p>
+
+<p>将ha.cf中的192.168.30.235改成192.168.30.234</p>
+
+<p>&nbsp;</p>
+
+<h3>DRBD主从自动切换测试</h3>
+
+<p>1）    首先在 drbd-01启动heartbeat：</p>
+
+<p>/etc/init.d/heartbeat  start</p>
+
+<p>2）    接着在 drbd-02 启动heartbear:</p>
+
+<p>/etc/init.d/heartbeat  start</p>
+
+<p>&nbsp;</p>
+
+<p>在drbd-01输入：</p>
+
+<p>ip a</p>
+
+<p>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 16436 qdisc noqueue state UNKNOWN</p>
+
+<p>link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</p>
+
+<p>inet 127.0.0.1/8 scope host lo</p>
+
+<p>inet6 ::1/128 scope host</p>
+
+<p>valid_lft forever preferred_lft forever</p>
+
+<p>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</p>
+
+<p>link/ether 08:00:27:98:a2:6c brd ff:ff:ff:ff:ff:ff</p>
+
+<p>inet 192.168.30.234/24 brd 192.168.30.255 scope global eth0</p>
+
+<p>inet <b>192.168.30.229</b>/24 brd 192.168.30.255 scope global secondary eth0:0</p>
+
+<p>inet6 fe80::a00:27ff:fe98:a26c/64 scope link</p>
+
+<p>valid_lft forever preferred_lft forever</p>
+
+<p>从结果可以看出，VIP已经出现。</p>
+
+<p>&nbsp;</p>
+
+<p>3）    停止drbd-01的heartbeat服务或将网线断掉，同时监控drbd-02的DRBD状态，</p>
+
+<p>drbd-02操作：</p>
+
+<p>watch -n 1 /etc/init.d/drbd status</p>
+
+<p>如果一切正常，可以看到状态在不断变化。</p>
+
+<p>4）    恢复drbd-01的heartbeat服务或将网线接上，同时监控drbd-02的DRBD状态，如果正常drbd-01又变为主节点（auto_failback on 决定）了。</p>
+
+<p>&nbsp;</p>
+
+<h2>Mysql+DRBD+Heartbeat配置</h2>
+
+<h3>Mysql安装</h3>
+
+<p><b>安装Mysql</b><b>依赖包</b></p>
+
+<p>yum -y install gcc gcc-c++ ncurses-devel libtool zlib-devel bison</p>
+
+<p>&nbsp;</p>
+
+<p><b>创建用户与组</b></p>
+
+<p>groupadd mysqluseradd -g mysql mysql</p>
+
+<p><b>设置内核参数</b></p>
+
+<p>vi /etc/security/limits.confmysql              soft    nproc   2047mysql              hard    nproc   16384mysql              soft    nofile  1024</p>
+
+<p>mysql              hard    nofile  65536</p>
+
+<p>&nbsp;</p>
+
+<p><b>安装Mysql</b></p>
+
+<p>由于源码安装Mysql5.6需要依赖cmake，必须先安装cmake：</p>
+
+<p>mkdir ~/software; cd ~/softwarewget <a href="ftp://192.168.30.211/pub/Tools/mysql/cmake-2.8.4.tar.gztar">ftp://192.168.30.211/pub/Tools/mysql/cmake-2.8.4.tar.gztar</a> zxvf cmake-2.8.4.tar.gzcd cmake-2.8.4</p>
+
+<p>./configure</p>
+
+<p>gmake &amp;&amp; make install</p>
+
+<p>&nbsp;</p>
+
+<p>开始安装Mysql</p>
+
+<p>cd ~/softwarewget <a href="ftp://192.168.30.211/pub/Tools/mysql/mysql-5.6.5-m8.tar.gztar">ftp://192.168.30.211/pub/Tools/mysql/mysql-5.6.5-m8.tar.gztar</a> zxvf mysql-5.6.5-m8.tar.gzcd mysql-5.6.5-m8</p>
+
+<p>cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \</p>
+
+<p>-DDEFAULT_CHARSET=utf8 \</p>
+
+<p>-DDEFAULT_COLLATION=utf8_general_ci \</p>
+
+<p>-DENABLED_LOCAL_INFILE=ON \</p>
+
+<p>-DWITH_INNOBASE_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_FEDERATED_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_PARTITION_STORAGE_ENGINE=1 \</p>
+
+<p>-DWITH_PERFSCHEMA_STORAGE_ENGINE=1 \</p>
+
+<p>-DCOMPILATION_COMMENT=&lsquo;agenge for mysql&rsquo; \</p>
+
+<p>-DWITH_READLINE=ON \</p>
+
+<p>-DMYSQL_UNIX_ADDR=/data/mysqldata/3306/mysql.sock \</p>
+
+<p>-DSYSCONFDIR=/data/mysqldata/3306</p>
+
+<p>make &amp;&amp; make install</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<h3>Mysql设置</h3>
+
+<p>设置权限</p>
+
+<p>chown -R mysql:mysql /usr/local/mysql</p>
+
+<p>设置环境变量</p>
+
+<p>vi /etc/profileexport PATH=/usr/local/mysql/bin:$PATH</p>
+
+<p>使环境变量马上生效</p>
+
+<p>source /etc/profile</p>
+
+<p>设置相关存储路径</p>
+
+<p>cd /datamkdir -p mysqldata/3306/{data,binlog,tmp,innodb_ts,innodb_log}cd /data/mysqldata/mkdir script backup</p>
+
+<p>chown -R mysql:mysql /data/mysqldata/</p>
+
+<p>&nbsp;</p>
+
+<p>创建my.cnf</p>
+
+<p>vi /data/mysqldata/3306/my.cnf[client]port = 3306socket = /data/mysqldata/3306/mysql.sock</p>
+
+<p>&nbsp;</p>
+
+<h1>Here follows entries for some specific programs</h1>
+
+<p>&nbsp;</p>
+
+<h1>The MySQL server</h1>
+
+<p>[mysqld]</p>
+
+<p>port     = 3306</p>
+
+<p>user     = mysql</p>
+
+<p>socket   = /data/mysqldata/3306/mysql.sock</p>
+
+<p>pid-file = /tmp/mysql.pid</p>
+
+<p>basedir  = /usr/local/mysql</p>
+
+<p>datadir  = /data/mysqldata/3306/data</p>
+
+<p>tmpdir   = /data/mysqldata/3306/tmp</p>
+
+<p>open_files_limit    = 10240</p>
+
+<p>server-id = 333306</p>
+
+<p>lower_case_table_names = 1</p>
+
+<p>character-set-server = utf8</p>
+
+<p>skip-name-resolve</p>
+
+<p>&nbsp;</p>
+
+<p>max_connections = 1000</p>
+
+<p>max_connect_errors = 100000</p>
+
+<p>max_allowed_packet = 512M</p>
+
+<p>max_heap_table_size = 1024M</p>
+
+<p>max_length_for_sort_data = 4096</p>
+
+<p>back_log=100</p>
+
+<p>interactive_timeout = 28800</p>
+
+<p>wait_timeout = 28800</p>
+
+<p>&nbsp;</p>
+
+<p>default-storage-engine = InnoDB</p>
+
+<p>&nbsp;</p>
+
+<p>net_buffer_length = 8K</p>
+
+<p>sort_buffer_size = 2M</p>
+
+<p>join_buffer_size = 4M</p>
+
+<p>read_buffer_size = 2M</p>
+
+<p>read_rnd_buffer_size = 16M</p>
+
+<p>&nbsp;</p>
+
+<p>query_cache_size = 128M</p>
+
+<p>query_cache_limit = 2M</p>
+
+<p>query_cache_min_res_unit = 2k</p>
+
+<p>&nbsp;</p>
+
+<p>thread_cache_size = 300</p>
+
+<p>table_open_cache = 1024</p>
+
+<p>tmp_table_size = 256M</p>
+
+<p>&nbsp;</p>
+
+<h1><strong><strong><strong><strong><strong><em>  Logs related settings </em></strong></strong></strong></strong></strong></h1>
+
+<p>log-bin  = ../binlog/mysql-bin</p>
+
+<p>relay-log = ../binlog/mysql-relay-bin</p>
+
+<p>binlog_format=mixed</p>
+
+<p>binlog_cache_size=32m</p>
+
+<p>max_binlog_cache_size=512m</p>
+
+<p>max_binlog_size=512m</p>
+
+<p>long_query_time = 1</p>
+
+<p>log_output = FILE</p>
+
+<p>log-error =  ../mysql-error.log</p>
+
+<p>slow_query_log = 1</p>
+
+<p>slow_query_log_file = ../slow_statement.log</p>
+
+<h1>log_queries_not_using_indexes</h1>
+
+<p>general_log = 0</p>
+
+<p>general_log_file = ../general_statement.log</p>
+
+<p>expire-logs-days = 14</p>
+
+<p>&nbsp;</p>
+
+<h1><strong><strong><strong><strong><strong><em> MyISAM Specific options </em></strong></strong></strong></strong></strong></h1>
+
+<p>key_buffer_size = 32M</p>
+
+<p>bulk_insert_buffer_size = 64M</p>
+
+<p>myisam_sort_buffer_size = 128M</p>
+
+<p>myisam_max_sort_file_size = 10G</p>
+
+<p>myisam_repair_threads = 1</p>
+
+<p>myisam_recover</p>
+
+<p>&nbsp;</p>
+
+<h1><strong><strong><strong><strong><strong><em> INNODB Specific options </em></strong></strong></strong></strong></strong></h1>
+
+<p>innodb_file_per_table = 1</p>
+
+<p>transaction-isolation = READ-COMMITTED</p>
+
+<p>&nbsp;</p>
+
+<p>innodb_additional_mem_pool_size = 16M</p>
+
+<p>innodb_buffer_pool_size = 1192M</p>
+
+<p>innodb_data_home_dir = ../innodb_ts</p>
+
+<p>innodb_data_file_path = ibdata1:2048M:autoextend</p>
+
+<p>&nbsp;</p>
+
+<p>innodb_file_io_threads = 4</p>
+
+<p>innodb_thread_concurrency = 8</p>
+
+<p>innodb_log_buffer_size = 128M</p>
+
+<p>innodb_log_file_size = 256M</p>
+
+<p>innodb_log_files_in_group = 3</p>
+
+<p>&nbsp;</p>
+
+<p>innodb_log_group_home_dir = ../innodb_log</p>
+
+<p>innodb_flush_log_at_trx_commit = 2</p>
+
+<p>innodb_max_dirty_pages_pct = 80</p>
+
+<p>innodb_lock_wait_timeout = 120</p>
+
+<p>innodb_flush_method=O_DIRECT</p>
+
+<p>performance_schema</p>
+
+<p>&nbsp;</p>
+
+<p>[mysqldump]</p>
+
+<p>quick</p>
+
+<p>max_allowed_packet = 512M</p>
+
+<p>&nbsp;</p>
+
+<p>[mysql]</p>
+
+<p>no-auto-rehash</p>
+
+<h1>Remove the next comment character if you are not familiar with SQL</h1>
+
+<h1>safe-updates</h1>
+
+<p>&nbsp;</p>
+
+<p>[myisamchk]</p>
+
+<p>key_buffer_size = 32M</p>
+
+<p>sort_buffer_size = 20M</p>
+
+<p>read_buffer_size = 2M</p>
+
+<p>write_buffer_size = 2M</p>
+
+<p>&nbsp;</p>
+
+<p>[mysqlhotcopy]</p>
+
+<p>interactive-timeout</p>
+
+<p>&nbsp;</p>
+
+<p>[mysqld_safe]</p>
+
+<p>open-files-limit = 8192</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>安装mysql database，并启动Myql：</p>
+
+<p>/usr/local/mysql/scripts/mysql_install_db \</p>
+
+<p>&mdash;datadir=/data/mysqldata/3306/data \</p>
+
+<p>&mdash;defaults-file=/data/mysqldata/3306/my.cnf \</p>
+
+<p>&mdash;basedir=/usr/local/mysql &mdash;user=mysql</p>
+
+<p>mysqld_safe &mdash;defaults-file=/data/mysqldata/3306/my.cnf &amp;</p>
+
+<p>mysqladmin -uroot password &lsquo;new_password&rsquo; -S /data/mysqldata/3306/mysql.sock</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>mysql -uroot -p123456</p>
+
+<p>mysql&gt; select user,host from mysql.user;</p>
+
+<p>mysql&gt; delete from mysql.user where (user,host) not in (select &lsquo;root&rsquo;,&lsquo;localhost&rsquo;);</p>
+
+<p>mysql&gt; delete from mysql.proxies_priv where host=&lsquo;localhost.localdomain&rsquo;;</p>
+
+<p>mysql&gt; delete from mysql.db;</p>
+
+<p>mysql&gt; flush privileges;</p>
+
+<p>mysql&gt; quit</p>
+
+<p>mysqladmin -uroot -p123456 shutdownrm -f /data/mysqldata/3306/mysql-error.logmysqld_safe &mdash;defaults-file=/data/mysqldata/3306/my.cnf &amp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>启动Mysql脚本</p>
+
+<p>cp support-files/mysql.server  /etc/init.d/mysqldchmod +x /etc/init.d/mysqld</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>修改ha.cf</p>
+
+<p>由于现在是管理Mysql，故要将mysqld由heartbeat管理（2个节点都执行）</p>
+
+<p>cat /etc/ha.d/haresourcesdrbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0:0  drbddisk::r0 Filesystem::/dev/drbd0::/data::ext4 mysqld</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>测试</p>
+
+<p>1）  准备Mysql数据（节点1操作）</p>
+
+<p>mysql -uroot -pEnter password:Welcome to the MySQL monitor.  Commands end with ; or \g.Your MySQL connection id is 2</p>
+
+<p>Server version: 5.6.5-m8-log agenge for mysql</p>
+
+<p>&nbsp;</p>
+
+<p>Copyright &copy; 2000, 2012, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>&nbsp;</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its</p>
+
+<p>affiliates. Other names may be trademarks of their respective</p>
+
+<p>owners.</p>
+
+<p>&nbsp;</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; create database mydb;</p>
+
+<p>Query OK, 1 row affected (0.02 sec)</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; use mydb;</p>
+
+<p>Database changed</p>
+
+<p>mysql&gt; create table t_1( id  int not null, name varchar(10));</p>
+
+<p>Query OK, 0 rows affected (0.14 sec)</p>
+
+<p>mysql&gt; insert into t_1 values(1,&lsquo;aaa&rsquo;);</p>
+
+<p>Query OK, 1 row affected (0.00 sec)</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; commit;</p>
+
+<p>Query OK, 0 rows affected (0.00 sec)</p>
+
+<p>mysql&gt; quit;</p>
+
+<p>Bye</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>2）  切换主、次节点，同时监控drbd-02服务器的日志</p>
+
+<p>watch -n 1 /etc/init.d/drbd status</p>
+
+<p>如果一切正常，可以看到ro的状态从“Secondary/Primary”变成“Primary/Secondary”。</p>
+
+<p>例如偶切换成的状态如下：</p>
+
+<p>drbd driver loaded OK; device status:</p>
+
+<p>version: 8.4.3 (api:1/proto:86-101)</p>
+
+<p>GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by root@<b>drbd-02.i.12582.com</b>, 2013-08-08 16:46:23</p>
+
+<p>m:res  cs         ro                 ds                 p  mounted  fstype</p>
+
+<p>0:r0   Connected  <b>Primary/Secondary</b>  UpToDate/UpToDate  C  /data    ext4</p>
+
+<p>3）  查询数据是否丢失（drbd-02操作）</p>
+
+<p>mysql -uroot -p</p>
+
+<p>Enter password:</p>
+
+<p>Welcome to the MySQL monitor.  Commands end with ; or \g.</p>
+
+<p>Your MySQL connection id is 2</p>
+
+<p>Server version: 5.6.5-m8-log agenge for mysql</p>
+
+<p>&nbsp;</p>
+
+<p>Copyright &copy; 2000, 2012, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>&nbsp;</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its</p>
+
+<p>affiliates. Other names may be trademarks of their respective</p>
+
+<p>owners.</p>
+
+<p>&nbsp;</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>&nbsp;</p>
+
+<p>mysql&gt; use mydb;</p>
+
+<p>Database changed</p>
+
+<p>mysql&gt; select * from t_1;</p>
+
+<p>+&mdash;&mdash;+&mdash;&mdash;&mdash;+</p>
+
+<p>| id | name |</p>
+
+<p>+&mdash;&mdash;+&mdash;&mdash;&mdash;+</p>
+
+<p>|  1 | aaa  |</p>
+
+<p>+&mdash;&mdash;+&mdash;&mdash;&mdash;+</p>
+
+<p>1 row in set (0.00 sec)</p>
+
+<h2>从结果可以看到在drbd-02上数据已经有了。</h2>
+
+<p>layout: post
+title: DRBD+Heartbeat+Mysql高可用配置
+categories:
+&ndash; 运维
+tags:
+&ndash; drbd
+&ndash; heartbeat
+&ndash; mysql
+&ndash; 集群
+&ndash; 高可用
+published: true</p>
+
+<h2>comments: true</h2>
+
+<h2>介绍</h2>
+
+<p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
+
+<p>DRBD工作需要在两个节点上同时准备一块一模一样的分区组成镜像，这就是为什么它叫做分布式复制块设备，它主要通过复制数据来实现文件同步（备份），主要用于集群文件共享， 我们通过它的工作原理来了解块复制和文件复制的不同。</p>
+
+<p>首先，您需要知道，DRBD是工作在系统内核空间，而不是用户空间，它直接复制的是二进制数据，这是它速度快的根本原因。其次，DRBD至少需要两个节点来工作，一主一次。</p>
+
+<p>DRBD的文件同步过程和普通复制过程的不同：</p>
+
+<p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
+
+<!--more-->
+
+
+<h2>准备工作</h2>
+
+<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
+
+<p>主节点(Primary Node)
+次节点(Secondary Node)
+主机名
+drbd-01.i.12582.com
+drbd-02.i.12582.com
+操作系统
+CentOS 6.3 x86_64位
+CentOS 6.3 x86_64位
+硬盘分区
+/dev/sdb  8G
+/dev/sdb  8G
+IP地址
+192.168.30.234
+192.168.30.235</p>
+
+<p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+<h2>初始化设置</h2>
+
+<p>1  所有节点关闭iptables和SELinux</p>
+
+<p>2  在所有节点/etc/hosts加入以下内容：</p>
+
+<pre><code>192.168.30.234  drbd-01.i.12582.com drbd-01
+192.168.30.235  drbd-02.i.12582.com drbd-02
+</code></pre>
+
+<p>3  所有节点创建独立分区：</p>
+
+<pre><code>fdisk /dev/sdbDevice contains neither a valid DOS partition table, nor Sun, SGI or OSF disklabelBuilding a new DOS disklabel with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
+After that, of course, the previous content won't be recoverable.
+Warning: invalid flag 0x0000 of partition table 4 will be corrected by w(rite)
+WARNING: DOS-compatible mode is deprecated. It's strongly recommended to
+switch off the mode (command 'c') and change display units to
+sectors (command 'u').
+
+Command (m for help): p
+Disk /dev/sdb: 8589 MB, 8589934592 bytes
+255 heads, 63 sectors/track, 1044 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x46b64833
+
+Device Boot    Start        End        Blocks    Id    System
+
+Command (m for help): n
+Command action
+e   extended
+p   primary partition (1-4)
+p
+Partition number (1-4): 1
+First cylinder (1-1044, default 1):
+Using default value 1
+Last cylinder, +cylinders or +size{K,M,G} (1-1044, default 1044):
+Using default value 1044
+
+Command (m for help): w
+The partition table has been altered!
+Calling ioctl() to re-read partition table.
+Syncing disks.
+</code></pre>
+
+<h2>安装Hearbeat</h2>
+
+<pre><code>wget ftp://mirror.switch.ch/pool/1/mirror/scientificlinux/6rolling/i386/os/Packages/epel-release-6-5.noarch.rpm
+rpm -ivUh epel-release-6-5.noarch.rpm
+yum --enablerepo=epel install heartbeat -y
+</code></pre>
+
+<h2>安装DRBD</h2>
+
+<p>1  安装依赖包</p>
+
+<pre><code>yum -y install gcc kernel-devel kernel-headers flex
+</code></pre>
+
+<p>2  安装DRBD</p>
+
+<pre><code>wget http://oss.linbit.com/drbd/8.4/drbd-8.4.3.tar.gz
+tar zxvf drbd-8.4.3.tar.gz
+cd drbd-8.4.3
+./configure --prefix=/usr/local/drbd --with-km --with-heartbeat
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+make install
+cp -R /usr/local/drbd/etc/ha.d/resource.d/drbd* /etc/ha.d/resource.d/
+</code></pre>
+
+<p>3  其他设置</p>
+
+<pre><code>mkdir -p /usr/local/drbd/var/run/drbd
+cp /usr/local/drbd/etc/rc.d/init.d/drbd /etc/rc.d/init.d/
+chkconfig --add drbdchkconfig drbd on
+</code></pre>
+
+<h2>安装DRBD模块</h2>
+
+<pre><code>cd drbdmake 
+clean
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+cp drbd.ko /lib/modules/`uname -r`/kernel/lib/
+depmod
+</code></pre>
+
+<p>以上操作请在所有节点操作一次。</p>
+
+<hr />
+
+<h2>设置DRBD</h2>
+
+<p><strong>配置drbd.conf</strong></p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/global_common.conf
+global {
+    minor-count 64;
+    usage-count yes;
+    # minor-count dialog-refresh disable-ip-verification
+}
+
+
+common {
+    syncer { rate 1000M; }
+    handlers {
+        # These are EXAMPLE handlers only.
+        # They may have severe implications,
+        # like hard resetting the node under certain circumstances.
+        # Be careful when chosing your poison.
+
+        pri-on-incon-degr "/usr/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        pri-lost-after-sb "/usr/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt; /proc/sysrq-trigger ; reboot -f";
+        local-io-error "/usr/lib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-emergency-shutdown.sh; echo o &amp;gt; /proc/sysrq-trigger ; halt -f";
+        fence-peer "/usr/lib/drbd/crm-fence-peer.sh";
+        pri-lost "/usr/local/drbd/lib/drbd/notify-pri-lost.sh; /usr/local/drbd/lib/drbd/notify-emergency-reboot.sh; echo b &amp;gt;/proc/sysrq-trigger ; reboot -f";
+        split-brain "/usr/lib/drbd/notify-split-brain.sh root";
+        out-of-sync "/usr/lib/drbd/notify-out-of-sync.sh root";
+        # before-resync-target "/usr/lib/drbd/snapshot-resync-target-lvm.sh -p 15 -- -c 16k";
+        # after-resync-target /usr/lib/drbd/unsnapshot-resync-target-lvm.sh;
+    }
+
+    startup {
+
+        # wfc-timeout degr-wfc-timeout outdated-wfc-timeout wait-after-sb
+        wfc-timeout 60;
+        degr-wfc-timeout 120;
+        outdated-wfc-timeout 2;
+    }
+
+    options {
+        # cpu-mask on-no-data-accessible
+        }
+
+    disk {
+        # size max-bio-bvecs on-io-error fencing disk-barrier disk-flushes
+        # disk-drain md-flushes resync-rate resync-after al-extents
+        # c-plan-ahead c-delay-target c-fill-target c-max-rate
+        # c-min-rate disk-timeout
+        on-io-error detach;
+        fencing resource-only;
+    }
+
+    net {
+        # protocol timeout max-epoch-size max-buffers unplug-watermark
+        # connect-int ping-int sndbuf-size rcvbuf-size ko-count
+        # allow-two-primaries cram-hmac-alg shared-secret after-sb-0pri
+        # after-sb-1pri after-sb-2pri always-asbp rr-conflict
+        # ping-timeout data-integrity-alg tcp-cork on-congestion
+        # congestion-fill congestion-extents csums-alg verify-alg
+        # use-rle
+        protocol C;
+    }
+}
+</code></pre>
+
+<p>设置资源文件</p>
+
+<pre><code>cat /usr/local/drbd/etc/drbd.d/r0.res
+resource r0 {
+    on drbd-01.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.234:7788;
+        meta-disk       internal;
+    }
+
+    on drbd-02.i.12582.com {
+        device          /dev/drbd0;
+        disk            /dev/sdb1;
+        address         192.168.30.235:7788;
+        meta-disk       internal;
+    }
+}
+</code></pre>
+
+<hr />
+
+<h3>设置权限</h3>
+
+<pre><code>chgrp haclient /sbin/drbdsetup
+chmod o-x /sbin/drbdsetup
+chmod u+s /sbin/drbdsetup
+chgrp haclient /sbin/drbdmeta
+chmod o-x /sbin/drbdmeta
+chmod u+s /sbin/drbdmeta
+</code></pre>
+
+<p>加载DRBD模块与建立resource</p>
+
+<pre><code>modprobe drbd
+lsmod | grep drbd
+drbd                  328626  0
+libcrc32c               1246  1 drbd
+</code></pre>
+
+<p>写入一些数据到/dev/sdb1</p>
+
+<pre><code>dd if=/dev/zero of=/dev/sdb1 bs=1M count=100
+</code></pre>
+
+<p>建立Resource</p>
+
+<pre><code>drbdadm create-md r0
+Writing meta data...
+initializing activity log
+NOT initializing bitmap
+New drbd meta data block successfully created.
+success
+</code></pre>
+
+<h3>启动DRBD</h3>
+
+<pre><code>/etc/init.d/drbd start
+Starting DRBD resources: [
+      create res: r0
+    prepare disk: r0
+     adjust disk: r0
+     adjust net: r0
+]
+degr-wfc-timeout has to be shorter than wfc-timeout
+degr-wfc-timeout implicitly set to wfc-timeout (60s)
+..........
+***************************************************************
+DRBD's startup script waits for the peer node(s) to appear.
+- In case this node was already a degraded cluster before the
+reboot the timeout is 120 seconds. [degr-wfc-timeout]
+- If the peer was available before the reboot the timeout will
+expire after 60 seconds. [wfc-timeout]
+(These values are for resource 'r0'; 0 sec -&amp;gt; wait forever)
+To abort waiting enter 'yes' [  49]:yes
+
+.
+</code></pre>
+
+<p>节点2按以上操作执行一次。</p>
+
+<h3>DRBD状态查看</h3>
+
+<ol>
+<li><p>Secondary/Unknown：若drbd-01服务启动而drbd-02尚未启动,则ro会出现Secondary/Unknown</p>
+
+<pre><code> /init.d/drbd status
+ drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs        ro                 ds                 p   mounted
+ fstype
+ 0:r0   WFConnection  Secondary/Unknown  Inconsistent/DUnknown  C
+</code></pre>
+
+<p>查看drbd</p>
+
+<pre><code>  cat /proc/drbd
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:WFConnection ro:Secondary/Unknown ds:Inconsistent/DUnknown C r----s
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre></li>
+<li><p>Inconsistent/Inconsistent：ds出現Inconsistent表示兩台node資料尚未同步。</p>
+
+<pre><code> drbd driver loaded OK; device status:
+ version: 8.4.3 (api:1/proto:86-101)
+ GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+ root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+ m:res  cs         ro                   ds                         p  mounted  
+ fstype
+ 0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre>
+
+<p>查看内核</p>
+
+<pre><code>  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  0: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r-----
+  ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:8385604
+</code></pre>
+
+<p>3  SyncSource：cs出現SyncTarget表示正在同步中，可看到目前同步時的進度．</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs          ro                 ds                     p  mounted  
+  fstype
+  ...    sync'ed:    26.1%              (6056/8188)M
+  0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>4  Secondary/Secondary：表示尚未設定Primary Node。</p>
+
+<pre><code>  drbd driver loaded OK; device status:
+  version: 8.4.3 (api:1/proto:86-101)
+  GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+  root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+  m:res  cs         ro                   ds                         p  mounted  
+  fstype
+  0:r0   Connected  Secondary/Secondary  Inconsistent/Inconsistent  C
+</code></pre></li>
+</ol>
+
+
+<h3>设置主节点(Primary Node)</h3>
+
+<p>在drbd-01进行以下操作:</p>
+
+<pre><code>drbdadm -- --overwrite-data-of-peer primary r0
+</code></pre>
+
+<p>再查看下状态:</p>
+
+<pre><code>/etc/init.d/drbd status
+drbd driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-01.i.12582.com, 2013-08-08 14:00:35
+m:res  cs          ro                 ds                     p  mounted  fstype
+...    sync'ed:    13.1%              (7124/8188)M
+0:r0   SyncSource  Primary/Secondary  UpToDate/Inconsistent  C
+</code></pre>
+
+<p>在drbd-02查看下状态：</p>
+
+<pre><code>driver loaded OK; device status:
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by 
+root@drbd-02.i.12582.com, 2013-08-08 14:16:07
+m:res  cs         ro                 ds                 p  mounted  fstype
+0:r0   Connected  Secondary/Primary  UpToDate/UpToDate  C
+</code></pre>
+
+<p>格式化（drbd-01）</p>
+
+<pre><code>mkfs.ext4 /dev/drbd0
+</code></pre>
+
+<p>挂载到文件系统：</p>
+
+<pre><code>mkdir /datamount /dev/drbd0 /data
+</code></pre>
+
+<h2>测试DRBD</h2>
+
+<h3>测试同步</h3>
+
+<ol>
+<li><p>在主节点（Primary Node）复制一些数据到/data</p>
+
+<pre><code> cp -r drbd-8.4.3 /data/
+</code></pre></li>
+<li><p>在次节点（Secondary Node）执行以下步骤：</p>
+
+<pre><code> drbdadm down r0
+</code></pre>
+
+<p>注：次节点在DRBD启动状态下是无法mount /data的，所以必须先手动停止才能mount。</p>
+
+<pre><code>  mkdir /datamount -t ext4 /dev/sdb1 /datals -l
+</code></pre>
+
+<p>就可以看到数据已经全部同步过来。</p></li>
+</ol>
+
+
+<h2>Heartbeat配置</h2>
+
+<ol>
+<li><p>主节点操作：</p>
+
+<pre><code> vim /etc/ha.d/ha.cf
+ debugfile /var/log/ha-debug   # 打开错误日志报告
+
+ keepalive 2    # 2秒检测一次心跳线连接
+ deadtime 10    # 10秒测试不到 主节点心跳线就认为有问题
+ warntime 6    # 警告时间（建议在2－10之间）
+ initdead 120   # 初始化启动时 120秒无连接视为正常，或指定heartbeat 在启动时，
+ # 需要等待120秒才去启动任何资源
+
+ udpport 694     # 用udp的694端口连接，netstat -antulp | grep 694
+ ucast eth0 192.168.30.235      # 单播方式连接（主、从都是写对方的IP连接）
+ node  drbd-01.i.12582.com  # 声明主节点（uname -n）
+ node  drbd-02.i.12582.com  # 声明次节点（uname -n）
+ auto_failback on                    # 自动切换（主节点恢复后会自动切换回来）
+ respawn hacluster /usr/lib64/heartbeat/ipfail  #监控ipfail进程是否挂掉，否则重启它
+</code></pre></li>
+<li><p>编辑认证文件</p>
+
+<pre><code> vim /etc/ha.d/authkeys
+ auth 1
+ 1 sha1 MySecret&amp;nbsp;
+</code></pre></li>
+<li><p>权限</p>
+
+<pre><code> chmod 600 /etc/ha.d/authkeys
+</code></pre></li>
+<li><p>编辑资源文件</p>
+
+<pre><code> vim /etc/ha.d/haresources
+ drbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0 drbddisk::r0 
+ Filesystem::/dev/drbd0::/data::ext4
+</code></pre>
+
+<p> drbd-01.i.12582.com   主节点的主机名</p>
+
+<p> IPaddr::192.168.30.229/24/eth0    设置虚拟IP</p>
+
+<p> drbddisk::r0                  管理资源r0</p>
+
+<p> Filesystem::/dev/drbd0::/data::ext4   执行umount和mount操作</p></li>
+<li><p>次节点操作：</p>
+
+<p> 将ha.cf中的192.168.30.235改成192.168.30.234</p></li>
+</ol>
+
+
+<h3>DRBD主从自动切换测试</h3>
+
+<ol>
+<li><p>首先在 drbd-01启动heartbeat：</p>
+
+<pre><code> /etc/init.d/heartbeat  start
+</code></pre></li>
+<li><p>接着在 drbd-02 启动heartbear:</p>
+
+<pre><code> /etc/init.d/heartbeat  start
+</code></pre></li>
+<li><p>在drbd-01输入：</p>
+
+<pre><code> ip a
+
+ 1: lo: &amp;lt;LOOPBACK,UP,LOWER_UP&amp;gt; mtu 16436 qdisc noqueue state UNKNOWN
+     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+     inet 127.0.0.1/8 scope host lo
+     inet6 ::1/128 scope host
+         valid_lft forever preferred_lft forever
+ 2: eth0: &amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
+     link/ether 08:00:27:98:a2:6c brd ff:ff:ff:ff:ff:ff
+     inet 192.168.30.234/24 brd 192.168.30.255 scope global eth0
+     inet &lt;b&gt;192.168.30.229&lt;/b&gt;/24 brd 192.168.30.255 scope global secondary eth0:0
+     inet6 fe80::a00:27ff:fe98:a26c/64 scope link
+         valid_lft forever preferred_lft forever
+</code></pre>
+
+<p>从结果可以看出，VIP已经出现。</p></li>
+<li><p>停止drbd-01的heartbeat服务或将网线断掉，同时监控drbd-02的DRBD状态.</p></li>
+<li><p>drbd-02操作：</p>
+
+<pre><code> watch -n 1 /etc/init.d/drbd status
+</code></pre>
+
+<p>如果一切正常，可以看到状态在不断变化。</p></li>
+<li><p>恢复drbd-01的heartbeat服务或将网线接上，同时监控drbd-02的DRBD状态，如果正常drbd-01又变为主节点（auto_failback on 决定）了。</p></li>
+</ol>
+
+
+<h2>Mysql+DRBD+Heartbeat配置</h2>
+
+<h3>Mysql安装</h3>
+
+<p><strong>安装Mysql依赖包</strong></p>
+
+<pre><code>yum -y install gcc gcc-c++ ncurses-devel libtool zlib-devel bison
+</code></pre>
+
+<p><b>创建用户与组</b></p>
+
+<pre><code>groupadd mysqluseradd -g mysql mysql
+</code></pre>
+
+<p><b>设置内核参数</b></p>
+
+<pre><code>vi /etc/security/limits.conf
+mysql              soft    nproc   2047
+mysql              hard    nproc   16384
+mysql              soft    nofile  1024
+mysql              hard    nofile  65536
+</code></pre>
+
+<p><b>安装Mysql</b></p>
+
+<p>由于源码安装Mysql5.6需要依赖cmake，必须先安装cmake：</p>
+
+<pre><code>mkdir ~/software; cd ~/software
+wget ftp://192.168.30.211/pub/Tools/mysql/cmake-2.8.4.tar.gz
+tar zxvf cmake-2.8.4.tar.gz
+cd cmake-2.8.4
+./configure
+gmake &amp;&amp;  make install
+</code></pre>
+
+<p>开始安装Mysql</p>
+
+<pre><code>cd ~/software
+wget ftp://192.168.30.211/pub/Tools/mysql/mysql-5.6.5-m8.tar.gz
+tar zxvf mysql-5.6.5-m8.tar.gz
+cd mysql-5.6.5-m8
+
+cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
+  -DDEFAULT_CHARSET=utf8 \
+  -DDEFAULT_COLLATION=utf8_general_ci \
+  -DENABLED_LOCAL_INFILE=ON \
+  -DWITH_INNOBASE_STORAGE_ENGINE=1 \
+  -DWITH_FEDERATED_STORAGE_ENGINE=1 \
+  -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+  -DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
+  -DWITH_PARTITION_STORAGE_ENGINE=1 \
+  -DWITH_PERFSCHEMA_STORAGE_ENGINE=1 \
+  -DCOMPILATION_COMMENT='agenge for mysql' \
+  -DWITH_READLINE=ON \
+  -DMYSQL_UNIX_ADDR=/data/mysqldata/3306/mysql.sock \
+  -DSYSCONFDIR=/data/mysqldata/3306
+  make &amp;&amp; make install
+</code></pre>
+
+<h3>Mysql设置</h3>
+
+<ul>
+<li><p>设置权限</p>
+
+<pre><code>  chown -R mysql:mysql /usr/local/mysql
+</code></pre></li>
+<li><p>设置环境变量</p>
+
+<pre><code>  vi /etc/profileexport PATH=/usr/local/mysql/bin:$PATH
+</code></pre></li>
+<li><p>使环境变量马上生效</p>
+
+<pre><code>  source /etc/profile
+</code></pre></li>
+<li><p>设置相关存储路径</p>
+
+<pre><code>  cd /data
+  mkdir -p mysqldata/3306/{data,binlog,tmp,innodb_ts,innodb_log}
+  cd /data/mysqldata/mkdir script backup
+  chown -R mysql:mysql /data/mysqldata/
+</code></pre></li>
+<li><p>创建my.cnf</p>
+
+<pre><code>  vi /data/mysqldata/3306/my.cnf
+  [client]
+  port = 3306
+  socket = /data/mysqldata/3306/mysql.sock
+
+  # Here follows entries for some specific programs
+
+  # The MySQL server
+  [mysqld]
+  port     = 3306
+  user     = mysql
+  socket   = /data/mysqldata/3306/mysql.sock
+  pid-file = /tmp/mysql.pid
+  basedir  = /usr/local/mysql
+  datadir  = /data/mysqldata/3306/data
+  tmpdir   = /data/mysqldata/3306/tmp
+  open_files_limit    = 10240
+  server-id = 333306
+  lower_case_table_names = 1
+  character-set-server = utf8
+  skip-name-resolve
+  max_connections = 1000
+  max_connect_errors = 100000
+  max_allowed_packet = 512M
+  max_heap_table_size = 1024M
+  max_length_for_sort_data = 4096
+  back_log=100
+  interactive_timeout = 28800
+  wait_timeout = 28800
+
+  default-storage-engine = InnoDB
+
+  net_buffer_length = 8K
+  sort_buffer_size = 2M
+  join_buffer_size = 4M
+  read_buffer_size = 2M
+  read_rnd_buffer_size = 16M
+
+  query_cache_size = 128M
+  query_cache_limit = 2M
+  query_cache_min_res_unit = 2k
+
+  thread_cache_size = 300
+  table_open_cache = 1024
+  tmp_table_size = 256M
+
+  #***********  Logs related settings ***********
+  log-bin  = ../binlog/mysql-bin
+  relay-log = ../binlog/mysql-relay-bin
+  binlog_format=mixed
+  binlog_cache_size=32m
+  max_binlog_cache_size=512m
+  max_binlog_size=512m
+  long_query_time = 1
+  log_output = FILE
+  log-error =  ../mysql-error.log
+  slow_query_log = 1
+  slow_query_log_file = ../slow_statement.log
+  #log_queries_not_using_indexes
+  general_log = 0
+  general_log_file = ../general_statement.log
+  expire-logs-days = 14
+
+  #*********** MyISAM Specific options ***********
+  key_buffer_size = 32M
+  bulk_insert_buffer_size = 64M
+  myisam_sort_buffer_size = 128M
+  myisam_max_sort_file_size = 10G
+  myisam_repair_threads = 1
+  myisam_recover
+
+  #*********** INNODB Specific options ***********
+  innodb_file_per_table = 1
+  transaction-isolation = READ-COMMITTED
+
+  innodb_additional_mem_pool_size = 16M
+  innodb_buffer_pool_size = 1192M
+  innodb_data_home_dir = ../innodb_ts
+  innodb_data_file_path = ibdata1:2048M:autoextend
+
+  innodb_file_io_threads = 4
+  innodb_thread_concurrency = 8
+  innodb_log_buffer_size = 128M
+  innodb_log_file_size = 256M
+  innodb_log_files_in_group = 3
+
+  innodb_log_group_home_dir = ../innodb_log
+  innodb_flush_log_at_trx_commit = 2
+  innodb_max_dirty_pages_pct = 80
+  innodb_lock_wait_timeout = 120
+  innodb_flush_method=O_DIRECT
+  performance_schema
+
+  [mysqldump]
+  quick
+  max_allowed_packet = 512M
+
+  [mysql]
+  no-auto-rehash
+  # Remove the next comment character if you are not familiar with SQL
+  #safe-updates
+
+  [myisamchk]
+  key_buffer_size = 32M
+  sort_buffer_size = 20M
+  read_buffer_size = 2M
+  write_buffer_size = 2M
+
+  [mysqlhotcopy]
+  interactive-timeout
+
+  [mysqld_safe]
+  open-files-limit = 8192
+</code></pre></li>
+<li><p>安装mysql database，并启动Myql：</p>
+
+<pre><code>  /usr/local/mysql/scripts/mysql_install_db \
+    --datadir=/data/mysqldata/3306/data \
+    --defaults-file=/data/mysqldata/3306/my.cnf \
+    --basedir=/usr/local/mysql --user=mysql
+  mysqld_safe --defaults-file=/data/mysqldata/3306/my.cnf &amp;amp;
+  mysqladmin -uroot password 'new_password' -S /data/mysqldata/3306/mysql.sock
+
+  mysql -uroot -p123456
+  mysql&gt; select user,host from mysql.user;
+  mysql&gt; delete from mysql.user where (user,host) not in (select 'root','localhost');
+  mysql&gt; delete from mysql.proxies_priv where host='localhost.localdomain';
+  mysql&gt; delete from mysql.db;
+  mysql&gt; flush privileges;
+  mysql&gt; quit
+  mysqladmin -uroot -p123456 shutdownrm -f /data/mysqldata/3306/mysql-error.logmysqld_safe --defaults-file=/data/mysqldata/3306/my.cnf &amp;amp;
+</code></pre></li>
+<li><p>启动Mysql脚本</p>
+
+<pre><code>  cp support-files/mysql.server  /etc/init.d/mysqld
+  chmod +x /etc/init.d/mysqld
+</code></pre></li>
+<li><p>修改ha.cf</p></li>
+</ul>
+
+
+<p> 由于现在是管理Mysql，故要将mysqld由heartbeat管理（2个节点都执行）</p>
+
+<pre><code>    cat /etc/ha.d/haresources
+    drbd-01.i.12582.com IPaddr::192.168.30.229/24/eth0:0  drbddisk::r0 
+    Filesystem::/dev/drbd0::/data::ext4 mysqld
+</code></pre>
+
+<ul>
+<li><p>测试</p>
+
+<ol>
+<li><p> 准备Mysql数据（节点1操作）</p>
+
+<pre><code>  mysql -uroot -p
+  Enter password:
+  Welcome to the MySQL monitor.  Commands end with ; or \g.
+  Your MySQL connection id is 2
+  Server version: 5.6.5-m8-log agenge for mysql
+
+  Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
+
+  Oracle is a registered trademark of Oracle Corporation and/or its
+  affiliates. Other names may be trademarks of their respective
+  owners.
+
+  Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+  mysql&gt; create database mydb;
+  Query OK, 1 row affected (0.02 sec)
+
+  mysql&gt; use mydb;
+  Database changed
+  mysql&gt; create table t_1( id  int not null, name varchar(10));
+  Query OK, 0 rows affected (0.14 sec)
+  mysql&gt; insert into t_1 values(1,'aaa');
+  Query OK, 1 row affected (0.00 sec)
+
+  mysql&gt; commit;
+  Query OK, 0 rows affected (0.00 sec)
+  mysql&gt; quit;
+  Bye
+</code></pre></li>
+<li><p> 切换主、次节点，同时监控drbd-02服务器的日志</p>
+
+<pre><code>  watch -n 1 /etc/init.d/drbd status
+</code></pre></li>
+</ol>
+
+
+<p>  如果一切正常，可以看到ro的状态从“Secondary/Primary”变成“Primary/Secondary”。</p>
+
+<p>  例如偶切换成的状态如下：</p>
+
+<pre><code>      drbd driver loaded OK; device status:
+      version: 8.4.3 (api:1/proto:86-101)
+      GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by root@&lt;b&gt;drbd-02.i.12582.com&lt;/b&gt;, 2013-08-08 16:46:23
+      m:res  cs         ro                 ds                 p  mounted  fstype
+      0:r0   Connected  &lt;b&gt;Primary/Secondary&lt;/b&gt;  UpToDate/UpToDate  C  /data    ext4
+</code></pre>
+
+<ol>
+<li><p> 查询数据是否丢失（drbd-02操作）</p>
+
+<pre><code>  mysql -uroot -p
+  Enter password:
+  Welcome to the MySQL monitor.  Commands end with ; or \g.
+  Your MySQL connection id is 2
+  Server version: 5.6.5-m8-log agenge for mysql
+
+  Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
+
+  Oracle is a registered trademark of Oracle Corporation and/or its
+  affiliates. Other names may be trademarks of their respective
+  owners.
+
+  Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+  mysql&gt; use mydb;
+  Database changed
+  mysql&gt; select * from t_1;
+  +----+------+
+  | id | name |
+  +----+------+
+  |  1 | aaa  |
+  +----+------+
+  1 row in set (0.00 sec)
+</code></pre></li>
+</ol>
+
+
+<p>  以看到在drbd-02上数据已经有了。</p></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-09T00:00:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/yun-wei/'>运维</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha/" data-via="" data-counturl="http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha/" >Tweet</a>
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/07/28/video-decoder-intro/" title="Previous Post: 视频编解码术语概念介绍">&laquo; 视频编解码术语概念介绍</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/09/12/write-blog-octopress-with-github/" title="Next Post: 利用GitHub搭建免费的个人blog">利用GitHub搭建免费的个人blog &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li class='category'><a href='/blog/categories/blog-博客-/'>Blog[博客] (1)</a></li>
+<li class='category'><a href='/blog/categories/github/'>Github (1)</a></li>
+<li class='category'><a href='/blog/categories/云计算/'>云计算 (3)</a></li>
+<li class='category'><a href='/blog/categories/流媒体/'>流媒体 (1)</a></li>
+<li class='category'><a href='/blog/categories/运维/'>运维 (1)</a></li>
+ 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
