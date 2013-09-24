@@ -400,35 +400,12 @@ WordPress官方已经被墙（ &hellip;">
 - --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
 </code></pre>
 
-<p> 使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a></p>
-
-<p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
-
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/02.png"><img class="alignnone size-full wp-image-716" alt="02" src="http://agenge.com/wp-content/uploads/2013/07/02.png" width="621" height="489" /></a></p>
-
-<p> 点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：</p>
-
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/03.png"><img class="alignnone size-full wp-image-717" alt="03" src="http://agenge.com/wp-content/uploads/2013/07/03.png" width="337" height="319" /></a></p>
-
-<p> 点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：</p>
-
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/04.png"><img class="alignnone size-full wp-image-718" alt="04" src="http://agenge.com/wp-content/uploads/2013/07/04.png" width="597" height="449" /></a></p>
-
-<p> 安装之后并关机，进入下一步操作。</p>
-
-<ol>
-<li>上传镜像</li>
-</ol>
-
-
-<p> 最后一步就是要将刚才的虚拟磁盘文件上传到云平台中心:</p>
-
-<pre><code>    glance image-create --name Win-2008-x86_64-cloud --is-public true --container-format ovf --disk-format qcow2 &lt; /home/agen/winserver2008.img
-</code></pre>
-
-<p> 通过以上的步骤，希望新手能够成功制作一份完美的镜像文件，如果在制作过程中有任何疑问，请留言，最好是邮件，偶在有时间的情况下肯定会第一时间解答。</p>
-</div>
+<p> </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/07/24/make_openstack-windows2008-image/">阅读全文 &rarr;</a>
+    </footer>
   
 
 
