@@ -387,9 +387,20 @@ WordPress官方已经被墙（ &hellip;">
    --os-type windows --os-variant=win2k8 --accelerate \
    --network=bridge:br0,model=virtio  \
    --disk path=/path/to/win_driver/virtio-win-0.1-59.iso,device=cdrom,perms=ro&lt;br /&gt;
+</code></pre></li>
+</ol>
+
+
+<p> 以上参数有点多，不过这里不一一解释，后期偶会专门写一篇介绍KVM相关知识点，这里只是描述几个重要的参数：</p>
+
+<pre><code>- -n  虚拟机的名称
+- --disk  虚拟磁盘存放的路径，即第一步qemu-img创建的虚拟磁盘。&lt;/span&gt;&lt;/li&gt;
+- -c  ISO的路径 &lt;/span&gt;&lt;/li&gt;
+- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。&lt;/span&gt;&lt;/li&gt;
+- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
 </code></pre>
 
-</div>
+<p>  </div>
   
   
     <footer>
