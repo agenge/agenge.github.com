@@ -39,14 +39,14 @@ comments: true
           --os-type windows --os-variant=win2k8 --accelerate \
           --network=bridge:br0,model=virtio  \
           --disk path=/path/to/win_driver/virtio-win-0.1-59.iso,device=cdrom,perms=ro<br />
- <!-- more -->         
+       
  以上参数有点多，不过这里不一一解释，后期偶会专门写一篇介绍KVM相关知识点，这里只是描述几个重要的参数：
     - -n  虚拟机的名称
 	- --disk  虚拟磁盘存放的路径，即第一步qemu-img创建的虚拟磁盘。</span></li>
 	- -c  ISO的路径 </span></li>
 	- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。</span></li>
 	- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。</span></li>
- 
+  <!-- more -->  
  使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a>
 
  连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：
