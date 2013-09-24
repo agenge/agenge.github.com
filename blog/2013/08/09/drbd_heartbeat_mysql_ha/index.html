@@ -56,8 +56,9 @@
 </form>
   
 <ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+    <li><a href="/about">关于我</a></li>
 </ul>
 
 </nav>
@@ -103,9 +104,6 @@
 
 <p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
 
-<!--more-->
-
-
 <h2>准备工作</h2>
 
 <p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
@@ -140,6 +138,9 @@
 
 
 <p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+<!--more-->
+
 
 <h2>初始化设置</h2>
 
@@ -2034,7 +2035,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
 <aside class="sidebar">
   
     <section>
-  <h1>Recent Posts</h1>
+  <h1>最新文章</h1>
   <ul id="recent_posts">
     
       <li class="post">
@@ -2059,7 +2060,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
     
   </ul>
 </section>
-
+Included file 'asides/category_list.html' not found in _includes directory
 
 
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 运维 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-wei/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-24T11:59:16+08:00</updated>
+  <updated>2013-09-24T13:40:39+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -29,9 +29,6 @@
 <p>DRBD的文件同步过程和普通复制过程的不同：</p>
 
 <p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
-
-<!--more-->
-
 
 <h2>准备工作</h2>
 
@@ -67,6 +64,9 @@
 
 
 <p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+<!--more-->
+
 
 <h2>初始化设置</h2>
 
