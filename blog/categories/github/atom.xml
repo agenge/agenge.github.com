@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: github | TaurusHome]]></title>
+  <link href="http://agenge.github.io/blog/categories/github/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-09-24T11:56:06+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[利用GitHub搭建免费的个人blog]]></title>
+    <link href="http://agenge.github.io/blog/2013/09/14/write-blog-octopress-with-github.markdown/"/>
+    <updated>2013-09-14T12:53:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/09/14/write-blog-octopress-with-github.markdown</id>
+    <content type="html"><![CDATA[<p>**准备工具</p>
+
+<pre><code>Git for Windows
+ssh-keygen -C "username@email.com" -t rsa
+</code></pre>
+
+<p>上传到 Github</p>
+
+<pre><code>rubyinstaller-1.9.3-p392.exe
+DevKit-tdm-32-4.5.2-20111229-1559-sfx.exe
+markdownpad2-setup.exe (排版与写作)
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
