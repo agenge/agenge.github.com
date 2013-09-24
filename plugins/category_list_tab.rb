@@ -1,4 +1,4 @@
-module Jekyll 
+﻿module Jekyll 
   class CategoryListTag < Liquid::Tag 
     def render(context) 
       html = "" 
