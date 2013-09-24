@@ -741,36 +741,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
 <p> 如果报错，请参考<a href="http://blog.csdn.net/wche1990/article/details/6759422">这里</a>.</p>
 
-<h3>主机名设置</h3>
-
-<p>在所有节点的/etc/hosts加入以下信息（需要修改每个节点对应的IP）：</p>
-
-<pre><code>    192.168.30.73  control-01
-    192.168.30.74  compute-01
-    192.168.30.75  compute-02
-</code></pre>
-
-<h3>Mysql和rabbitmq安装</h3>
-
-<p>在所有节点执行，密码统一设置为”123456”(你也可以设置为其他较安全的密码)：</p>
-
-<pre><code>    sudo apt-get install -y mysql-server python-mysqldb
-    sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
-    sudo /etc/init.d/mysql restart
-    sudo apt-get install -y rabbitmq-server
-</code></pre>
-
-<h3>时间同步</h3>
-
-<p>在所有节点执行：</p>
-
-<pre><code>    sudo apt-get install -y ntp
-    sudo sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.comnserver 127.127.1.0nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
-    sudo /etc/init.d/ntp restart
-</code></pre>
-
-<hr />
-
 </div>
   
   

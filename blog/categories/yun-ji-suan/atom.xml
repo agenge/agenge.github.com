@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-24T17:46:32+08:00</updated>
+  <updated>2013-09-24T17:50:10+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -358,6 +358,9 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
 <p> 如果报错，请参考<a href="http://blog.csdn.net/wche1990/article/details/6759422">这里</a>.</p>
 
+<!-- more -->
+
+
 <h3>主机名设置</h3>
 
 <p>在所有节点的/etc/hosts加入以下信息（需要修改每个节点对应的IP）：</p>
@@ -387,9 +390,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 </code></pre>
 
 <hr />
-
-<!-- more -->
-
 
 <h2>控制节点安装</h2>
 
