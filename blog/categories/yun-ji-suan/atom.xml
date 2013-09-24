@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-24T15:01:01+08:00</updated>
+  <updated>2013-09-24T15:14:48+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -387,6 +387,9 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 </code></pre>
 
 <hr />
+
+<!-- more -->
+
 
 <h2>控制节点安装</h2>
 
