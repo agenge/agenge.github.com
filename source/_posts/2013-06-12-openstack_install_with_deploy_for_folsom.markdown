@@ -196,6 +196,8 @@ comments: true
         sudo /etc/init.d/ntp restart
 
 ---
+
+<!-- more -->
 ##控制节点安装
 ###安装OpenStack组件
 1. 在控制节点执行：
