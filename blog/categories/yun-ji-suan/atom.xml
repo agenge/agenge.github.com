@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-24T23:43:57+08:00</updated>
+  <updated>2013-09-25T08:55:21+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -71,7 +71,10 @@
 - --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
 </code></pre>
 
-<p>  <!-- more --><br/>
+<!-- more -->
+
+
+<p>
  使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a></p>
 
 <p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
