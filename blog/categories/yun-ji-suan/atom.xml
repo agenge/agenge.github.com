@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-26T10:29:27+08:00</updated>
+  <updated>2013-09-26T10:37:29+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -679,7 +679,7 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
 <p>如果没问题，输出内容类似下图：</p>
 
-<p><a href="http://agenge.com/wp-content/uploads/2013/06/01.png"><img class="alignnone size-full wp-image-702" alt="01" src="http://agenge.com/wp-content/uploads/2013/06/01.png" width="678" height="117" /></a></p>
+<p><img src="/images/2013/06/01.jpg" title="" ></p>
 
 <hr />
 
@@ -780,7 +780,7 @@ glance image-create --name myFirstVM --is-public true --container-format bare --
 
 <p>如果一切正常，会输出类似以下内容：</p>
 
-<p><a href="http://agenge.com/wp-content/uploads/2013/06/02.png"><img class="alignnone size-full wp-image-703" alt="02" src="http://agenge.com/wp-content/uploads/2013/06/02.png" width="536" height="300" /></a></p>
+<p><img src="/images/2013/06/02.jpg" title="" ></p>
 
 <hr />
 
@@ -1002,7 +1002,7 @@ glance image-create --name myFirstVM --is-public true --container-format bare --
 
 <p> 如果正常，会输出类似以下信息：</p>
 
-<p> <a href="http://agenge.com/wp-content/uploads/2013/06/03.png"><img class="alignnone size-full wp-image-704" alt="03" src="http://agenge.com/wp-content/uploads/2013/06/03.png" width="974" height="62" /></a></p>
+<p><img src="/images/2013/06/03.jpg" title="" ></p>
 
 <ol>
 <li><p>创建fixed_ip（内网虚拟机IP）</p>
@@ -1214,7 +1214,7 @@ sudo /etc/init.d/memcached restart
 
 <p>在创建之后会输出以下类似信息：</p>
 
-<p><a href="http://agenge.com/wp-content/uploads/2013/06/04.png"><img class="alignnone size-full wp-image-705" alt="04" src="http://agenge.com/wp-content/uploads/2013/06/04.png" width="996" height="454" /></a></p>
+<p><img src="/images/2013/06/04.jpg" title="" ></p>
 
 <p>从图中可看出正在创建一个实例。</p>
 
