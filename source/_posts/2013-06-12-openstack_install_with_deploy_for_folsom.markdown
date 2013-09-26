@@ -462,7 +462,7 @@ comments: true
 
 如果没问题，输出内容类似下图：
 
-<a href="http://agenge.com/wp-content/uploads/2013/06/01.png"><img class="alignnone size-full wp-image-702" alt="01" src="http://agenge.com/wp-content/uploads/2013/06/01.png" width="678" height="117" /></a>
+{% img /images/2013/06/01.png  %}
 
 ---
 ###Glance配置
@@ -539,7 +539,7 @@ comments: true
 
 如果一切正常，会输出类似以下内容：
 
-<a href="http://agenge.com/wp-content/uploads/2013/06/02.png"><img class="alignnone size-full wp-image-703" alt="02" src="http://agenge.com/wp-content/uploads/2013/06/02.png" width="536" height="300" /></a>
+{% img /images/2013/06/02.png  %}
 
 ---
 ###Cinder配置
@@ -736,7 +736,7 @@ comments: true
 
  如果正常，会输出类似以下信息：
 
- <a href="http://agenge.com/wp-content/uploads/2013/06/03.png"><img class="alignnone size-full wp-image-704" alt="03" src="http://agenge.com/wp-content/uploads/2013/06/03.png" width="974" height="62" /></a>
+{% img /images/2013/06/03.png  %}
 
 7. 创建fixed_ip（内网虚拟机IP）
 
@@ -918,7 +918,7 @@ comments: true
 
 在创建之后会输出以下类似信息：
 
-<a href="http://agenge.com/wp-content/uploads/2013/06/04.png"><img class="alignnone size-full wp-image-705" alt="04" src="http://agenge.com/wp-content/uploads/2013/06/04.png" width="996" height="454" /></a>
+{% img /images/2013/06/04.png  %}
 
 从图中可看出正在创建一个实例。
 

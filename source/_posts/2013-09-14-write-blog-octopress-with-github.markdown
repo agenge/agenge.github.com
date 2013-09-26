@@ -5,7 +5,7 @@ date: 2013-09-12 22:18
 comments: true
 categories: 
 -  Github
--  Blog[博客]
+-  Blog
 ---
 
 # 前言
