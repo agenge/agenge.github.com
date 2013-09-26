@@ -825,6 +825,73 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2013/05/23/linux-kickstart/">批量装机&#8212;Linux无人值守之Kickstart</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-23T00:00:00+08:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前段时间总是忙于安装系统，对于偶这种懒人来说，一天安装两遍都无法承受，别说更多，基本上有两个原因造出：</p>
+
+<ul>
+<li>时间很宝贵。</li>
+<li>偶比较懒惰。</li>
+</ul>
+
+
+<p>一直习惯于 RedHat 家族产品，从最开始接触的RHEL，到后来同时使用的Fedora，及目前使用最多的CentOS，这无疑是偶最为熟悉的Linux，为啥偶要提这些捏？因为以下操作是基于这些Linux操作的啦，费话在此打住，以下为详细操作步骤.</p>
+
+<h2>安装基础包</h2>
+
+<p>_注：以下Yum操作是基于偶本地的ftp 仓库源，&mdash;enablerepo是告诉yum使用这个指定的安装源，
+默认情况下，CentOS自带的仓库源也是可以用滴，优先推荐各位使用哦，有个前提条件：连网！
+What？服务器不能上网？公司不许随意连公网？能说脏话吗？Fuck! _</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install dhcp-* --enablerepo=centos5.5
+</span><span class='line'>yum -y install tftp-* --enablerepo=centos5.5
+</span><span class='line'>yum -y install vsftpd-* --enablerepo=centos5.5
+</span><span class='line'>cp /usr/share/doc/dhcp-3.0.5/dhcpd.conf.sample /etc/dhcpd.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>配置dhcp</h2>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/23/linux-kickstart/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2013/05/02/zabbix-source-install-conf/">Zabbix 源码安装与配置</a></h1>
     
     

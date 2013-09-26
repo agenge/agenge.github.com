@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 运维 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-wei/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-26T14:49:26+08:00</updated>
+  <updated>2013-09-26T17:50:41+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -1883,6 +1883,258 @@ cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
 <p>  以看到在drbd-02上数据已经有了。</p></li>
 </ul>
 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[批量装机---Linux无人值守之Kickstart]]></title>
+    <link href="http://agenge.github.io/blog/2013/05/23/linux-kickstart/"/>
+    <updated>2013-05-23T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/05/23/linux-kickstart</id>
+    <content type="html"><![CDATA[<p>前段时间总是忙于安装系统，对于偶这种懒人来说，一天安装两遍都无法承受，别说更多，基本上有两个原因造出：</p>
+
+<ul>
+<li>时间很宝贵。</li>
+<li>偶比较懒惰。</li>
+</ul>
+
+
+<p>一直习惯于 RedHat 家族产品，从最开始接触的RHEL，到后来同时使用的Fedora，及目前使用最多的CentOS，这无疑是偶最为熟悉的Linux，为啥偶要提这些捏？因为以下操作是基于这些Linux操作的啦，费话在此打住，以下为详细操作步骤.</p>
+
+<h2>安装基础包</h2>
+
+<p>_注：以下Yum操作是基于偶本地的ftp 仓库源，&mdash;enablerepo是告诉yum使用这个指定的安装源，
+默认情况下，CentOS自带的仓库源也是可以用滴，优先推荐各位使用哦，有个前提条件：连网！
+What？服务器不能上网？公司不许随意连公网？能说脏话吗？Fuck! _
+<code>
+yum -y install dhcp-* --enablerepo=centos5.5
+yum -y install tftp-* --enablerepo=centos5.5
+yum -y install vsftpd-* --enablerepo=centos5.5
+cp /usr/share/doc/dhcp-3.0.5/dhcpd.conf.sample /etc/dhcpd.conf
+</code></p>
+
+<h2>配置dhcp</h2>
+
+<!-- more -->
+
+
+<pre><code>vi /etc/dhcpd.conf
+</code></pre>
+
+<p>添加以下信息：
+<code>
+filename "pxelinux.0";     # 指定bootloader文件
+next-server 192.168.0.20;  # 指定索取pxelinux.0的tftp服务器IP
+</code>
+添加的这两行可在大括号外面，也可在里面，next-server选项可写可不写，但建议各位写上啦。
+<code>
+service dhcpd start   # 启动服务
+cd /tftpboot
+cp /mnt/isolinux/* ./
+</code>
+实际需要的是vmlinuz，initrd.img  *.msg 这几个文件，但为了操作方便，偶直接把isolinux目录下的文件全cp过来（偶在文章开头就说过偶比较懒惰，换成生产环境千万别这样玩）。</p>
+
+<p><code>
+mkdir pxelinux.cfg
+mv isolinux.cfg pxelinux.cfg/default
+cp /usr/lib/syslinux/pxelinux.0 /tftpboot
+</code>
+default配置文件的作用是告诉主机从哪里去加载操作系统内核，并将启动加载文件拷到/tftpboot下。修改tftp参数并启动tftp服务
+```
+vi /etc/xinetd.d/tftp</p>
+
+<h1>*********************************</h1>
+
+<p>service tftp
+{</p>
+
+<pre><code>socket_type = dgram
+protocol = udp
+wait = yes
+user = root
+server = /usr/sbin/in.tftpd
+server_args = -s /tftpboot
+disable = &lt;span style="color: #ff0000;"&gt;&lt;strong&gt;no&lt;/strong&gt;&lt;/span&gt;
+per_source = 11
+cps = 100 2
+flags = IPv4
+</code></pre>
+
+<p>}</p>
+
+<h1>*********************************</h1>
+
+<p><code>
+tftpboot 这个参数主要是指定tftp client 客户端从服务器的哪个目录去加载bootloader的pxelinux.0文件。启动服务：
+</code>
+service xinetd restart
+chkconfig tftp on
+vi /tftpboot/pxelinux.cfg/default
+<code>
+修改第3行，第12行.
+</code>
+default linux
+prompt 1
+timeout 10 //时间调小点
+display boot.msg
+F1 boot.msg
+F2 options.msg
+F3 general.msg
+F4 param.msg
+F5 rescue.msg
+label linux
+kernel vmlinuz
+append ks=<a href="ftp://192.168.0.20/pub/ks.cfg">ftp://192.168.0.20/pub/ks.cfg</a> initrd=initrd.img
+label text
+```</p>
+
+<h2>安装Kickstart</h2>
+
+<p><code>
+yum install -y *kickstart* --enablerepo=centos5.5
+system-config-kickstart
+</code>
+_提示：所有以system-config开头的命令，都需要图形界面的支持。这不是必须的，前提是对ks的配置文件语法很熟悉啦。 _</p>
+
+<h3>配置ks.cfg</h3>
+
+<p>首先将 ks.cfg 保存到 /var/ftp/pub 目录下，将修改相应权限：</p>
+
+<pre><code>chmod 707 /var/ftp/pub/ks.cfg
+</code></pre>
+
+<p>以下是偶使用的ks.cfg全文 ，请各位根据自己情况修改：</p>
+
+<p>```</p>
+
+<h1>platform=x86, AMD64, or Intel EM64T</h1>
+
+<h1>System authorization information</h1>
+
+<p>auth &mdash;useshadow &mdash;enablemd5</p>
+
+<h1>System bootloader configuration</h1>
+
+<p>bootloader &mdash;location=mbr</p>
+
+<h1>Partition clearing information</h1>
+
+<p>clearpart &mdash;all &mdash;initlabel</p>
+
+<h1>Use graphical install</h1>
+
+<h1>graphical</h1>
+
+<p>text</p>
+
+<h1>Firewall configuration</h1>
+
+<p>firewall &mdash;disabled</p>
+
+<h1>Run the Setup Agent on first boot</h1>
+
+<p>firstboot &mdash;disable</p>
+
+<h1>System keyboard</h1>
+
+<p>keyboard us</p>
+
+<h1>System language</h1>
+
+<p>lang en_US</p>
+
+<h1>Installation logging level</h1>
+
+<p>logging &mdash;level=info</p>
+
+<h1>Use network installation</h1>
+
+<p>url &mdash;url=<strong><a href="ftp://192.168.30.210/pub/x86_64/centos5.5">ftp://192.168.30.210/pub/x86_64/centos5.5</a></strong></p>
+
+<h1>Network information</h1>
+
+<p>network &mdash;bootproto=dhcp &mdash;device=eth0 &mdash;onboot=on</p>
+
+<h1>Reboot after installation</h1>
+
+<p>reboot</p>
+
+<h1>Root password</h1>
+
+<p>rootpw &mdash;iscrypted $1$R79JLo34$.Yi4OUmL5PhpsxzSTL1hX1</p>
+
+<h1>SELinux configuration</h1>
+
+<p>selinux &mdash;disabled</p>
+
+<h1>System timezone</h1>
+
+<p>timezone Asia/Chongqing</p>
+
+<h1>Install OS instead of upgrade</h1>
+
+<p>install</p>
+
+<h1>X Window System configuration information</h1>
+
+<p>xconfig &mdash;defaultdesktop=GNOME &mdash;depth=8 &mdash;resolution=1026x768 &mdash;startxonboot</p>
+
+<h1>Disk partitioning information</h1>
+
+<p>part /boot &mdash;bytes-per-inode=4096 &mdash;fstype=&ldquo;ext3&rdquo; &mdash;size=256
+part swap &mdash;bytes-per-inode=4096 &mdash;fstype=&ldquo;swap&rdquo; &mdash;size=2048</p>
+
+<h1>part / &mdash;bytes-per-inode=4096 &mdash;fstype=&ldquo;ext3&rdquo; &mdash;grow &mdash;size=1</h1>
+
+<p>part / &mdash;bytes-per-inode=4096 &mdash;fstype=&ldquo;ext3&rdquo; &mdash;grow &mdash;size=102400</p>
+
+<p>%packages &mdash;resolvedeps</p>
+
+<h1>@system-tools</h1>
+
+<h1>@gnome-desktop</h1>
+
+<p>@base-x</p>
+
+<h1>@sound-and-video</h1>
+
+<h1>@chinese-support</h1>
+
+<h1>@graphical-internet</h1>
+
+<h1>@admin-tools</h1>
+
+<h1>@editors</h1>
+
+<h1>key &mdash;skip</h1>
+
+<p>```</p>
+
+<p>所有以井号(#)开头的为注释行.</p>
+
+<ul>
+<li>url是操作系统的镜像地址</li>
+<li>part / (未注释行)是指根分区分100G, 如果你的磁盘很大，剩余的空间可在安装系统后根据您的具体需求而设。</li>
+<li>@bash-x  安装最基础的系统包</li>
+<li>resolvedeps 将自动解决包之间的依赖关系。</li>
+</ul>
+
+
+<h3>启动所有服务</h3>
+
+<p><code>
+service dhcpd restart
+service xinetd restart
+service vsftpd restart
+</code></p>
+
+<h2>PXE安装系统</h2>
+
+<p>当服务器一切工作准备就绪，就开始大规模安装Linux系统吧，由于各个主板对应的BIOS设置不同，此处无法满足所有的需求，通常做法是：</p>
+
+<p>进入BIOS &ndash;> PXE boot &ndash;> enable &ndash;> save and reboot</p>
+
+<p>如果各位有任何疑问，请留言回复。</p>
 ]]></content>
   </entry>
   

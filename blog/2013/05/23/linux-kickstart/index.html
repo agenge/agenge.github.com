@@ -1,0 +1,542 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>批量装机---Linux无人值守之Kickstart - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="前段时间总是忙于安装系统，对于偶这种懒人来说，一天安装两遍都无法承受，别说更多，基本上有两个原因造出： 时间很宝贵。
+偶比较懒惰。 一直习惯于 RedHat 家族产品，从最开始接触的RHEL，到后来同时使用的Fedora，及目前使用最多的CentOS，这无疑是偶最为熟悉的Linux， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/05/23/linux-kickstart">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-6520474-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">批量装机---Linux无人值守之Kickstart</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-23T00:00:00+08:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>前段时间总是忙于安装系统，对于偶这种懒人来说，一天安装两遍都无法承受，别说更多，基本上有两个原因造出：</p>
+
+<ul>
+<li>时间很宝贵。</li>
+<li>偶比较懒惰。</li>
+</ul>
+
+
+<p>一直习惯于 RedHat 家族产品，从最开始接触的RHEL，到后来同时使用的Fedora，及目前使用最多的CentOS，这无疑是偶最为熟悉的Linux，为啥偶要提这些捏？因为以下操作是基于这些Linux操作的啦，费话在此打住，以下为详细操作步骤.</p>
+
+<h2>安装基础包</h2>
+
+<p>_注：以下Yum操作是基于偶本地的ftp 仓库源，&mdash;enablerepo是告诉yum使用这个指定的安装源，
+默认情况下，CentOS自带的仓库源也是可以用滴，优先推荐各位使用哦，有个前提条件：连网！
+What？服务器不能上网？公司不许随意连公网？能说脏话吗？Fuck! _</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install dhcp-* --enablerepo=centos5.5
+</span><span class='line'>yum -y install tftp-* --enablerepo=centos5.5
+</span><span class='line'>yum -y install vsftpd-* --enablerepo=centos5.5
+</span><span class='line'>cp /usr/share/doc/dhcp-3.0.5/dhcpd.conf.sample /etc/dhcpd.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>配置dhcp</h2>
+
+<!-- more -->
+
+
+<pre><code>vi /etc/dhcpd.conf
+</code></pre>
+
+<p>添加以下信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>filename "pxelinux.0";     # 指定bootloader文件
+</span><span class='line'>next-server 192.168.0.20;  # 指定索取pxelinux.0的tftp服务器IP</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加的这两行可在大括号外面，也可在里面，next-server选项可写可不写，但建议各位写上啦。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service dhcpd start   # 启动服务
+</span><span class='line'>cd /tftpboot
+</span><span class='line'>cp /mnt/isolinux/* ./</span></code></pre></td></tr></table></div></figure>
+
+
+<p>实际需要的是vmlinuz，initrd.img  *.msg 这几个文件，但为了操作方便，偶直接把isolinux目录下的文件全cp过来（偶在文章开头就说过偶比较懒惰，换成生产环境千万别这样玩）。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir pxelinux.cfg
+</span><span class='line'>mv isolinux.cfg pxelinux.cfg/default
+</span><span class='line'>cp /usr/lib/syslinux/pxelinux.0 /tftpboot</span></code></pre></td></tr></table></div></figure>
+
+
+<p>default配置文件的作用是告诉主机从哪里去加载操作系统内核，并将启动加载文件拷到/tftpboot下。修改tftp参数并启动tftp服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vi /etc/xinetd.d/tftp
+</span><span class='line'># *********************************
+</span><span class='line'>service tftp
+</span><span class='line'>{
+</span><span class='line'>    socket_type = dgram
+</span><span class='line'>    protocol = udp
+</span><span class='line'>    wait = yes
+</span><span class='line'>    user = root
+</span><span class='line'>    server = /usr/sbin/in.tftpd
+</span><span class='line'>    server_args = -s /tftpboot
+</span><span class='line'>    disable = &lt;span style="color: #ff0000;"&gt;&lt;strong&gt;no&lt;/strong&gt;&lt;/span&gt;
+</span><span class='line'>    per_source = 11
+</span><span class='line'>    cps = 100 2
+</span><span class='line'>    flags = IPv4
+</span><span class='line'>}
+</span><span class='line'># *********************************</span></code></pre></td></tr></table></div></figure>
+
+
+<p>tftpboot 这个参数主要是指定tftp client 客户端从服务器的哪个目录去加载bootloader的pxelinux.0文件。启动服务：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service xinetd restart
+</span><span class='line'>chkconfig tftp on
+</span><span class='line'>vi /tftpboot/pxelinux.cfg/default</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改第3行，第12行.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>default linux
+</span><span class='line'>prompt 1
+</span><span class='line'>timeout 10 //时间调小点
+</span><span class='line'>display boot.msg
+</span><span class='line'>F1 boot.msg
+</span><span class='line'>F2 options.msg
+</span><span class='line'>F3 general.msg
+</span><span class='line'>F4 param.msg
+</span><span class='line'>F5 rescue.msg
+</span><span class='line'>label linux
+</span><span class='line'>kernel vmlinuz
+</span><span class='line'>append ks=ftp://192.168.0.20/pub/ks.cfg initrd=initrd.img
+</span><span class='line'>label text</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>安装Kickstart</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum install -y *kickstart* --enablerepo=centos5.5
+</span><span class='line'>system-config-kickstart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>_提示：所有以system-config开头的命令，都需要图形界面的支持。这不是必须的，前提是对ks的配置文件语法很熟悉啦。 _</p>
+
+<h3>配置ks.cfg</h3>
+
+<p>首先将 ks.cfg 保存到 /var/ftp/pub 目录下，将修改相应权限：</p>
+
+<pre><code>chmod 707 /var/ftp/pub/ks.cfg
+</code></pre>
+
+<p>以下是偶使用的ks.cfg全文 ，请各位根据自己情况修改：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#platform=x86, AMD64, or Intel EM64T
+</span><span class='line'># System authorization information
+</span><span class='line'>auth --useshadow --enablemd5
+</span><span class='line'># System bootloader configuration
+</span><span class='line'>bootloader --location=mbr
+</span><span class='line'># Partition clearing information
+</span><span class='line'>clearpart --all --initlabel
+</span><span class='line'># Use graphical install
+</span><span class='line'>#graphical
+</span><span class='line'>text
+</span><span class='line'># Firewall configuration
+</span><span class='line'>firewall --disabled
+</span><span class='line'># Run the Setup Agent on first boot
+</span><span class='line'>firstboot --disable
+</span><span class='line'># System keyboard
+</span><span class='line'>keyboard us
+</span><span class='line'># System language
+</span><span class='line'>lang en_US
+</span><span class='line'># Installation logging level
+</span><span class='line'>logging --level=info
+</span><span class='line'># Use network installation
+</span><span class='line'>url --url=&lt;strong&gt;ftp://192.168.30.210/pub/x86_64/centos5.5&lt;/strong&gt;
+</span><span class='line'># Network information
+</span><span class='line'>network --bootproto=dhcp --device=eth0 --onboot=on
+</span><span class='line'># Reboot after installation
+</span><span class='line'>reboot
+</span><span class='line'>#Root password
+</span><span class='line'>rootpw --iscrypted $1$R79JLo34$.Yi4OUmL5PhpsxzSTL1hX1
+</span><span class='line'>
+</span><span class='line'># SELinux configuration
+</span><span class='line'>selinux --disabled
+</span><span class='line'># System timezone
+</span><span class='line'>timezone Asia/Chongqing
+</span><span class='line'># Install OS instead of upgrade
+</span><span class='line'>install
+</span><span class='line'># X Window System configuration information
+</span><span class='line'>xconfig --defaultdesktop=GNOME --depth=8 --resolution=1026x768 --startxonboot
+</span><span class='line'># Disk partitioning information
+</span><span class='line'>part /boot --bytes-per-inode=4096 --fstype="ext3" --size=256
+</span><span class='line'>part swap --bytes-per-inode=4096 --fstype="swap" --size=2048
+</span><span class='line'>#part / --bytes-per-inode=4096 --fstype="ext3" --grow --size=1
+</span><span class='line'>part / --bytes-per-inode=4096 --fstype="ext3" --grow --size=102400
+</span><span class='line'>
+</span><span class='line'>%packages --resolvedeps
+</span><span class='line'>#@system-tools
+</span><span class='line'>#@gnome-desktop
+</span><span class='line'>
+</span><span class='line'>@base-x
+</span><span class='line'>
+</span><span class='line'>#@sound-and-video
+</span><span class='line'>#@chinese-support
+</span><span class='line'>#@graphical-internet
+</span><span class='line'>#@admin-tools
+</span><span class='line'>#@editors
+</span><span class='line'>#key --skip
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所有以井号(#)开头的为注释行.</p>
+
+<ul>
+<li>url是操作系统的镜像地址</li>
+<li>part / (未注释行)是指根分区分100G, 如果你的磁盘很大，剩余的空间可在安装系统后根据您的具体需求而设。</li>
+<li>@bash-x  安装最基础的系统包</li>
+<li>resolvedeps 将自动解决包之间的依赖关系。</li>
+</ul>
+
+
+<h3>启动所有服务</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service dhcpd restart
+</span><span class='line'>service xinetd restart
+</span><span class='line'>service vsftpd restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>PXE安装系统</h2>
+
+<p>当服务器一切工作准备就绪，就开始大规模安装Linux系统吧，由于各个主板对应的BIOS设置不同，此处无法满足所有的需求，通常做法是：</p>
+
+<p>进入BIOS &ndash;> PXE boot &ndash;> enable &ndash;> save and reboot</p>
+
+<p>如果各位有任何疑问，请留言回复。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-23T00:00:00+08:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/yun-wei/'>运维</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/05/02/zabbix-source-install-conf/" title="Previous Post: Zabbix 源码安装与配置">&laquo; Zabbix 源码安装与配置</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/05/29/zabbix-config-emailalert/" title="Next Post: Zabbix配置与报警设置">Zabbix配置与报警设置 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
