@@ -1,110 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
 
-<!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>DRBD+Heartbeat+Mysql高可用配置 - TaurusHome</title>
-  <meta name="author" content="agenge">
-
-  
-  <meta name="description" content="介绍 DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。 &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-6520474-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">TaurusHome</a></h1>
-  
-    <h2>攻城师</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:agenge.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">首页</a></li>
-  <li><a href="/blog/archives">归档</a></li>
-  <li><a href="/about">关于我</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
+  <title><![CDATA[文章分类: 运维 | TaurusHome]]></title>
+  <link href="http://agenge.github.io/blog/categories/operation-maintenance/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-09-26T12:04:56+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
     
-      <h1 class="entry-title">DRBD+Heartbeat+Mysql高可用配置</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
 
   
-
-
-<time datetime="2013-08-09T00:00:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><h2>介绍</h2>
+  <entry>
+    <title type="html"><![CDATA[DRBD+Heartbeat+Mysql高可用配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha/"/>
+    <updated>2013-08-09T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/08/09/drbd_heartbeat_mysql_ha</id>
+    <content type="html"><![CDATA[<h2>介绍</h2>
 
 <p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
 
@@ -1969,147 +1883,319 @@ cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
 <p>  以看到在drbd-02上数据已经有了。</p></li>
 </ul>
 
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
+]]></content>
+  </entry>
   
+  <entry>
+    <title type="html"><![CDATA[Zabbix 源码安装与配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/05/02/zabbix-source-install-conf/"/>
+    <updated>2013-05-02T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/05/02/zabbix-source-install-conf</id>
+    <content type="html"><![CDATA[<h2>1、安装环境</h2>
 
-<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
-
-      
-
-
-
-
-
+<ul>
+<li>操作系统：:CentOS 5.5 64位</li>
+<li>Mysql：5.5.27</li>
+<li>Apache httpd：2.4.4</li>
+<li>Zabbix：2.0.6</li>
+</ul>
 
 
+<h2>2、源码安装</h2>
 
+<h3>安装Zabbix</h3>
+
+<h4>创建用户</h4>
+
+<p><code>
+groupadd zabbix
+useradd -g zabbix -M -s /sbin/nologin zabbix
+</code></p>
+
+<h3>源码安装Zabbix</h3>
+
+<p>下载页面请点击 <a href="http://www.zabbix.com/download.php">这里</a>。下载之后按照以下步骤执行：</p>
+
+<p>```
+yum install wget curl-devel net-snmp-devel php-bcmath
+tar zxvf zabbix-2.0.6.tar.gz
+cd zabbix-2.0.6
+./configure &mdash;prefix=/data/zabbix \
+  &mdash;enable-server &mdash;enable-agent \
+  &mdash;with-mysql &mdash;with-net-snmp \
+  &mdash;with-libcurl &mdash;enable-proxy</p>
+
+<p>make &amp;&amp; make install
+```
+如果一切顺利，安装完成。</p>
+
+<h3>创建Zabbix 数据库</h3>
+
+<p>这里假设你已经安装好Mysql数据库，具体的安装方法请自己到网上搜索解决。
+```
+mysql -uroot -p
+Enter password:</p>
+
+<p>Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 63
+Server version: 5.0.95 Source distribution</p>
+
+<p>Copyright &copy; 2000, 2011, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective owners.</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>mysql> create database zabbix character set utf8;
+mysql> grant all privileges on zabbix.* to zabbix@localhost identified by &lsquo;zabbix&rsquo;;
+Query OK, 1 row affected (0.00 sec)</p>
+
+<p>mysql> quit
+mysql -uzabbix -p zabbix &lt; database/mysql/schema.sql
+mysql -uzabbix -p zabbix &lt; database/mysql/images.sql
+mysql -uzabbix -p zabbix &lt; database/mysql/data.sql
+```</p>
+
+<h3>配置Zabbix</h3>
+
+<p>设置服务自启动：
+<code>
+cp misc/init.d/fedora/core/zabbix_server /etc/init.d/
+chmod +x /etc/init.d/zabbix_server
+</code>
+修改zabbix_server中的BASEDIR=/data/zabbix
+<code>
+chkconfig --add zabbix_server
+chkconfig zabbix_server on
+</code>
+设置zabbix 配置文件：
+<code>
+vim /data/zabbix/etc/zabbix/zabbix_server.conf
+DBName=zabbix
+DBPassword=zabbix
+</code></p>
+
+<p>只需要修改密码即可，其他都保持默认值。当然如果你的Mysql不是安装在本地，肯定也要修改相应的IP啦。</p>
+
+<h4>启动Zabbix Server</h4>
+
+<p><code>
+/etc/init.d/zabbix_server start
+</code>
+确认zabbix server是否已经启动：
+```
+netstat -antulp | grep zabbix</p>
+
+<p>tcp        0      0 0.0.0.0:10051               0.0.0.0:*                   LISTEN      19087/zabbix_server
+```</p>
+
+<!-- more -->
+
+
+<h2>3、安装Zabbix Web接口</h2>
+
+<p>Zabbix前端使用PHP编写，故Web Server必须支持PHP。</p>
+
+<h4>安装Apr</h4>
+
+<p><code>
+wget http://mirrors.cnnic.cn/apache//apr/apr-1.4.6.tar.gz
+tar zxvf apr-1.4.6.tar.gz
+cd apr-1.4.6
+./configure --prefix=/usr/local/apr
+make &amp;&amp; make install
+</code></p>
+
+<h4>安装Apr-utils</h4>
+
+<p><code>
+wget http://mirrors.cnnic.cn/apache//apr/apr-util-1.5.2.tar.gz
+tar zxvf apr-util-1.5.2.tar.gz
+cd apr-util-1.5.2
+./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr/
+make &amp;&amp; make install
+</code></p>
+
+<h4>安装pcre</h4>
+
+<p><code>
+tar zxvf pcre-8.32.tar.gz
+cd pcre-8.32
+./configure
+make &amp;&amp; make install
+</code></p>
+
+<h3>安装Apache httpd</h3>
+
+<p>```
+wget <a href="http://labs.mop.com/apache-mirror//httpd/httpd-2.4.4.tar.bz2">http://labs.mop.com/apache-mirror//httpd/httpd-2.4.4.tar.bz2</a>
+tar jxvf httpd-2.4.4.tar.bz2
+cp -rf apr-1.4.6 /data/software/httpd-2.4.4/srclib/apr
+cp -rf apr-util-1.5.2 /data/software/httpd-2.4.4/srclib/apr-util
+cd httpd-2.4.4
+./configure &mdash;prefix=/usr/local/httpd \
+  &mdash;enable-modules &mdash;enable-ssl &mdash;enable-module=so \
+  &mdash;with-apr=/usr/local/apr \
+  &mdash;with-apr-util=/usr/local/apr-util &mdash;with-included-apr \
+  &mdash;enable-mods-shared=most &mdash;with-included-apr</p>
+
+<p>make &amp;&amp; make install
+/usr/local/httpd/bin/apachectl start
+```</p>
+
+<h4>安装 PHP</h4>
+
+<p>安装gettext（国际化支持）：
+<code>
+wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.2.tar.gz
+tar zxvf gettext-0.18.2.tar.gz
+cd gettext-0.18.2
+./configure
+make &amp;&amp; make install
+</code>
+安装libpng：
+<code>
+tar zxvf libpng-1.6.1.tar.gz
+cd libpng-1.6.1
+./configure --prefix=/usr/local/libpng --enable-shared
+make &amp;&amp; make install
+</code>
+安装freetype：
+<code>
+tar jxvf freetype-2.4.11.tar.bz2
+cd freetype-2.4.11
+./configure --prefix=/usr/local/freetype&lt;b&gt;&lt;/b&gt;
+make &amp;&amp; make install
+</code>
+安装JPEG：
+<code>
+wget http://www.ijg.org/files/jpegsrc.v9.tar.gz
+tar zxvf jpegsrc.v9.tar.gz
+cd jpeg-9/
+./configure --prefix=/usr/local/jpeg9 --enable-shared --enable-static
+make &amp;&amp; make install
+</code>
+安装GD库：
+<code>
+wget https://bitbucket.org/libgd/gd-libgd/get/GD_2_0_33.tar.gz
+tar zxvf GD_2_0_33.tar.gz
+cd libgd-gd-libgd-486e81dea984/src
+./configure --with-png  --with-freetype  --with-jpeg
+make install
+</code>
+安装PHP：
+```
+wget <a href="ftp://192.168.30.211:/pub/Tools/php-5.3.19.tar.bz2">ftp://192.168.30.211:/pub/Tools/php-5.3.19.tar.bz2</a>
+tar jxvf php-5.3.19.tar.bz2</p>
+
+<p>./configure &mdash;prefix=/usr/local/php  \
+  &mdash;with-config-file-path=/usr/local/php/etc \
+  &mdash;disable-debug &mdash;disable-rpath &mdash;with-gettext  \
+  &mdash;with-mcrypt &mdash;with-mysql=/usr/local/mysql \
+  &mdash;with-mysql-sock=/data/mysqldata/3306/mysql.sock \
+  &mdash;with-mysqli=/usr/local/mysql/bin/mysql_config \
+  &mdash;enable-mbstring &mdash;enable-pdo &mdash;with-curl \
+  &mdash;enable-inline-optimization &mdash;with-bz2 \
+  &mdash;with-zlib &mdash;enable-sockets &mdash;enable-bcmath \
+  &mdash;enable-sysvsem &mdash;enable-sysvshm &mdash;enable-pcntl \
+  &mdash;enable-mbregex &mdash;with-mhash &mdash;enable-xml \
+  &mdash;enable-zip &mdash;with-pcre-regex &mdash;with-gettext \
+  &mdash;with-apxs2=/usr/local/httpd/bin/apxs \
+  &mdash;with-gd &mdash;enable-gd-native-ttf &mdash;with-jpeg-dir=/usr/local/include \
+  &mdash;with-png-dir=/usr/local/include &mdash;with-freetype-dir=/usr/include/freetype2</p>
+
+<p>make ZEND_EXTRA_LIBS=&lsquo;-liconv&rsquo;
+make install
+cp php.ini-production /usr/local/php/etc/php.ini
+cp sapi/fpm/init.d.php-fpm.in /etc/init.d/php-fpm
+chmod +x /etc/init.d/php-fpm
+chkconfig php-fpm on
+cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf
+<code>
+修改时区：
+</code>
+vim /usr/local/php/etc/php.ini
+<code>
+在 [Date] 之后增加一行：
+</code>
+date.timezone =  Asia/Chongqing
+```
+将 max_execution_time 的值修改为 300或更大值，将max_input_time的值修改为300或更大值。</p>
+
+<p>修改httpd.conf：
+<code>
+vim /usr/local/httpd/conf/httpd.conf
+</code>
+在最后增加：
+<code>
+AddType application/x-httpd-php  .php
+AddType application/x-httpd-php-source  .phps
+</code>
+并将：
+<code>
+DirectoryIndex index.html
+</code>
+修改为：
+<code>
+DirectoryIndex index.php index.html
+</code></p>
+
+<h4>配置Zabbix Web接口</h4>
+
+<p><code>
+mkdir /usr/local/httpd/htdocs/zabbix
+cd frontends/php/
+cp -a . /usr/local/httpd/htdocs/zabbix/
+cd /usr/local/httpd/htdocs/zabbix/
+cp conf/zabbix.conf.php.example conf/zabbix.conf.php
+vim conf/zabbix.conf.php
+</code>
+修改好连接Myql数据库的相关信息。</p>
+
+<h4>安装Zabbix前台</h4>
+
+<p>使用浏览器打开Zabbix URL: <a href="http://server_ip/zabbix">http://server_ip/zabbix</a></p>
+
+<p>用户名：admin</p>
+
+<p>密码：  zabbix</p>
+
+<h2>安装Zabbix Agent</h2>
+
+<h3>Zabbix Agent For Linux</h3>
+
+<p>添加用户：
+<code>
+groupadd zabbix
+useradd -g zabbix -M -s /sbin/nologin zabbix
+</code>
+下载 Zabbix Agent
+<code>
+wget http://www.zabbix.com/downloads/2.0.6/zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
+tar zxvf zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
+mv sbin/zabbix_agent* /usr/sbin/
+mv bin/zabbix_* /usr/bin/
+mkdir -p /etc/zabbix
+mv conf/* /etc/zabbix
+echo "zabbix_agent    10050/tcp" &gt;&gt; /etc/services
+echo "zabbix_agent    10050/udp" &gt;&gt; /etc/services
+sed -i 's/Server=127.0.0.1/Server=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf
+sed -i 's/Hostname=Zabbix server/Hostname=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf
+</code>
+启动 Zabbix Agent
+<code>
+zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf
+ps aux | grep zabbix
+echo "zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf" &gt;&gt; /etc/rc.local
+</code>
+测试是否正确
+<code>
+zabbix_get -s 192.168.30.226 -p 10050 -k agent.ping
+1
+</code>
+如果返回1表示正常。</p>
+]]></content>
+  </entry>
   
-
-
-<time datetime="2013-08-09T00:00:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/mysql{mysql}/'>Mysql{mysql}</a>, <a class='category' href='/blog/categories/yun-wei-{operation-maintenance}/'>运维{operation-maintenance}</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  
-  
-  
-     <!-- JiaThis Button BEGIN -->
-<div class="jiathis_style_24x24">
-	<a class="jiathis_button_qzone"></a>
-	<a class="jiathis_button_tsina"></a>
-	<a class="jiathis_button_tqq"></a>
-	<a class="jiathis_button_weixin"></a>
-	<a class="jiathis_button_renren"></a>
-	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
-	<a class="jiathis_counter_style"></a>
-</div>
-<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
-<!-- JiaThis Button END -->
-
-<!-- UY BEGIN -->
-<div id="uyan_frame"></div>
-<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
-<!-- UY END -->
- 
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2013/07/28/video-decoder-intro/" title="Previous Post: 视频编解码术语概念介绍">&laquo; 视频编解码术语概念介绍</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2013/09/12/write-blog-octopress-with-github/" title="Next Post: 利用GitHub搭建免费的个人blog">利用GitHub搭建免费的个人blog &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>最新文章</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
-      </li>
-    
-  </ul>
-</section>
-<section> 
-  <h1>文章分类</h1> 
-  <ul id="categories"> 
-    <li class='category'><a href='/blog/categories/blog-blog-/'>Blog (1)</a></li>
-<li class='category'><a href='/blog/categories/github-github-/'>Github (1)</a></li>
-<li class='category'><a href='/blog/categories/mysql-mysql-/'>Mysql (1)</a></li>
-<li class='category'><a href='/blog/categories/云计算-cloud-computing-/'>云计算 (3)</a></li>
-<li class='category'><a href='/blog/categories/流媒体-media-/'>流媒体 (1)</a></li>
-<li class='category'><a href='/blog/categories/监控-monitor-/'>监控 (2)</a></li>
-<li class='category'><a href='/blog/categories/运维-operation-maintenance-/'>运维 (2)</a></li>
- 
-  </ul> 
-</section>
-
-
-
-
-  
-</aside>
-
-
-    </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2013 - agenge -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
-
-</footer>
-  
-
-
-
-
-
-
-
-
-
-
-
-</body>
-</html>
+</feed>
