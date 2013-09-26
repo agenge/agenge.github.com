@@ -2,7 +2,8 @@
 layout: post
 title: 制作OpenStack CentOS 6.3 镜像
 categories:
-- 云计算{cloud-computing}
+- 云计算
+- OpenStack
 tags:
 - CentOS
 - OpenStack

@@ -46,7 +46,8 @@ module Jekyll
       #self.data['title']       = "#{title_prefix}#{category[/[^{]*/]}"
       # Set the meta-description for this page.
       meta_description_prefix  = site.config['category_meta_description_prefix'] || 'Category: '
-      self.data['description'] = "#{meta_description_prefix}#{category[/[^{]*/]}"
+      self.data['description'] = "#{meta_description_prefix}#{category}"
+	  #self.data['description'] = "#{meta_description_prefix}#{category[/[^{]*/]}"
     end
 
   end
@@ -70,11 +71,12 @@ module Jekyll
       self.data['category']    = category
       # Set the title for this page.
       title_prefix             = site.config['category_title_prefix'] || 'Category: '
-      self.data['title']       = "#{title_prefix}#{category[/[^{]*/]}"
+      #self.data['title']       = "#{title_prefix}#{category[/[^{]*/]}"
+	  self.data['title']       = "#{title_prefix}#{category}"
       # Set the meta-description for this page.
       meta_description_prefix  = site.config['category_meta_description_prefix'] || 'Category: '
-      self.data['description'] = "#{meta_description_prefix}#{category[/[^{]*/]}"
-
+      self.data['description'] = "#{meta_description_prefix}#{category}"
+	  #self.data['description'] = "#{meta_description_prefix}#{category[/[^{]*/]}"
       # Set the correct feed URL.
       self.data['feed_url'] = "#{category_dir}/#{name}"
     end
@@ -109,12 +111,18 @@ module Jekyll
       if self.layouts.key? 'category_index'
         dir = self.config['category_dir'] || 'categories'
         self.categories.keys.each do |category|
-          self.write_category_index(File.join(self.config['category_dir'], category[/(?<={)[^}]*/]), category)
+          cate_dir =  category.gsub(/_|\P{Word}/, '-').gsub(/-{2,}/, '-').downcase
+          cate_dir = URI::escape(cate_dir)
+          cate_dir = URI::parse(cate_dir)
+          cate_dir = cate_dir.to_s
+          self.write_category_index(File.join(dir, cate_dir), category)
+		  #self.write_category_index(File.join(self.config['category_dir'], category[/(?<={)[^}]*/]), category)
 		  #self.write_category_index(File.join(dir, category.to_url), category)
         end
 
       # Throw an exception if the layout couldn't be found.
       else
+		throw "No 'category_index' layout found."
         raise <<-ERR
 
 

@@ -4,8 +4,8 @@ title: "利用GitHub搭建免费的个人blog"
 date: 2013-09-12 22:18
 comments: true
 categories: 
--  Github{github}
--  Blog{blog}
+-  Github
+-  Blog
 ---
 
 # 前言

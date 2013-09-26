@@ -2,7 +2,8 @@
 layout: post
 title: 制作OpenStack Windows Server 2008 镜像
 categories:
-- 云计算{cloud-computing}
+- 云计算
+- OpenStack
 tags:
 - OpenStack
 - 镜像制作
