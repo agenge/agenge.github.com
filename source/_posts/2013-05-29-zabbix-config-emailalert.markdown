@@ -17,7 +17,7 @@ comments: true
 
 1. “Configuration” -> “Hosts”，点击添加一台主机“Host”:
 
- {% img [center] [/images/2013/05/01.jpg] %}
+ {% img /images/2013/05/01.jpg  %}
 
 2. 需要填写的内容主要为：“主机(Host)”、“模板(Templates)”，详细操作请见下列图中所示：主机的设置如下：
 
