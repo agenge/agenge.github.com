@@ -33,7 +33,7 @@ destination: public
 plugins: plugins
 code_dir: downloads/code
 category_dir: blog/categories
-category_title_prefix: '文章分类: '
+#category_title_prefix: '文章分类: '
 markdown: rdiscount
 rdiscount:
   extensions:
