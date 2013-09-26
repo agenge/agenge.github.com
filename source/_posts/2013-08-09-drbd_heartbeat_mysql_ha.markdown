@@ -2,7 +2,8 @@
 layout: post
 title: DRBD+Heartbeat+Mysql高可用配置
 categories:
-- 运维
+- 运维{operation-maintenance}
+- Mysql{mysql}
 tags:
 - drbd
 - heartbeat

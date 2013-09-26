@@ -2,7 +2,7 @@
 layout: post
 title: 视频编解码术语概念介绍
 categories:
-- 流媒体
+- 流媒体{media}
 tags:
 - ffmpeg
 - libav

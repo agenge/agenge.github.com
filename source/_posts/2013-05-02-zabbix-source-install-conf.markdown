@@ -2,7 +2,8 @@
 layout: post
 title: Zabbix 源码安装与配置
 categories:
-- 运维
+- 运维{operation-maintenance}
+- 监控{monitor}
 tags:
 - zabbix
 - 监控系统

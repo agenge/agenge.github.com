@@ -2,7 +2,7 @@
 layout: post
 title: Zabbix配置与报警设置
 categories:
-- 监控
+- 监控{monitor}
 tags:
 - zabbix
 - 监控系统

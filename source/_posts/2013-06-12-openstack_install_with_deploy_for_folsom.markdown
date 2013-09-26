@@ -2,7 +2,7 @@
 layout: post
 title: Openstack安装与部署(Folsom)
 categories:
-- 云计算
+- 云计算{cloud-computing}
 tags:
 - Cinder
 - Glance
