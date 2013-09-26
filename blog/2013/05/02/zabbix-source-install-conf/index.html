@@ -1,0 +1,719 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Zabbix 源码安装与配置 - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="1、安装环境 操作系统：:CentOS 5.5 64位
+Mysql：5.5.27
+Apache httpd：2.4.4
+Zabbix：2.0.6 2、源码安装 安装Zabbix 创建用户 1
+2
+groupadd zabbix
+useradd -g zabbix -M -s /sbin/ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/05/02/zabbix-source-install-conf">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-6520474-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Zabbix 源码安装与配置</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-02T00:00:00+08:00" pubdate data-updated="true">May 2<span>nd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>1、安装环境</h2>
+
+<ul>
+<li>操作系统：:CentOS 5.5 64位</li>
+<li>Mysql：5.5.27</li>
+<li>Apache httpd：2.4.4</li>
+<li>Zabbix：2.0.6</li>
+</ul>
+
+
+<h2>2、源码安装</h2>
+
+<h3>安装Zabbix</h3>
+
+<h4>创建用户</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
+</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>源码安装Zabbix</h3>
+
+<p>下载页面请点击 <a href="http://www.zabbix.com/download.php">这里</a>。下载之后按照以下步骤执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum install wget curl-devel net-snmp-devel php-bcmath
+</span><span class='line'>tar zxvf zabbix-2.0.6.tar.gz
+</span><span class='line'>cd zabbix-2.0.6
+</span><span class='line'>./configure --prefix=/data/zabbix \
+</span><span class='line'>  --enable-server --enable-agent \
+</span><span class='line'>  --with-mysql --with-net-snmp \
+</span><span class='line'>  --with-libcurl --enable-proxy
+</span><span class='line'>
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果一切顺利，安装完成。</p>
+
+<h3>创建Zabbix 数据库</h3>
+
+<p>这里假设你已经安装好Mysql数据库，具体的安装方法请自己到网上搜索解决。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 63
+</span><span class='line'>Server version: 5.0.95 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create database zabbix character set utf8;
+</span><span class='line'>mysql&gt; grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
+</span><span class='line'>Query OK, 1 row affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; quit
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/schema.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/images.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/data.sql</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>配置Zabbix</h3>
+
+<p>设置服务自启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp misc/init.d/fedora/core/zabbix_server /etc/init.d/
+</span><span class='line'>chmod +x /etc/init.d/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改zabbix_server中的BASEDIR=/data/zabbix</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --add zabbix_server
+</span><span class='line'>chkconfig zabbix_server on</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置zabbix 配置文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /data/zabbix/etc/zabbix/zabbix_server.conf
+</span><span class='line'>DBName=zabbix
+</span><span class='line'>DBPassword=zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只需要修改密码即可，其他都保持默认值。当然如果你的Mysql不是安装在本地，肯定也要修改相应的IP啦。</p>
+
+<h4>启动Zabbix Server</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/zabbix_server start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>确认zabbix server是否已经启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>netstat -antulp | grep zabbix
+</span><span class='line'>
+</span><span class='line'>tcp        0      0 0.0.0.0:10051               0.0.0.0:*                   LISTEN      19087/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<h2>3、安装Zabbix Web接口</h2>
+
+<p>Zabbix前端使用PHP编写，故Web Server必须支持PHP。</p>
+
+<h4>安装Apr</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirrors.cnnic.cn/apache//apr/apr-1.4.6.tar.gz
+</span><span class='line'>tar zxvf apr-1.4.6.tar.gz
+</span><span class='line'>cd apr-1.4.6
+</span><span class='line'>./configure --prefix=/usr/local/apr
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>安装Apr-utils</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirrors.cnnic.cn/apache//apr/apr-util-1.5.2.tar.gz
+</span><span class='line'>tar zxvf apr-util-1.5.2.tar.gz
+</span><span class='line'>cd apr-util-1.5.2
+</span><span class='line'>./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr/
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>安装pcre</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf pcre-8.32.tar.gz
+</span><span class='line'>cd pcre-8.32
+</span><span class='line'>./configure
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装Apache httpd</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://labs.mop.com/apache-mirror//httpd/httpd-2.4.4.tar.bz2
+</span><span class='line'>tar jxvf httpd-2.4.4.tar.bz2
+</span><span class='line'>cp -rf apr-1.4.6 /data/software/httpd-2.4.4/srclib/apr
+</span><span class='line'>cp -rf apr-util-1.5.2 /data/software/httpd-2.4.4/srclib/apr-util
+</span><span class='line'>cd httpd-2.4.4
+</span><span class='line'>./configure --prefix=/usr/local/httpd \
+</span><span class='line'>  --enable-modules --enable-ssl --enable-module=so \
+</span><span class='line'>  --with-apr=/usr/local/apr \
+</span><span class='line'>  --with-apr-util=/usr/local/apr-util --with-included-apr \
+</span><span class='line'>  --enable-mods-shared=most --with-included-apr
+</span><span class='line'>
+</span><span class='line'>make && make install
+</span><span class='line'>/usr/local/httpd/bin/apachectl start</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>安装 PHP</h4>
+
+<p>安装gettext（国际化支持）：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.2.tar.gz
+</span><span class='line'>tar zxvf gettext-0.18.2.tar.gz
+</span><span class='line'>cd gettext-0.18.2
+</span><span class='line'>./configure
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装libpng：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf libpng-1.6.1.tar.gz
+</span><span class='line'>cd libpng-1.6.1
+</span><span class='line'>./configure --prefix=/usr/local/libpng --enable-shared
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装freetype：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar jxvf freetype-2.4.11.tar.bz2
+</span><span class='line'>cd freetype-2.4.11
+</span><span class='line'>./configure --prefix=/usr/local/freetype&lt;b&gt;&lt;/b&gt;
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装JPEG：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.ijg.org/files/jpegsrc.v9.tar.gz
+</span><span class='line'>tar zxvf jpegsrc.v9.tar.gz
+</span><span class='line'>cd jpeg-9/
+</span><span class='line'>./configure --prefix=/usr/local/jpeg9 --enable-shared --enable-static
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装GD库：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://bitbucket.org/libgd/gd-libgd/get/GD_2_0_33.tar.gz
+</span><span class='line'>tar zxvf GD_2_0_33.tar.gz
+</span><span class='line'>cd libgd-gd-libgd-486e81dea984/src
+</span><span class='line'>./configure --with-png  --with-freetype  --with-jpeg
+</span><span class='line'>make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装PHP：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget ftp://192.168.30.211:/pub/Tools/php-5.3.19.tar.bz2
+</span><span class='line'>tar jxvf php-5.3.19.tar.bz2
+</span><span class='line'>
+</span><span class='line'>./configure --prefix=/usr/local/php  \
+</span><span class='line'>  --with-config-file-path=/usr/local/php/etc \
+</span><span class='line'>  --disable-debug --disable-rpath --with-gettext  \
+</span><span class='line'>  --with-mcrypt --with-mysql=/usr/local/mysql \
+</span><span class='line'>  --with-mysql-sock=/data/mysqldata/3306/mysql.sock \
+</span><span class='line'>  --with-mysqli=/usr/local/mysql/bin/mysql_config \
+</span><span class='line'>  --enable-mbstring --enable-pdo --with-curl \
+</span><span class='line'>  --enable-inline-optimization --with-bz2 \
+</span><span class='line'>  --with-zlib --enable-sockets --enable-bcmath \
+</span><span class='line'>  --enable-sysvsem --enable-sysvshm --enable-pcntl \
+</span><span class='line'>  --enable-mbregex --with-mhash --enable-xml \
+</span><span class='line'>  --enable-zip --with-pcre-regex --with-gettext \
+</span><span class='line'>  --with-apxs2=/usr/local/httpd/bin/apxs \
+</span><span class='line'>  --with-gd --enable-gd-native-ttf --with-jpeg-dir=/usr/local/include \
+</span><span class='line'>  --with-png-dir=/usr/local/include --with-freetype-dir=/usr/include/freetype2
+</span><span class='line'>  
+</span><span class='line'>make ZEND_EXTRA_LIBS='-liconv'
+</span><span class='line'>make install
+</span><span class='line'>cp php.ini-production /usr/local/php/etc/php.ini
+</span><span class='line'>cp sapi/fpm/init.d.php-fpm.in /etc/init.d/php-fpm
+</span><span class='line'>chmod +x /etc/init.d/php-fpm
+</span><span class='line'>chkconfig php-fpm on
+</span><span class='line'>cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改时区：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /usr/local/php/etc/php.ini</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 [Date] 之后增加一行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>date.timezone =  Asia/Chongqing</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将 max_execution_time 的值修改为 300或更大值，将max_input_time的值修改为300或更大值。</p>
+
+<p>修改httpd.conf：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /usr/local/httpd/conf/httpd.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在最后增加：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AddType application/x-httpd-php  .php
+</span><span class='line'>AddType application/x-httpd-php-source  .phps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>并将：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>DirectoryIndex index.html</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改为：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>DirectoryIndex index.php index.html</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>配置Zabbix Web接口</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir /usr/local/httpd/htdocs/zabbix
+</span><span class='line'>cd frontends/php/
+</span><span class='line'>cp -a . /usr/local/httpd/htdocs/zabbix/
+</span><span class='line'>cd /usr/local/httpd/htdocs/zabbix/
+</span><span class='line'>cp conf/zabbix.conf.php.example conf/zabbix.conf.php
+</span><span class='line'>vim conf/zabbix.conf.php</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改好连接Myql数据库的相关信息。</p>
+
+<h4>安装Zabbix前台</h4>
+
+<p>使用浏览器打开Zabbix URL: <a href="http://server_ip/zabbix">http://server_ip/zabbix</a></p>
+
+<p>用户名：admin</p>
+
+<p>密码：  zabbix</p>
+
+<h2>安装Zabbix Agent</h2>
+
+<h3>Zabbix Agent For Linux</h3>
+
+<p>添加用户：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
+</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下载 Zabbix Agent</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.zabbix.com/downloads/2.0.6/zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
+</span><span class='line'>tar zxvf zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
+</span><span class='line'>mv sbin/zabbix_agent* /usr/sbin/
+</span><span class='line'>mv bin/zabbix_* /usr/bin/
+</span><span class='line'>mkdir -p /etc/zabbix
+</span><span class='line'>mv conf/* /etc/zabbix
+</span><span class='line'>echo "zabbix_agent    10050/tcp" &gt;&gt; /etc/services
+</span><span class='line'>echo "zabbix_agent    10050/udp" &gt;&gt; /etc/services
+</span><span class='line'>sed -i 's/Server=127.0.0.1/Server=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf
+</span><span class='line'>sed -i 's/Hostname=Zabbix server/Hostname=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动 Zabbix Agent</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf
+</span><span class='line'>ps aux | grep zabbix
+</span><span class='line'>echo "zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf" &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
+
+
+<p>测试是否正确</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>zabbix_get -s 192.168.30.226 -p 10050 -k agent.ping
+</span><span class='line'>1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果返回1表示正常。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-02T00:00:00+08:00" pubdate data-updated="true">May 2<span>nd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/yun-wei/'>运维</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/05/29/zabbix-config-emailalert/" title="Next Post: Zabbix配置与报警设置">Zabbix配置与报警设置 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li class='category'><a href='/blog/categories/blog-博客-/'>Blog[博客] (1)</a></li>
+<li class='category'><a href='/blog/categories/github/'>Github (1)</a></li>
+<li class='category'><a href='/blog/categories/云计算/'>云计算 (3)</a></li>
+<li class='category'><a href='/blog/categories/流媒体/'>流媒体 (1)</a></li>
+<li class='category'><a href='/blog/categories/监控/'>监控 (1)</a></li>
+<li class='category'><a href='/blog/categories/运维/'>运维 (2)</a></li>
+ 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

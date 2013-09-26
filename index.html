@@ -741,6 +741,267 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/29/zabbix-config-emailalert/">Zabbix配置与报警设置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-29T00:00:00+08:00" pubdate data-updated="true">May 29<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>上次偶写了一篇<a href="http://agenge.com/blog/2013/05/02/zabbix-source-install-conf">Zabbix 源码安装与配置</a> ，安装之后默认是无法监控客户端主机滴，所以偶今天专门写篇文章来介绍Zabbix配置，主要涉及到：添加主机、邮件报警及一些常见的操作流程，希望对初学者有所帮助。</p>
+
+<h2>监控机</h2>
+
+<p>通在安装Zabbix之后，还需要在Web管理控制台添加需要监控的主机，下列是以添加一台监控主机为例进行演示。</p>
+
+<ol>
+<li>“Configuration” &ndash;> “Hosts”，点击添加一台主机“Host”:</li>
+</ol>
+
+
+<p> <img class="[center]" src="[/images/2013/05/01.jpg]"></p>
+
+<ol>
+<li>需要填写的内容主要为：“主机(Host)”、“模板(Templates)”，详细操作请见下列图中所示：主机的设置如下：</li>
+</ol>
+
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/05/02.jpg"><img class="alignnone size-full wp-image-668" alt="02" src="http://agenge.com/wp-content/uploads/2013/05/02.jpg" width="1004" height="615" /></a>
+ 模板的设置如下：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/05/03.jpg"><img class="alignnone size-full wp-image-669" alt="03" src="http://agenge.com/wp-content/uploads/2013/05/03.jpg" width="630" height="221" /></a></p>
+
+<p> 点击“添加(Add)”之后，从弹出的子页面选择需要的模板，Zabbix默认已自带非常多的模板，</p>
+
+<p> 例如Mysql、Zabbix Server、Zabbix Agentd、OS Linux等。</p>
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/04.jpg"><img class="alignnone size-full wp-image-670" alt="04" src="http://agenge.com/wp-content/uploads/2013/05/04.jpg" width="450" height="450" /></a></p>
+
+<p> 勾选所需要的监控模板后，点击最下边的“选择(Select)”，回到之前的模板标签页，最后一定要记得保存(Save)。</p>
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/05.jpg"><img class="alignnone size-full wp-image-671" alt="05" src="http://agenge.com/wp-content/uploads/2013/05/05.jpg" width="560" height="184" /></a></p>
+
+<ol>
+<li>如果一切正常，默认在1分钟之后就会变成可用状态：
+<a href="http://agenge.com/wp-content/uploads/2013/05/06.jpg"><img class="alignnone size-full wp-image-672" alt="06" src="http://agenge.com/wp-content/uploads/2013/05/06.jpg" width="622" height="78" /></a></li>
+</ol>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/29/zabbix-config-emailalert/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/02/zabbix-source-install-conf/">Zabbix 源码安装与配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-02T00:00:00+08:00" pubdate data-updated="true">May 2<span>nd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1、安装环境</h2>
+
+<ul>
+<li>操作系统：:CentOS 5.5 64位</li>
+<li>Mysql：5.5.27</li>
+<li>Apache httpd：2.4.4</li>
+<li>Zabbix：2.0.6</li>
+</ul>
+
+
+<h2>2、源码安装</h2>
+
+<h3>安装Zabbix</h3>
+
+<h4>创建用户</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
+</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>源码安装Zabbix</h3>
+
+<p>下载页面请点击 <a href="http://www.zabbix.com/download.php">这里</a>。下载之后按照以下步骤执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum install wget curl-devel net-snmp-devel php-bcmath
+</span><span class='line'>tar zxvf zabbix-2.0.6.tar.gz
+</span><span class='line'>cd zabbix-2.0.6
+</span><span class='line'>./configure --prefix=/data/zabbix \
+</span><span class='line'>  --enable-server --enable-agent \
+</span><span class='line'>  --with-mysql --with-net-snmp \
+</span><span class='line'>  --with-libcurl --enable-proxy
+</span><span class='line'>
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果一切顺利，安装完成。</p>
+
+<h3>创建Zabbix 数据库</h3>
+
+<p>这里假设你已经安装好Mysql数据库，具体的安装方法请自己到网上搜索解决。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 63
+</span><span class='line'>Server version: 5.0.95 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create database zabbix character set utf8;
+</span><span class='line'>mysql&gt; grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
+</span><span class='line'>Query OK, 1 row affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; quit
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/schema.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/images.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/data.sql</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>配置Zabbix</h3>
+
+<p>设置服务自启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp misc/init.d/fedora/core/zabbix_server /etc/init.d/
+</span><span class='line'>chmod +x /etc/init.d/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改zabbix_server中的BASEDIR=/data/zabbix</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --add zabbix_server
+</span><span class='line'>chkconfig zabbix_server on</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置zabbix 配置文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /data/zabbix/etc/zabbix/zabbix_server.conf
+</span><span class='line'>DBName=zabbix
+</span><span class='line'>DBPassword=zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只需要修改密码即可，其他都保持默认值。当然如果你的Mysql不是安装在本地，肯定也要修改相应的IP啦。</p>
+
+<h4>启动Zabbix Server</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/zabbix_server start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>确认zabbix server是否已经启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>netstat -antulp | grep zabbix
+</span><span class='line'>
+</span><span class='line'>tcp        0      0 0.0.0.0:10051               0.0.0.0:*                   LISTEN      19087/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/02/zabbix-source-install-conf/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
     
     <a href="/blog/archives">Blog Archives</a>
@@ -782,7 +1043,8 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 <li class='category'><a href='/blog/categories/github/'>Github (1)</a></li>
 <li class='category'><a href='/blog/categories/云计算/'>云计算 (3)</a></li>
 <li class='category'><a href='/blog/categories/流媒体/'>流媒体 (1)</a></li>
-<li class='category'><a href='/blog/categories/运维/'>运维 (1)</a></li>
+<li class='category'><a href='/blog/categories/监控/'>监控 (1)</a></li>
+<li class='category'><a href='/blog/categories/运维/'>运维 (2)</a></li>
  
   </ul> 
 </section>

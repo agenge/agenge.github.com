@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-25T14:54:20+08:00</updated>
+  <updated>2013-09-26T09:44:02+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -3858,6 +3858,755 @@ sudo /etc/init.d/memcached restart
 
 <p>关于安装与部署，偶暂时写到这里，这只是很简单的一个入门例子而已，下次偶会介绍
 如何制作CentOS5.5、CentOS 6.3及Windows Server 2008的镜像，很多同学因镜像而烦恼。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Zabbix配置与报警设置]]></title>
+    <link href="http://agenge.github.io/blog/2013/05/29/zabbix-config-emailalert/"/>
+    <updated>2013-05-29T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/05/29/zabbix-config-emailalert</id>
+    <content type="html"><![CDATA[<p>上次偶写了一篇<a href="http://agenge.com/blog/2013/05/02/zabbix-source-install-conf">Zabbix 源码安装与配置</a> ，安装之后默认是无法监控客户端主机滴，所以偶今天专门写篇文章来介绍Zabbix配置，主要涉及到：添加主机、邮件报警及一些常见的操作流程，希望对初学者有所帮助。</p>
+
+<h2>监控机</h2>
+
+<p>通在安装Zabbix之后，还需要在Web管理控制台添加需要监控的主机，下列是以添加一台监控主机为例进行演示。</p>
+
+<ol>
+<li>“Configuration” &ndash;> “Hosts”，点击添加一台主机“Host”:</li>
+</ol>
+
+
+<p> <img class="[center]" src="[/images/2013/05/01.jpg]"></p>
+
+<ol>
+<li>需要填写的内容主要为：“主机(Host)”、“模板(Templates)”，详细操作请见下列图中所示：主机的设置如下：</li>
+</ol>
+
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/05/02.jpg"><img class="alignnone size-full wp-image-668" alt="02" src="http://agenge.com/wp-content/uploads/2013/05/02.jpg" width="1004" height="615" /></a>
+ 模板的设置如下：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/05/03.jpg"><img class="alignnone size-full wp-image-669" alt="03" src="http://agenge.com/wp-content/uploads/2013/05/03.jpg" width="630" height="221" /></a></p>
+
+<p> 点击“添加(Add)”之后，从弹出的子页面选择需要的模板，Zabbix默认已自带非常多的模板，</p>
+
+<p> 例如Mysql、Zabbix Server、Zabbix Agentd、OS Linux等。</p>
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/04.jpg"><img class="alignnone size-full wp-image-670" alt="04" src="http://agenge.com/wp-content/uploads/2013/05/04.jpg" width="450" height="450" /></a></p>
+
+<p> 勾选所需要的监控模板后，点击最下边的“选择(Select)”，回到之前的模板标签页，最后一定要记得保存(Save)。</p>
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/05.jpg"><img class="alignnone size-full wp-image-671" alt="05" src="http://agenge.com/wp-content/uploads/2013/05/05.jpg" width="560" height="184" /></a></p>
+
+<ol>
+<li>如果一切正常，默认在1分钟之后就会变成可用状态：
+<a href="http://agenge.com/wp-content/uploads/2013/05/06.jpg"><img class="alignnone size-full wp-image-672" alt="06" src="http://agenge.com/wp-content/uploads/2013/05/06.jpg" width="622" height="78" /></a></li>
+</ol>
+
+
+<!-- more -->
+
+
+<h2>报警设置</h2>
+
+<p>在添加监控主机之后，还需要邮件报警设置，否则监控人员无法及时掌握系统状态，报警一般是邮件报警与短信报警，甚至相两者结合。 其中邮件报警又可分为自定义脚本警报和自己搭建邮件服务器进行报警，短信报警暂时不涉及，后面会有专门章节进行介绍，本章只涉及到自定义邮件报警的设置，使用一个Msmtp（兼容SendMail接口的SMTP客户端. 工具，关于它的原理介绍，请自行搜索。下面是详细的安装步骤：</p>
+
+<h3>邮件报警设置</h3>
+
+<ol>
+<li>安装</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar jxvf msmtp-1.4.31.tar.bz2
+</span><span class='line'>cd msmtp-1.4.31
+</span><span class='line'>./configure --prefix=/usr/local/msmtp
+</span><span class='line'>make && make install
+</span><span class='line'>mkdir /usr/local/msmtp/etc
+</span><span class='line'>touch /usr/local/msmtp/etc/msmtprc</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>配置</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /usr/local/msmtp/etc/msmtprc
+</span><span class='line'>########################################
+</span><span class='line'>defaults
+</span><span class='line'>account default
+</span><span class='line'>host smtp.139.com
+</span><span class='line'>port 25
+</span><span class='line'>from taurus52@139.com
+</span><span class='line'>auth login
+</span><span class='line'>tls off
+</span><span class='line'>user taurus52@139.com
+</span><span class='line'>password 123456
+</span><span class='line'>logfile /var/log/mmlog
+</span><span class='line'>########################################</span></code></pre></td></tr></table></div></figure>
+
+
+<p> host/from/user/password这三个字段，请根据具体情况修改。</p>
+
+<p> 安装Mutt，Mutt是一个邮件用户代理工作，其本身不发送和接收邮件，需要调用邮件传输代码(例如Msmtp或sendmail) 来发送和接收邮件.</p>
+
+<pre><code>```
+yum -y install mutt
+vim /etc/Muttrc
+set sendmail="/usr/local/msmtp/bin/msmtp"
+set use_from=yes
+set realname="taurus52@163.com"
+set editor="vi"
+</code></pre>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  * /etc/Muttrc为全局设置，如果只是对某个用户设置，可以在~/muttrc中设置。
+</span><span class='line'>  * sendmail设置为msmtp的绝对路径
+</span><span class='line'>  * realname 设置你的email地址
+</span><span class='line'>  * editor 设置为你的编辑器，如果你中emacs忠实用户，也是可以滴。
+</span><span class='line'>
+</span><span class='line'> 测试是否能够发送邮件：</span></code></pre></td></tr></table></div></figure>
+
+
+<p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#x74;&#101;&#x73;&#116;&#x5f;&#122;&#x61;&#98;&#98;&#105;&#x78;&#64;&#x67;&#109;&#97;&#x69;&#x6c;&#x2e;&#99;&#x6f;&#x6d;">&#x74;&#101;&#x73;&#x74;&#x5f;&#x7a;&#97;&#x62;&#x62;&#105;&#x78;&#x40;&#x67;&#x6d;&#97;&#x69;&#108;&#46;&#x63;&#x6f;&#109;</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  * -a 代表添加附件
+</span><span class='line'>  * “testmail” 邮件正文
+</span><span class='line'>  * -s “test” 邮件标题
+</span><span class='line'>  * test_zabbix@gmail.com 为接收的邮件人。
+</span><span class='line'>
+</span><span class='line'> 登录邮件客户端察看确认收到邮件：
+</span><span class='line'>
+</span><span class='line'> &lt;a href="http://agenge.com/wp-content/uploads/2013/05/07.jpg"&gt;&lt;img class="alignnone size-full wp-image-673" alt="07" src="http://agenge.com/wp-content/uploads/2013/05/07.jpg" width="373" height="246" /&gt;&lt;/a&gt;
+</span><span class='line'>
+</span><span class='line'> 修改zabbix_server.conf以下内容：</span></code></pre></td></tr></table></div></figure>
+
+
+<p> mkdir -p /data/zabbix/alertscripts
+ vim zabbix_server.conf
+ AlertScriptsPath=${datadir}/alertscripts</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'> 创建一个监控脚本：</span></code></pre></td></tr></table></div></figure>
+
+
+<p> vim /data/zabbix/alertscripts/zabbix_monitor
+ #!/bin/bash
+ $1 to mail address
+ $2 mail subject
+ $3 mail content
+ echo &ldquo;$3&rdquo; | mutt -s &ldquo;$2&rdquo; $1</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'> 修改权限：</span></code></pre></td></tr></table></div></figure>
+
+
+<p> chown zabbix:zabbix /data/zabbix/alertscripts
+&#8220;`
+ 到目前为止，已经手动测试通过邮件报警的功能，接下来需要将它集成到zabbix监控系统中。</p>
+
+<ol>
+<li><p>点击“管理(Administration)”->“媒体类型(Media types)”，点击页面最右边的“添加媒体类型(Cretae media type)”:
+<a href="http://agenge.com/wp-content/uploads/2013/05/08.jpg"><img class="alignnone size-full wp-image-674" alt="08" src="http://agenge.com/wp-content/uploads/2013/05/08.jpg" width="691" height="318" /></a></p></li>
+<li><p>Description： 此为描述，可随意填写。</p></li>
+<li>Type： 选择 “Script’。</li>
+<li>Script name：填写刚才创建的shell脚本(当然，也可以是其他脚本)名称，例如zabbix_monitor。</li>
+<li>Enabled： 启用此脚本。</li>
+</ol>
+
+
+<p> 最后记得“Save”哦。</p>
+
+<h4>添加用户和组</h4>
+
+<ol>
+<li>添加用户组</li>
+</ol>
+
+
+<p> 点击“管理(Administration)”->“用户(Users)”，点击最右边的“创建用户组(Create user group)”:</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/05/09.jpg"><img class="alignnone size-full wp-image-675" alt="09" src="http://agenge.com/wp-content/uploads/2013/05/09.jpg" width="422" height="196" /></a></p>
+
+<p> 用户组(User group)只需要填写“Group name”，其他默认即可。</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/05/10.jpg"><img class="alignnone size-full wp-image-676" alt="10" src="http://agenge.com/wp-content/uploads/2013/05/10.jpg" width="871" height="355" /></a></p>
+
+<p> 权限(Permissions)需要添加之前新增的主机，点击“Read-write”下的“添加(Add)”，并在的子页面选择对应的主机组，例如选择“Puppet”：</p>
+
+<p> <a href="http://agenge.com/wp-content/uploads/2013/05/11.jpg"><img class="alignnone size-full wp-image-677" alt="11" src="http://agenge.com/wp-content/uploads/2013/05/11.jpg" width="621" height="457" /></a></p>
+
+<p> 点击“Select”确认。最后“保存(Save)”，即添加一个用户组(puppet)。</p>
+
+<ol>
+<li>添加用户</li>
+</ol>
+
+
+<p> 添加一个用户组之后，此用户组中并没有任何一个用户，必须在此用户组中增加用户才行，在用户组列表页面，点击用户组“Puppet”之后的“Users(0)”：</p>
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/12.jpg"><img class="alignnone size-full wp-image-678" alt="12" src="http://agenge.com/wp-content/uploads/2013/05/12.jpg" width="611" height="371" /></a></p>
+
+<p>  在跳转后的“Users”页面最右边，点击“创建用户(Create user)”：</p>
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/13.jpg"><img class="alignnone size-full wp-image-679" alt="13" src="http://agenge.com/wp-content/uploads/2013/05/13.jpg" width="418" height="185" /></a></p>
+
+<p>  之后有三个标签需要设置</p>
+
+<ul>
+<li>用户标签：</li>
+</ul>
+
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/14.jpg"><img class="alignnone size-full wp-image-680" alt="14" src="http://agenge.com/wp-content/uploads/2013/05/14.jpg" width="679" height="578" /></a></p>
+
+<ul>
+<li>媒体标签：</li>
+</ul>
+
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/15.jpg"><img class="alignnone size-full wp-image-681" alt="15" src="http://agenge.com/wp-content/uploads/2013/05/15.jpg" width="885" height="520" /></a></p>
+
+<ul>
+<li>权限标签(Permissions)：</li>
+</ul>
+
+
+<p>  <a href="http://agenge.com/wp-content/uploads/2013/05/16.jpg"><img class="alignnone size-full wp-image-682" alt="16" src="http://agenge.com/wp-content/uploads/2013/05/16.jpg" width="595" height="618" /></a></p>
+
+<p>  此处就能看到之前在创建用户组时看到的权限，最后点击“保存(Save)”。</p>
+
+<h4>触发器设置</h4>
+
+<p>添加邮件报警设置和用户设置之后，还需要配置触发器，表示当某个触发器达到设置的值后，就会报警。</p>
+
+<p>Action标签：</p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/05/17.jpg"><img class="alignnone size-full wp-image-683" alt="17" src="http://agenge.com/wp-content/uploads/2013/05/17.jpg" width="631" height="495" /></a></p>
+
+<p>条件(Conditions)标签：</p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/05/18.jpg"><img class="alignnone size-full wp-image-684" alt="18" src="http://agenge.com/wp-content/uploads/2013/05/18.jpg" width="850" height="310" /></a></p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/05/19.jpg"><img class="alignnone size-full wp-image-685" alt="19" src="http://agenge.com/wp-content/uploads/2013/05/19.jpg" width="713" height="323" /></a></p>
+
+<p>操作(Operations)标签：</p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/05/20.jpg"><img class="alignnone size-full wp-image-686" alt="20" src="http://agenge.com/wp-content/uploads/2013/05/20.jpg" width="807" height="651" /></a></p>
+
+<p><a href="http://agenge.com/wp-content/uploads/2013/05/21.jpg"><img class="alignnone size-full wp-image-687" alt="21" src="http://agenge.com/wp-content/uploads/2013/05/21.jpg" width="874" height="207" /></a></p>
+
+<p>以上就是Zabbix的基本操作流程，如果你还有疑问，可回复讨论。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Zabbix 源码安装与配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/05/02/zabbix-source-install-conf/"/>
+    <updated>2013-05-02T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/05/02/zabbix-source-install-conf</id>
+    <content type="html"><![CDATA[<h2>1、安装环境</h2>
+
+<ul>
+<li>操作系统：:CentOS 5.5 64位</li>
+<li>Mysql：5.5.27</li>
+<li>Apache httpd：2.4.4</li>
+<li>Zabbix：2.0.6</li>
+</ul>
+
+
+<h2>2、源码安装</h2>
+
+<h3>安装Zabbix</h3>
+
+<h4>创建用户</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
+</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>源码安装Zabbix</h3>
+
+<p>下载页面请点击 <a href="http://www.zabbix.com/download.php">这里</a>。下载之后按照以下步骤执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum install wget curl-devel net-snmp-devel php-bcmath
+</span><span class='line'>tar zxvf zabbix-2.0.6.tar.gz
+</span><span class='line'>cd zabbix-2.0.6
+</span><span class='line'>./configure --prefix=/data/zabbix \
+</span><span class='line'>  --enable-server --enable-agent \
+</span><span class='line'>  --with-mysql --with-net-snmp \
+</span><span class='line'>  --with-libcurl --enable-proxy
+</span><span class='line'>
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果一切顺利，安装完成。</p>
+
+<h3>创建Zabbix 数据库</h3>
+
+<p>这里假设你已经安装好Mysql数据库，具体的安装方法请自己到网上搜索解决。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 63
+</span><span class='line'>Server version: 5.0.95 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create database zabbix character set utf8;
+</span><span class='line'>mysql&gt; grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
+</span><span class='line'>Query OK, 1 row affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; quit
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/schema.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/images.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/data.sql</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>配置Zabbix</h3>
+
+<p>设置服务自启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp misc/init.d/fedora/core/zabbix_server /etc/init.d/
+</span><span class='line'>chmod +x /etc/init.d/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改zabbix_server中的BASEDIR=/data/zabbix</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --add zabbix_server
+</span><span class='line'>chkconfig zabbix_server on</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置zabbix 配置文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /data/zabbix/etc/zabbix/zabbix_server.conf
+</span><span class='line'>DBName=zabbix
+</span><span class='line'>DBPassword=zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只需要修改密码即可，其他都保持默认值。当然如果你的Mysql不是安装在本地，肯定也要修改相应的IP啦。</p>
+
+<h4>启动Zabbix Server</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/zabbix_server start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>确认zabbix server是否已经启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>netstat -antulp | grep zabbix
+</span><span class='line'>
+</span><span class='line'>tcp        0      0 0.0.0.0:10051               0.0.0.0:*                   LISTEN      19087/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<h2>3、安装Zabbix Web接口</h2>
+
+<p>Zabbix前端使用PHP编写，故Web Server必须支持PHP。</p>
+
+<h4>安装Apr</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirrors.cnnic.cn/apache//apr/apr-1.4.6.tar.gz
+</span><span class='line'>tar zxvf apr-1.4.6.tar.gz
+</span><span class='line'>cd apr-1.4.6
+</span><span class='line'>./configure --prefix=/usr/local/apr
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>安装Apr-utils</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirrors.cnnic.cn/apache//apr/apr-util-1.5.2.tar.gz
+</span><span class='line'>tar zxvf apr-util-1.5.2.tar.gz
+</span><span class='line'>cd apr-util-1.5.2
+</span><span class='line'>./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr/
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>安装pcre</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf pcre-8.32.tar.gz
+</span><span class='line'>cd pcre-8.32
+</span><span class='line'>./configure
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装Apache httpd</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://labs.mop.com/apache-mirror//httpd/httpd-2.4.4.tar.bz2
+</span><span class='line'>tar jxvf httpd-2.4.4.tar.bz2
+</span><span class='line'>cp -rf apr-1.4.6 /data/software/httpd-2.4.4/srclib/apr
+</span><span class='line'>cp -rf apr-util-1.5.2 /data/software/httpd-2.4.4/srclib/apr-util
+</span><span class='line'>cd httpd-2.4.4
+</span><span class='line'>./configure --prefix=/usr/local/httpd \
+</span><span class='line'>  --enable-modules --enable-ssl --enable-module=so \
+</span><span class='line'>  --with-apr=/usr/local/apr \
+</span><span class='line'>  --with-apr-util=/usr/local/apr-util --with-included-apr \
+</span><span class='line'>  --enable-mods-shared=most --with-included-apr
+</span><span class='line'>
+</span><span class='line'>make && make install
+</span><span class='line'>/usr/local/httpd/bin/apachectl start</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>安装 PHP</h4>
+
+<p>安装gettext（国际化支持）：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.2.tar.gz
+</span><span class='line'>tar zxvf gettext-0.18.2.tar.gz
+</span><span class='line'>cd gettext-0.18.2
+</span><span class='line'>./configure
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装libpng：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf libpng-1.6.1.tar.gz
+</span><span class='line'>cd libpng-1.6.1
+</span><span class='line'>./configure --prefix=/usr/local/libpng --enable-shared
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装freetype：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar jxvf freetype-2.4.11.tar.bz2
+</span><span class='line'>cd freetype-2.4.11
+</span><span class='line'>./configure --prefix=/usr/local/freetype&lt;b&gt;&lt;/b&gt;
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装JPEG：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.ijg.org/files/jpegsrc.v9.tar.gz
+</span><span class='line'>tar zxvf jpegsrc.v9.tar.gz
+</span><span class='line'>cd jpeg-9/
+</span><span class='line'>./configure --prefix=/usr/local/jpeg9 --enable-shared --enable-static
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装GD库：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://bitbucket.org/libgd/gd-libgd/get/GD_2_0_33.tar.gz
+</span><span class='line'>tar zxvf GD_2_0_33.tar.gz
+</span><span class='line'>cd libgd-gd-libgd-486e81dea984/src
+</span><span class='line'>./configure --with-png  --with-freetype  --with-jpeg
+</span><span class='line'>make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装PHP：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget ftp://192.168.30.211:/pub/Tools/php-5.3.19.tar.bz2
+</span><span class='line'>tar jxvf php-5.3.19.tar.bz2
+</span><span class='line'>
+</span><span class='line'>./configure --prefix=/usr/local/php  \
+</span><span class='line'>  --with-config-file-path=/usr/local/php/etc \
+</span><span class='line'>  --disable-debug --disable-rpath --with-gettext  \
+</span><span class='line'>  --with-mcrypt --with-mysql=/usr/local/mysql \
+</span><span class='line'>  --with-mysql-sock=/data/mysqldata/3306/mysql.sock \
+</span><span class='line'>  --with-mysqli=/usr/local/mysql/bin/mysql_config \
+</span><span class='line'>  --enable-mbstring --enable-pdo --with-curl \
+</span><span class='line'>  --enable-inline-optimization --with-bz2 \
+</span><span class='line'>  --with-zlib --enable-sockets --enable-bcmath \
+</span><span class='line'>  --enable-sysvsem --enable-sysvshm --enable-pcntl \
+</span><span class='line'>  --enable-mbregex --with-mhash --enable-xml \
+</span><span class='line'>  --enable-zip --with-pcre-regex --with-gettext \
+</span><span class='line'>  --with-apxs2=/usr/local/httpd/bin/apxs \
+</span><span class='line'>  --with-gd --enable-gd-native-ttf --with-jpeg-dir=/usr/local/include \
+</span><span class='line'>  --with-png-dir=/usr/local/include --with-freetype-dir=/usr/include/freetype2
+</span><span class='line'>  
+</span><span class='line'>make ZEND_EXTRA_LIBS='-liconv'
+</span><span class='line'>make install
+</span><span class='line'>cp php.ini-production /usr/local/php/etc/php.ini
+</span><span class='line'>cp sapi/fpm/init.d.php-fpm.in /etc/init.d/php-fpm
+</span><span class='line'>chmod +x /etc/init.d/php-fpm
+</span><span class='line'>chkconfig php-fpm on
+</span><span class='line'>cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改时区：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /usr/local/php/etc/php.ini</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 [Date] 之后增加一行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>date.timezone =  Asia/Chongqing</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将 max_execution_time 的值修改为 300或更大值，将max_input_time的值修改为300或更大值。</p>
+
+<p>修改httpd.conf：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /usr/local/httpd/conf/httpd.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在最后增加：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AddType application/x-httpd-php  .php
+</span><span class='line'>AddType application/x-httpd-php-source  .phps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>并将：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>DirectoryIndex index.html</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改为：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>DirectoryIndex index.php index.html</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>配置Zabbix Web接口</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir /usr/local/httpd/htdocs/zabbix
+</span><span class='line'>cd frontends/php/
+</span><span class='line'>cp -a . /usr/local/httpd/htdocs/zabbix/
+</span><span class='line'>cd /usr/local/httpd/htdocs/zabbix/
+</span><span class='line'>cp conf/zabbix.conf.php.example conf/zabbix.conf.php
+</span><span class='line'>vim conf/zabbix.conf.php</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改好连接Myql数据库的相关信息。</p>
+
+<h4>安装Zabbix前台</h4>
+
+<p>使用浏览器打开Zabbix URL: <a href="http://server_ip/zabbix">http://server_ip/zabbix</a></p>
+
+<p>用户名：admin</p>
+
+<p>密码：  zabbix</p>
+
+<h2>安装Zabbix Agent</h2>
+
+<h3>Zabbix Agent For Linux</h3>
+
+<p>添加用户：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
+</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下载 Zabbix Agent</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.zabbix.com/downloads/2.0.6/zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
+</span><span class='line'>tar zxvf zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
+</span><span class='line'>mv sbin/zabbix_agent* /usr/sbin/
+</span><span class='line'>mv bin/zabbix_* /usr/bin/
+</span><span class='line'>mkdir -p /etc/zabbix
+</span><span class='line'>mv conf/* /etc/zabbix
+</span><span class='line'>echo "zabbix_agent    10050/tcp" &gt;&gt; /etc/services
+</span><span class='line'>echo "zabbix_agent    10050/udp" &gt;&gt; /etc/services
+</span><span class='line'>sed -i 's/Server=127.0.0.1/Server=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf
+</span><span class='line'>sed -i 's/Hostname=Zabbix server/Hostname=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动 Zabbix Agent</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf
+</span><span class='line'>ps aux | grep zabbix
+</span><span class='line'>echo "zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf" &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
+
+
+<p>测试是否正确</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>zabbix_get -s 192.168.30.226 -p 10050 -k agent.ping
+</span><span class='line'>1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果返回1表示正常。</p>
 ]]></content>
   </entry>
   
