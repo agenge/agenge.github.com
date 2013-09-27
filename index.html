@@ -1070,7 +1070,128 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/04/14/blog-recovery/">要体现在行动上之Blog恢复</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-14T00:00:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前几天偶打开自己<a title="agenge" href="http://agenge.com">blog</a>时，突然发现无法打开，具体点说是显示数据库连接错误，第一反应是“被黑”，故而排查的第一步就是查看系统log，然而并没有看到相关错误信息，为尽快恢复，偶先尝试重启mysql，提示没有剩余空间，难道数据库数据文件太多导致？通过du后，发现果然如此，通过将过旧的数据文件（即Mysql bin log）删除即可。以下是整个恢复过程，仅供参考。</p>
+
+<p><strong> 1. 查看磁盘空间： </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# df -h
+</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
+</span><span class='line'>/dev/sda1 7.9G 7.9G 0M 100% /</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 2. 查看Mysql binlog 大小 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# pwd
+</span><span class='line'>/usr/local/mysql/var
+</span><span class='line'>[root@centos var]# ll | wc -l
+</span><span class='line'>1582
+</span><span class='line'>[root@centos var]# du -sh .
+</span><span class='line'>4.1G .</span></code></pre></td></tr></table></div></figure>
+
+
+<p>VPS的磁盘大小总共才8G，还包括操作系统所占空间，bin log占用足足4.1G。删除吧！</p>
+
+<p><strong> 3. 删除旧数据 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>Welcome to the MySQL monitor. Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 45959
+</span><span class='line'>Server version: 5.1.54-log Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective
+</span><span class='line'>owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; purge binary logs before '2013-01-01 00:00:00';
+</span><span class='line'>Query OK, 0 rows affected (10.39 sec)
+</span><span class='line'>mysql&gt; quit
+</span><span class='line'>Bye
+</span><span class='line'>[root@centos var]# df -h
+</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
+</span><span class='line'>/dev/sda1 7.9G 4.3G 3.3G 57% /</span></code></pre></td></tr></table></div></figure>
+
+
+<p>删除2013年1月1日之前的所有数据，剩余可用空间还有3.3G。</p>
+
+<p><strong> 4. 后记 </strong>
+如果以上操作就算完结，那无疑是在等待下一次磁盘被爆，为防止问题再次发生，必须主动监控来达到提前预防，所以偶部署了个小脚本，一旦磁盘达到90%，会mail通知偶。也许是对blog的不重视，之前一直未采取行动，或许惰性控制了我，最后问大家一个问题：如果某个东西对你非常重要，在危机来之前，各位都准备好迎接了吗？理想或想法体现到行动上了吗？</p>
+
+<p>2013/09/27 Update:</p>
+
+<p>如果只想写文章，而不想关心Mysql 及Http Server，甚至担心VPS被黑，偶强烈推荐使用 Octopress + Github，具体介绍及安装请见这里<a href="http://agenge.com/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -1107,7 +1228,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <section> 
   <h1>文章分类</h1> 
   <ul id="categories"> 
-    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
   </ul> 
 </section>
 

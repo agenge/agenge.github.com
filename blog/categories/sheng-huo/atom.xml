@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[文章分类: 生活 | TaurusHome]]></title>
+  <link href="http://agenge.github.io/blog/categories/sheng-huo/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-09-27T10:26:20+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[要体现在行动上之Blog恢复]]></title>
+    <link href="http://agenge.github.io/blog/2013/04/14/blog-recovery/"/>
+    <updated>2013-04-14T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/04/14/blog-recovery</id>
+    <content type="html"><![CDATA[<p>前几天偶打开自己<a title="agenge" href="http://agenge.com">blog</a>时，突然发现无法打开，具体点说是显示数据库连接错误，第一反应是“被黑”，故而排查的第一步就是查看系统log，然而并没有看到相关错误信息，为尽快恢复，偶先尝试重启mysql，提示没有剩余空间，难道数据库数据文件太多导致？通过du后，发现果然如此，通过将过旧的数据文件（即Mysql bin log）删除即可。以下是整个恢复过程，仅供参考。</p>
+
+<p><strong> 1. 查看磁盘空间： </strong>
+<code>
+[root@centos var]# df -h
+Filesystem Size Used Avail Use% Mounted on
+/dev/sda1 7.9G 7.9G 0M 100% /
+</code>
+<strong> 2. 查看Mysql binlog 大小 </strong>
+<code>
+[root@centos var]# pwd
+/usr/local/mysql/var
+[root@centos var]# ll | wc -l
+1582
+[root@centos var]# du -sh .
+4.1G .
+</code>
+VPS的磁盘大小总共才8G，还包括操作系统所占空间，bin log占用足足4.1G。删除吧！</p>
+
+<p><strong> 3. 删除旧数据 </strong>
+```
+[root@centos var]# mysql -uroot -p
+Enter password:
+Welcome to the MySQL monitor. Commands end with ; or \g.
+Your MySQL connection id is 45959
+Server version: 5.1.54-log Source distribution</p>
+
+<p>Copyright &copy; 2000, 2011, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>mysql> purge binary logs before &lsquo;2013-01-01 00:00:00&rsquo;;
+Query OK, 0 rows affected (10.39 sec)
+mysql> quit
+Bye
+[root@centos var]# df -h
+Filesystem Size Used Avail Use% Mounted on
+/dev/sda1 7.9G 4.3G 3.3G 57% /
+```
+删除2013年1月1日之前的所有数据，剩余可用空间还有3.3G。</p>
+
+<p><strong> 4. 后记 </strong>
+如果以上操作就算完结，那无疑是在等待下一次磁盘被爆，为防止问题再次发生，必须主动监控来达到提前预防，所以偶部署了个小脚本，一旦磁盘达到90%，会mail通知偶。也许是对blog的不重视，之前一直未采取行动，或许惰性控制了我，最后问大家一个问题：如果某个东西对你非常重要，在危机来之前，各位都准备好迎接了吗？理想或想法体现到行动上了吗？</p>
+
+<p>2013/09/27 Update:</p>
+
+<p>如果只想写文章，而不想关心Mysql 及Http Server，甚至担心VPS被黑，偶强烈推荐使用 Octopress + Github，具体介绍及安装请见这里<a href="http://agenge.com/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kindle PaperWhite开箱]]></title>
+    <link href="http://agenge.github.io/blog/2013/03/10/kindle-paperwhite-open/"/>
+    <updated>2013-03-10T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/03/10/kindle-paperwhite-open</id>
+    <content type="html"><![CDATA[<p>自从Amazon发布PaperWhite之后，一直想拥有它，119刀，确实不贵。由于身在天朝，无法直接在Amazon网上邮购，海掏捏，偶觉得麻烦(主要是没经验)，且周期太长，淘宝的代购价普遍1100左右，最后通过朋友推荐，</p>
+
+<p>淘宝有日版PaperWhite才780元(人民币)，还包邮。于是就下定决心购买，下面是不同阶段的过程。</p>
+
+<ol>
+<li>购买
+下单之后，整体来讲快递的速度相当快，先来看整个交易时间周期：</li>
+</ol>
+
+
+<p><img src="/images/2013/03/jy-01.jpg"></p>
+
+<p>注：货是2013年02月08日下午收到的，由于刚好过春节，偶直到02月13日才上网确认收货。</p>
+
+<p>下面是整个物流传递信息，可以看到在2013年01月25日下单，2013年02月05日才发货(估计卖家订单量太多，无法及时处理)，不过整个传递速度还是非常快滴。</p>
+
+<p><img src="/images/2013/03/wl-01.jpg"></p>
+
+<p>2.开箱
+包装正面图：</p>
+
+<p><img src="/images/2013/03/pw-01.jpg"></p>
+
+<p>包装内部图1：</p>
+
+<p><img src="/images/2013/03/pw-03.jpg"></p>
+
+<p>机身正面图：</p>
+
+<p><img src="/images/2013/03/pw-06.jpg"></p>
+
+<p>细心的同学可能已经发现这是多看系统的屏保。 :)</p>
+
+<p>皮套正面图：</p>
+
+<p><img src="/images/2013/03/pw-05.jpg"></p>
+
+<p>我的阅历：</p>
+
+<p><img src="/images/2013/03/pw-07.jpg"></p>
+
+<p>介个时间分布的统计方式有严重Bug，偶每天6:50起床，00:00&mdash;6:50之间的数据何来？现在看来此问题只有多看团队能够解答。</p>
+
+<p>最后，希望多看团队再接再厉吧，尽管Kindle原生系统已经非常优秀，但偶更喜欢对中文支持最好的多看系统。</p>
+]]></content>
+  </entry>
+  
+</feed>

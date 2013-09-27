@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-26T17:50:41+08:00</updated>
+  <updated>2013-09-27T10:26:20+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -3994,7 +3994,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#105;&#108;&#116;&#111;&#x3a;&#116;&#101;&#115;&#x74;&#95;&#122;&#x61;&#98;&#98;&#105;&#x78;&#64;&#x67;&#x6d;&#97;&#105;&#x6c;&#x2e;&#x63;&#111;&#109;">&#116;&#x65;&#x73;&#116;&#95;&#x7a;&#x61;&#x62;&#98;&#105;&#x78;&#x40;&#103;&#109;&#x61;&#x69;&#108;&#46;&#x63;&#111;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#116;&#101;&#115;&#x74;&#x5f;&#x7a;&#x61;&#98;&#x62;&#105;&#x78;&#x40;&#x67;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;">&#116;&#101;&#115;&#x74;&#95;&#122;&#x61;&#x62;&#98;&#x69;&#120;&#x40;&#103;&#109;&#97;&#105;&#x6c;&#46;&#99;&#x6f;&#109;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -4912,6 +4912,870 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
 
 <p>如果返回1表示正常。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[要体现在行动上之Blog恢复]]></title>
+    <link href="http://agenge.github.io/blog/2013/04/14/blog-recovery/"/>
+    <updated>2013-04-14T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/04/14/blog-recovery</id>
+    <content type="html"><![CDATA[<p>前几天偶打开自己<a title="agenge" href="http://agenge.com">blog</a>时，突然发现无法打开，具体点说是显示数据库连接错误，第一反应是“被黑”，故而排查的第一步就是查看系统log，然而并没有看到相关错误信息，为尽快恢复，偶先尝试重启mysql，提示没有剩余空间，难道数据库数据文件太多导致？通过du后，发现果然如此，通过将过旧的数据文件（即Mysql bin log）删除即可。以下是整个恢复过程，仅供参考。</p>
+
+<p><strong> 1. 查看磁盘空间： </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# df -h
+</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
+</span><span class='line'>/dev/sda1 7.9G 7.9G 0M 100% /</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 2. 查看Mysql binlog 大小 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# pwd
+</span><span class='line'>/usr/local/mysql/var
+</span><span class='line'>[root@centos var]# ll | wc -l
+</span><span class='line'>1582
+</span><span class='line'>[root@centos var]# du -sh .
+</span><span class='line'>4.1G .</span></code></pre></td></tr></table></div></figure>
+
+
+<p>VPS的磁盘大小总共才8G，还包括操作系统所占空间，bin log占用足足4.1G。删除吧！</p>
+
+<p><strong> 3. 删除旧数据 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>Welcome to the MySQL monitor. Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 45959
+</span><span class='line'>Server version: 5.1.54-log Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective
+</span><span class='line'>owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; purge binary logs before '2013-01-01 00:00:00';
+</span><span class='line'>Query OK, 0 rows affected (10.39 sec)
+</span><span class='line'>mysql&gt; quit
+</span><span class='line'>Bye
+</span><span class='line'>[root@centos var]# df -h
+</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
+</span><span class='line'>/dev/sda1 7.9G 4.3G 3.3G 57% /</span></code></pre></td></tr></table></div></figure>
+
+
+<p>删除2013年1月1日之前的所有数据，剩余可用空间还有3.3G。</p>
+
+<p><strong> 4. 后记 </strong>
+如果以上操作就算完结，那无疑是在等待下一次磁盘被爆，为防止问题再次发生，必须主动监控来达到提前预防，所以偶部署了个小脚本，一旦磁盘达到90%，会mail通知偶。也许是对blog的不重视，之前一直未采取行动，或许惰性控制了我，最后问大家一个问题：如果某个东西对你非常重要，在危机来之前，各位都准备好迎接了吗？理想或想法体现到行动上了吗？</p>
+
+<p>2013/09/27 Update:</p>
+
+<p>如果只想写文章，而不想关心Mysql 及Http Server，甚至担心VPS被黑，偶强烈推荐使用 Octopress + Github，具体介绍及安装请见这里<a href="http://agenge.com/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Puppet Dashboard配置及apache和Nginx整合]]></title>
+    <link href="http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server/"/>
+    <updated>2013-04-12T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server</id>
+    <content type="html"><![CDATA[<p>Dashboard一个基于Ruby on Rails设计的Web控制台，便于管理Puppet Master和Agent，整个安装过程比较简单，以下是具体的安装步骤。</p>
+
+<h2>安装前提条件</h2>
+
+<ol>
+<li>ruby版本>1.8.6，如果你是CentOS 5或是RHEL 5，可能你需要升级Ruby，官方下载地址请</li>
+</ol>
+
+
+<p> 点击<a href="ftp://ftp.ruby-lang.org/pub/ruby">这里</a>。具体的升级步骤由于下载的安装包已经包含，故不再介绍，本文示例基于Ruby 1.8.7。</p>
+
+<p> <code>
+ # ruby -v
+ ruby 1.8.7 (2011-06-30 patchlevel 352) [x86_64-linux]
+</code></p>
+
+<ol>
+<li>安装相关依赖包</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'> # yum install -y mysql mysql-devel mysql-server \
+</span><span class='line'>     ruby ruby-devel ruby-irb ruby-mysql \
+</span><span class='line'>     ruby-rdoc ruby-ri</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 如果你已经有Mysql，此处不需要安装mysql-server包。安装后加入开机自启动并启动mysql 。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># chkconfig mysqld on
+</span><span class='line'># /etc/init.d/mysqld start
+</span><span class='line'>Starting mysqld:                                           [  OK  ]</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>升级GEM软件包安装器</li>
+</ol>
+
+
+<p> 首先检查gem版本，如果已经是1.3.5，就不需要升级：
+ &#8220;`</p>
+
+<pre><code># gem -v
+1.3.5
+</code></pre>
+
+<p> &#8220;`
+如果是1.3.1，意味着你要升级gem：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.5.tgz
+</span><span class='line'># tar zxvf rubygems-1.3.5.tgz
+</span><span class='line'># cd rubygems-1.3.5
+</span><span class='line'># ruby setup.rb</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>安装rake</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># gem install rake</span></code></pre></td></tr></table></div></figure>
+
+
+<!--more-->
+
+
+<h2>数据库配置</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>
+</span><span class='line'>mysql&gt; use dashboard
+</span><span class='line'>Database changed
+</span><span class='line'>mysql&gt; grant all on dashboard.* to dashboard@localhost identified by 'dashboard';
+</span><span class='line'>Query OK, 0 rows affected (0.00 sec)
+</span><span class='line'>mysql&gt; flush privileges;
+</span><span class='line'>Query OK, 0 rows affected (0.00 sec)
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>安装Puppet Dashboard</h2>
+
+<ul>
+<li>下载Dashboard</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/
+</span><span class='line'># wget http://downloads.puppetlabs.com/dashboard/puppet-dashboard-1.2.20.tar.gz
+</span><span class='line'># tar -zxvf puppet-dashboard-1.2.20.tar.gz
+</span><span class='line'># cd puppet-dashboard-1.2.20</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建数据库用户,此处我们使用源码方式进行安装,你可以通过yum或apt-get安装。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># cp config/database.yml.example config/database.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>修改数据库配置：</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># vim config/database.yml
+</span><span class='line'>production:
+</span><span class='line'>database: dashboard
+</span><span class='line'>username: dashboard
+</span><span class='line'>password: dashboard
+</span><span class='line'>encoding: utf8
+</span><span class='line'>adapter: mysql</span></code></pre></td></tr></table></div></figure>
+
+
+<p>production代表生产环境，如果你是开发环境(development)或测试环境(test)，请修改相应的配置。</p>
+
+<ul>
+<li>初始化数据库</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production db:create
+</span><span class='line'># gem install mysql
+</span><span class='line'># rake RAILS_ENV=production db:migrate</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>修改时区
+默认是UTC时间，如果你在控制台看到的时区不对，那需要修改时区：</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># vim config/environment.rb</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将config.time_zone = &lsquo;UTC&#8217;  修改为 config.time_zone = &#8216;Chongqing&rsquo;</p>
+
+<ul>
+<li>启动Webrick Web服务器</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard-1.2.20
+</span><span class='line'># script/server -p 3000 -e production  -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面即代表启动dashboard，端口3000，以及后台(-d)运行,通过浏览器输入： <a href="http://dashboard_server:3000%C2%A0%C2%A0">http://dashboard_server:3000%C2%A0%C2%A0</a> 即可访问。</p>
+
+<h3>Puppet Dashboard配置</h3>
+
+<h4>服务器配置</h4>
+
+<p>在Puppet 服务器端/etc/puppet/puppet.conf中的[main]节加入：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>reports = http, store
+</span><span class='line'>reporturl = http://192.168.30.226:3000/reports/upload</span></code></pre></td></tr></table></div></figure>
+
+
+<p>部署lib文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># cp /usr/local/puppet-dashboard/ext/puppet/puppet_dashboard.rb /usr/lib/ruby/site_ruby/1.8/puppet/reports/</span></code></pre></td></tr></table></div></figure>
+
+
+<p>保存之后，重启puppetmaster即可。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppetmaster restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>客户端配置</h4>
+
+<p>在Puppet Agent（客户端）/etc/puppet/puppet.conf中的[main]节加入：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>report = true</span></code></pre></td></tr></table></div></figure>
+
+
+<p>保存之后，重启puppet即可。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppet restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>控制台配置</h4>
+
+<p>登录Dashboard后，需要自己添加： group和node</p>
+
+<h2>Puppet Dashboard常用操作</h2>
+
+<p><strong> 导入日志 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard
+</span><span class='line'># rake RAILS_ENV=production reports:import</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 优化数据库 </strong>
+当数据量过大时，需要优化mysql数据库：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard
+</span><span class='line'># rake RAILS_ENV=production db:raw:optimize</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 删除日志 </strong>
+删除1个月之前的数据：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard
+</span><span class='line'># rake RAILS_ENV=production reports:prune upto=1 unit=mon</span></code></pre></td></tr></table></div></figure>
+
+
+<p>删除15天前的日志：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production reports:prune upto=15 unit=day</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 备份数据库 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production db:raw:dump
+</span><span class='line'>mysqldump --add-locks --create-options --disable-keys --extended-insert --quick --set-charset --user=dashboard --password=dashboard dashboard &gt; production.sql.tmp
+</span><span class='line'>mv production.sql.tmp production.sql
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>恢复数据库 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production FILE=production.sql db:raw:restore</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> Dashboard 启停脚本 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/bash
+</span><span class='line'># Description: Puppet Dashboard init.d script
+</span><span class='line'>
+</span><span class='line'># Get function from functions library
+</span><span class='line'>. /etc/init.d/functions
+</span><span class='line'>
+</span><span class='line'># Start the service Puppet Dashboard
+</span><span class='line'>start() {
+</span><span class='line'>    echo -n "Starting Puppet Dashboard: "
+</span><span class='line'>    /usr/bin/ruby /usr/local/puppet-dashboard/script/server -e production -b 192.168.30.226 -d
+</span><span class='line'>    ### Create the lock file ###
+</span><span class='line'>    touch /var/lock/subsys/puppetdb
+</span><span class='line'>    success $"Puppet Dashboard startup"
+</span><span class='line'>    echo
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'># Restart the service Puppet Dashboard
+</span><span class='line'>stop() {
+</span><span class='line'>    echo -n "Stopping Puppet Dashboard: "
+</span><span class='line'>    kill -9 `ps ax | grep "/usr/bin/ruby /usr/local/puppet-dashboard/script/server" | grep -v grep | awk '{ print $1 }' `
+</span><span class='line'>    ### Now, delete the lock file ###
+</span><span class='line'>    rm -f /var/lock/subsys/puppetdb
+</span><span class='line'>    success $"Puppet Dashboard shutdown"
+</span><span class='line'>    echo
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>### main logic ###
+</span><span class='line'>case "$1" in
+</span><span class='line'>    start)
+</span><span class='line'>        start
+</span><span class='line'>    ;;
+</span><span class='line'>    stop)
+</span><span class='line'>        stop
+</span><span class='line'>    ;;
+</span><span class='line'>    status)
+</span><span class='line'>        status Puppet DB
+</span><span class='line'>    ;;
+</span><span class='line'>    restart|reload|condrestart)
+</span><span class='line'>        stop
+</span><span class='line'>        start
+</span><span class='line'>    ;;
+</span><span class='line'>    *)
+</span><span class='line'>    echo $"Usage: $0 {start|stop|restart|reload|status}"
+</span><span class='line'>    exit 1
+</span><span class='line'>esac
+</span><span class='line'>
+</span><span class='line'>exit 0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>使用Passenger运行Puppet Dashboard</h2>
+
+<p>相信用过Dashboard的人都知道在访问时控制台时比较缓慢，这正是由于内置的Webrick服务器导致，不过Puppet支持与其他第三方Web Server整合，以下分别介绍整合过程。</p>
+
+<h3>Apache整合Puppet Dashboard</h3>
+
+<ol>
+<li>安装依赖包</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># yum install ruby ruby-libs ruby-devel  http httpd</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>安装Passenger</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># gem install passenger</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>安装Apache的passenger模块</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># passenger-install-apache2-module</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果安装没问题的话，就会有以下类似信息输出：</p>
+
+<p> &#8220;`
+ The Apache 2 module was successfully installed.</p>
+
+<p> Please edit your Apache configuration file, and add these lines:</p>
+
+<pre><code>LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
+PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
+PassengerRuby /usr/bin/ruby
+</code></pre>
+
+<p> After you restart Apache, you are ready to deploy any number of Ruby on Rails
+ applications on Apache, without any further Ruby on Rails-specific
+ configuration!</p>
+
+<p> Press ENTER to continue.</p>
+
+<p> &#8220;`
+直接输入回车即可。</p>
+
+<ol>
+<li>配置Apache虚拟主机</li>
+</ol>
+
+
+<p> &#8220;`
+ # cd /usr/local/puppet-dashboard
+ # cp ext/passenger/dashboard-vhost.conf /etc/httpd/conf.d/
+ # vi /etc/httpd/conf.d/dashboard-vhost.conf
+ # UPDATE THESE PATHS TO SUIT YOUR ENVIRONMENT
+ LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
+ PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
+ PassengerRuby /usr/bin/ruby</p>
+
+<p> # you may want to tune these settings
+ PassengerHighPerformance on
+ PassengerMaxPoolSize 12
+ PassengerPoolIdleTime 1500
+ # PassengerMaxRequests 1000
+ PassengerStatThrottleRate 120
+ RailsAutoDetect On</p>
+
+<p> <VirtualHost *:80></p>
+
+<pre><code>     ServerName pmaster.i.12582.com
+     DocumentRoot /usr/local/puppet-dashboard/public/
+     &lt;Directory /usr/local/puppet-dashboard/public/&gt;
+             Options None
+             Order allow,deny
+             allow from all
+     &lt;/Directory&gt;
+</code></pre>
+
+<p>   ErrorLog /var/log/httpd/dashboard.example.com_error.log
+   LogLevel warn
+   CustomLog /var/log/httpd/dashboard.example.com_access.log combined
+   ServerSignature On
+ </VirtualHost></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>5. 重启httpd</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>/etc/init.d/httpd restart</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'> 此时再访问 http://pmaster.i.12582.com 发现速度较之前快太多。
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>###Nginx整合Puppet Dashboard
+</span><span class='line'>1. 安装依赖包</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>yum install ruby ruby-libs ruby-devel  http httpd</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>2. 安装Passenger</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>gem install passenger</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>3. 安装Nginx及passenger模块</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>passenger-install-nginx-module</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>回车后，会有两个选择：
+</span><span class='line'> * 表示下载nginx，编译且安装，推荐这种方式安装.
+</span><span class='line'> * 表示自定义安装Nginx,安装之后，nginx默认存放在/opt目录.
+</span><span class='line'>
+</span><span class='line'> 修改/opt/nginx/conf/nginx.conf，在最后一个}之前添加以下内容：
+</span><span class='line'>
+</span><span class='line'> ```
+</span><span class='line'>    server {
+</span><span class='line'>      listen 80;
+</span><span class='line'>      server_name pmaster.i.12582.com;
+</span><span class='line'>      root /usr/local/puppet-dashboard/public;
+</span><span class='line'>      passenger_enabled on;
+</span><span class='line'>    }
+</span><span class='line'> ```
+</span><span class='line'>
+</span><span class='line'>4. 重启Nginx</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>killall nginx</h1>
+
+<h1>/opt/nginx/sbin/nginx</h1>
+
+<p>&#8220;`</p>
+
+<p>最后，你要是有任何疑问，请留言。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[基于KVM和Hyper-V的Windows系统测试报告]]></title>
+    <link href="http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test/"/>
+    <updated>2013-03-13T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test</id>
+    <content type="html"><![CDATA[<p>最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
+由于我们的新系统是采用的C#开发，故部署在Windows，从而</p>
+
+<p>引发这个测试，具体介绍如下：</p>
+
+<h2>测试环境</h2>
+
+<ul>
+<li>硬件资源</li>
+</ul>
+
+
+<table width="609" border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">IP
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">功能
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">OS
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">CPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">内存
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">备注
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.61
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">CentOS 6.3 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">
+<p align="center">KVM
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.120
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">8G
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.63
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">Hyper-v</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.136
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">4G
+</td>
+</tr>
+</tbody>
+</table>
+
+
+<ul>
+<li><p>版本信息</p>
+
+<ul>
+<li>Libvirtd: 0.9.10</span></li></li>
+<li>Hyper-V：6.1（基于Windows Server 2008的组件）</li>
+</ul>
+</li>
+<li><p>测试工具</p>
+
+<ul>
+<li>HD Tune Pro 5.0</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>性能测试结果</h2>
+
+<p>为了尽量保持客观及测试的准确性，本次主要测试：随机访问读、文件基准
+* 随机访问读
+基于KVM的Windows 2008，192.168.30.120测试结果如下：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/k-h-test_01.png"></p>
+
+<p>基于Hyper-V的Windows 2008，192.168.30.136测试结果如下：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/k-h-test_02.png"></p>
+
+<p>从以上两个结果集中的IOPS和平均读取速率两个参数可看出，基于Hyper-V随机读的明显要优于基于KVM随机读。</p>
+
+<ul>
+<li>文件基准
+基于KVM的Windows 2008，192.168.30.120，文件大小：10G，数据随机读写，测试结果如下：</li>
+</ul>
+
+
+<p><img src="http://agenge.github.io/images/2013/03/k-h-test_03.png"></p>
+
+<p>基于Hyper-V的Windows 2008，192.168.30.136，文件大小：10G，数据随机读写，测试结果如下：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/k-h-test_04.png"></p>
+
+<p>通过文件基准得出以下几个结论：</p>
+
+<ol>
+<li><p>基于KVM的小文件写要优于基于Hyper-V小文件写，而基于Hyper-V小文件读明显要好很多；</p></li>
+<li><p>从整体来看，基于Hyper-V连续的小文件传输速度的IOPS要明显优于基于KVM；</p></li>
+<li><p>通过块大小为64M的文件可看出，基于Hyper-V的读写都要强于基于KVM很多；</p></li>
+</ol>
+
+
+<p>以上的2个测试点几乎可判断出，基于Hyper-V的Windows客户机整体上来讲要占优势，如果客户机是Windows，强烈建议使用基于Hyper-V的虚拟化。最后欢迎各位吐槽。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kindle PaperWhite开箱]]></title>
+    <link href="http://agenge.github.io/blog/2013/03/10/kindle-paperwhite-open/"/>
+    <updated>2013-03-10T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/03/10/kindle-paperwhite-open</id>
+    <content type="html"><![CDATA[<p>自从Amazon发布PaperWhite之后，一直想拥有它，119刀，确实不贵。由于身在天朝，无法直接在Amazon网上邮购，海掏捏，偶觉得麻烦(主要是没经验)，且周期太长，淘宝的代购价普遍1100左右，最后通过朋友推荐，</p>
+
+<p>淘宝有日版PaperWhite才780元(人民币)，还包邮。于是就下定决心购买，下面是不同阶段的过程。</p>
+
+<ol>
+<li>购买
+下单之后，整体来讲快递的速度相当快，先来看整个交易时间周期：</li>
+</ol>
+
+
+<p><img src="http://agenge.github.io/images/2013/03/jy-01.jpg"></p>
+
+<p>注：货是2013年02月08日下午收到的，由于刚好过春节，偶直到02月13日才上网确认收货。</p>
+
+<p>下面是整个物流传递信息，可以看到在2013年01月25日下单，2013年02月05日才发货(估计卖家订单量太多，无法及时处理)，不过整个传递速度还是非常快滴。</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/wl-01.jpg"></p>
+
+<p>2.开箱
+包装正面图：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/pw-01.jpg"></p>
+
+<p>包装内部图1：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/pw-03.jpg"></p>
+
+<p>机身正面图：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/pw-06.jpg"></p>
+
+<p>细心的同学可能已经发现这是多看系统的屏保。 :)</p>
+
+<p>皮套正面图：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/pw-05.jpg"></p>
+
+<p>我的阅历：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/pw-07.jpg"></p>
+
+<p>介个时间分布的统计方式有严重Bug，偶每天6:50起床，00:00&mdash;6:50之间的数据何来？现在看来此问题只有多看团队能够解答。</p>
+
+<p>最后，希望多看团队再接再厉吧，尽管Kindle原生系统已经非常优秀，但偶更喜欢对中文支持最好的多看系统。</p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 运维 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-wei/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-26T17:50:41+08:00</updated>
+  <updated>2013-09-27T10:26:20+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -2447,6 +2447,645 @@ zabbix_get -s 192.168.30.226 -p 10050 -k agent.ping
 1
 </code>
 如果返回1表示正常。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Puppet Dashboard配置及apache和Nginx整合]]></title>
+    <link href="http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server/"/>
+    <updated>2013-04-12T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server</id>
+    <content type="html"><![CDATA[<p>Dashboard一个基于Ruby on Rails设计的Web控制台，便于管理Puppet Master和Agent，整个安装过程比较简单，以下是具体的安装步骤。</p>
+
+<h2>安装前提条件</h2>
+
+<ol>
+<li>ruby版本>1.8.6，如果你是CentOS 5或是RHEL 5，可能你需要升级Ruby，官方下载地址请</li>
+</ol>
+
+
+<p> 点击<a href="ftp://ftp.ruby-lang.org/pub/ruby">这里</a>。具体的升级步骤由于下载的安装包已经包含，故不再介绍，本文示例基于Ruby 1.8.7。</p>
+
+<p> <code>
+ # ruby -v
+ ruby 1.8.7 (2011-06-30 patchlevel 352) [x86_64-linux]
+</code></p>
+
+<ol>
+<li><p>安装相关依赖包
+```</p>
+
+<h1>yum install -y mysql mysql-devel mysql-server \</h1>
+
+  ruby ruby-devel ruby-irb ruby-mysql \
+  ruby-rdoc ruby-ri
+<code>
+如果你已经有Mysql，此处不需要安装mysql-server包。安装后加入开机自启动并启动mysql 。
+</code>
+
+<h1>chkconfig mysqld on</h1>
+
+<h1>/etc/init.d/mysqld start</h1>
+
+<p>Starting mysqld:                                           [  OK  ]
+```</p></li>
+<li><p>升级GEM软件包安装器</p></li>
+</ol>
+
+
+<p> 首先检查gem版本，如果已经是1.3.5，就不需要升级：
+ ```</p>
+
+<pre><code># gem -v
+1.3.5
+</code></pre>
+
+<p> <code>
+如果是1.3.1，意味着你要升级gem：
+</code></p>
+
+<h1>wget <a href="http://production.cf.rubygems.org/rubygems/rubygems-1.3.5.tgz">http://production.cf.rubygems.org/rubygems/rubygems-1.3.5.tgz</a></h1>
+
+<h1>tar zxvf rubygems-1.3.5.tgz</h1>
+
+<h1>cd rubygems-1.3.5</h1>
+
+<h1>ruby setup.rb</h1>
+
+<p>```</p>
+
+<ol>
+<li>安装rake
+```
+
+<h1>gem install rake</h1>
+
+<p>```</p></li>
+</ol>
+
+
+<!--more-->
+
+
+<h2>数据库配置</h2>
+
+<p>```</p>
+
+<h1>mysql -uroot -p</h1>
+
+<p>Enter password:</p>
+
+<p>mysql> use dashboard
+Database changed
+mysql> grant all on dashboard.* to dashboard@localhost identified by &lsquo;dashboard&rsquo;;
+Query OK, 0 rows affected (0.00 sec)
+mysql> flush privileges;
+Query OK, 0 rows affected (0.00 sec)</p>
+
+<p>```</p>
+
+<h2>安装Puppet Dashboard</h2>
+
+<ul>
+<li>下载Dashboard
+```
+
+<h1>cd /usr/local/</h1>
+
+<h1>wget <a href="http://downloads.puppetlabs.com/dashboard/puppet-dashboard-1.2.20.tar.gz">http://downloads.puppetlabs.com/dashboard/puppet-dashboard-1.2.20.tar.gz</a></h1>
+
+<h1>tar -zxvf puppet-dashboard-1.2.20.tar.gz</h1>
+
+<h1>cd puppet-dashboard-1.2.20</h1>
+
+<code>
+创建数据库用户,此处我们使用源码方式进行安装,你可以通过yum或apt-get安装。
+</code>
+
+<h1>cp config/database.yml.example config/database.yml</h1>
+
+<p>```</p></li>
+<li><p>修改数据库配置：
+```</p>
+
+<h1>vim config/database.yml</h1>
+
+<p>production:
+database: dashboard
+username: dashboard
+password: dashboard
+encoding: utf8
+adapter: mysql
+```
+production代表生产环境，如果你是开发环境(development)或测试环境(test)，请修改相应的配置。</p></li>
+<li><p>初始化数据库
+```</p>
+
+<h1>rake RAILS_ENV=production db:create</h1>
+
+<h1>gem install mysql</h1>
+
+<h1>rake RAILS_ENV=production db:migrate</h1>
+
+<p>```</p></li>
+<li><p>修改时区
+默认是UTC时间，如果你在控制台看到的时区不对，那需要修改时区：
+```</p>
+
+<h1>vim config/environment.rb</h1>
+
+<p>```
+将config.time_zone = &lsquo;UTC'  修改为 config.time_zone = 'Chongqing&rsquo;</p></li>
+<li><p>启动Webrick Web服务器
+```</p>
+
+<h1>cd /usr/local/puppet-dashboard-1.2.20</h1>
+
+<h1>script/server -p 3000 -e production  -d</h1>
+
+<p>```
+上面即代表启动dashboard，端口3000，以及后台(-d)运行,通过浏览器输入： <a href="http://dashboard_server:3000%C2%A0%C2%A0">http://dashboard_server:3000%C2%A0%C2%A0</a> 即可访问。</p></li>
+</ul>
+
+
+<h3>Puppet Dashboard配置</h3>
+
+<h4>服务器配置</h4>
+
+<p>在Puppet 服务器端/etc/puppet/puppet.conf中的[main]节加入：
+<code>
+reports = http, store
+reporturl = http://192.168.30.226:3000/reports/upload
+</code>
+部署lib文件：
+```</p>
+
+<h1>cp /usr/local/puppet-dashboard/ext/puppet/puppet_dashboard.rb /usr/lib/ruby/site_ruby/1.8/puppet/reports/</h1>
+
+<p><code>
+保存之后，重启puppetmaster即可。
+</code></p>
+
+<h1>/etc/init.d/puppetmaster restart</h1>
+
+<p>```</p>
+
+<h4>客户端配置</h4>
+
+<p>在Puppet Agent（客户端）/etc/puppet/puppet.conf中的[main]节加入：
+<code>
+report = true
+</code>
+保存之后，重启puppet即可。
+```</p>
+
+<h1>/etc/init.d/puppet restart</h1>
+
+<p>```</p>
+
+<h4>控制台配置</h4>
+
+<p>登录Dashboard后，需要自己添加： group和node</p>
+
+<h2>Puppet Dashboard常用操作</h2>
+
+<p><strong> 导入日志 </strong>
+```</p>
+
+<h1>cd /usr/local/puppet-dashboard</h1>
+
+<h1>rake RAILS_ENV=production reports:import</h1>
+
+<p><code>
+** 优化数据库 **
+当数据量过大时，需要优化mysql数据库：
+</code></p>
+
+<h1>cd /usr/local/puppet-dashboard</h1>
+
+<h1>rake RAILS_ENV=production db:raw:optimize</h1>
+
+<p>```</p>
+
+<p><strong> 删除日志 </strong>
+删除1个月之前的数据：
+```</p>
+
+<h1>cd /usr/local/puppet-dashboard</h1>
+
+<h1>rake RAILS_ENV=production reports:prune upto=1 unit=mon</h1>
+
+<p><code>
+删除15天前的日志：
+</code></p>
+
+<h1>rake RAILS_ENV=production reports:prune upto=15 unit=day</h1>
+
+<p>```</p>
+
+<p><strong> 备份数据库 </strong>
+```</p>
+
+<h1>rake RAILS_ENV=production db:raw:dump</h1>
+
+<p>mysqldump &mdash;add-locks &mdash;create-options &mdash;disable-keys &mdash;extended-insert &mdash;quick &mdash;set-charset &mdash;user=dashboard &mdash;password=dashboard dashboard > production.sql.tmp
+mv production.sql.tmp production.sql</p>
+
+<p><code>
+**恢复数据库 **
+</code></p>
+
+<h1>rake RAILS_ENV=production FILE=production.sql db:raw:restore</h1>
+
+<p>```</p>
+
+<p><strong> Dashboard 启停脚本 </strong>
+```</p>
+
+<h1>!/bin/bash</h1>
+
+<h1>Description: Puppet Dashboard init.d script</h1>
+
+<h1>Get function from functions library</h1>
+
+<p>. /etc/init.d/functions</p>
+
+<h1>Start the service Puppet Dashboard</h1>
+
+<p>start() {</p>
+
+<pre><code>echo -n "Starting Puppet Dashboard: "
+/usr/bin/ruby /usr/local/puppet-dashboard/script/server -e production -b 192.168.30.226 -d
+### Create the lock file ###
+touch /var/lock/subsys/puppetdb
+success $"Puppet Dashboard startup"
+echo
+</code></pre>
+
+<p>}</p>
+
+<h1>Restart the service Puppet Dashboard</h1>
+
+<p>stop() {</p>
+
+<pre><code>echo -n "Stopping Puppet Dashboard: "
+kill -9 `ps ax | grep "/usr/bin/ruby /usr/local/puppet-dashboard/script/server" | grep -v grep | awk '{ print $1 }' `
+### Now, delete the lock file ###
+rm -f /var/lock/subsys/puppetdb
+success $"Puppet Dashboard shutdown"
+echo
+</code></pre>
+
+<p>}</p>
+
+<h3>main logic</h3>
+
+<p>case &ldquo;$1&rdquo; in</p>
+
+<pre><code>start)
+    start
+;;
+stop)
+    stop
+;;
+status)
+    status Puppet DB
+;;
+restart|reload|condrestart)
+    stop
+    start
+;;
+*)
+echo $"Usage: $0 {start|stop|restart|reload|status}"
+exit 1
+</code></pre>
+
+<p>esac</p>
+
+<p>exit 0</p>
+
+<p>```</p>
+
+<h2>使用Passenger运行Puppet Dashboard</h2>
+
+<p>相信用过Dashboard的人都知道在访问时控制台时比较缓慢，这正是由于内置的Webrick服务器导致，不过Puppet支持与其他第三方Web Server整合，以下分别介绍整合过程。</p>
+
+<h3>Apache整合Puppet Dashboard</h3>
+
+<ol>
+<li>安装依赖包
+```
+
+<h1>yum install ruby ruby-libs ruby-devel  http httpd</h1>
+
+<p>```</p></li>
+<li>安装Passenger
+```
+
+<h1>gem install passenger</h1>
+
+<p>```</p></li>
+<li>安装Apache的passenger模块
+```
+
+<h1>passenger-install-apache2-module</h1>
+
+<p>```
+如果安装没问题的话，就会有以下类似信息输出：</p></li>
+</ol>
+
+
+<p> ```
+ The Apache 2 module was successfully installed.</p>
+
+<p> Please edit your Apache configuration file, and add these lines:</p>
+
+<pre><code>LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
+PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
+PassengerRuby /usr/bin/ruby
+</code></pre>
+
+<p> After you restart Apache, you are ready to deploy any number of Ruby on Rails
+ applications on Apache, without any further Ruby on Rails-specific
+ configuration!</p>
+
+<p> Press ENTER to continue.</p>
+
+<p> ```
+直接输入回车即可。</p>
+
+<ol>
+<li>配置Apache虚拟主机</li>
+</ol>
+
+
+<p> ```
+ # cd /usr/local/puppet-dashboard
+ # cp ext/passenger/dashboard-vhost.conf /etc/httpd/conf.d/
+ # vi /etc/httpd/conf.d/dashboard-vhost.conf
+ # UPDATE THESE PATHS TO SUIT YOUR ENVIRONMENT
+ LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
+ PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
+ PassengerRuby /usr/bin/ruby</p>
+
+<p> # you may want to tune these settings
+ PassengerHighPerformance on
+ PassengerMaxPoolSize 12
+ PassengerPoolIdleTime 1500
+ # PassengerMaxRequests 1000
+ PassengerStatThrottleRate 120
+ RailsAutoDetect On</p>
+
+<p> <VirtualHost *:80></p>
+
+<pre><code>     ServerName pmaster.i.12582.com
+     DocumentRoot /usr/local/puppet-dashboard/public/
+     &lt;Directory /usr/local/puppet-dashboard/public/&gt;
+             Options None
+             Order allow,deny
+             allow from all
+     &lt;/Directory&gt;
+</code></pre>
+
+<p>   ErrorLog /var/log/httpd/dashboard.example.com_error.log
+   LogLevel warn
+   CustomLog /var/log/httpd/dashboard.example.com_access.log combined
+   ServerSignature On
+ </VirtualHost>
+<code>
+5. 重启httpd
+</code></p>
+
+<h1>/etc/init.d/httpd restart</h1>
+
+<p>```
+ 此时再访问 <a href="http://pmaster.i.12582.com">http://pmaster.i.12582.com</a> 发现速度较之前快太多。</p>
+
+<h3>Nginx整合Puppet Dashboard</h3>
+
+<ol>
+<li>安装依赖包
+```
+
+<h1>yum install ruby ruby-libs ruby-devel  http httpd</h1>
+
+<p>```</p></li>
+<li>安装Passenger
+```
+
+<h1>gem install passenger</h1>
+
+<p>```</p></li>
+<li>安装Nginx及passenger模块
+```
+
+<h1>passenger-install-nginx-module</h1>
+
+<p>```
+回车后，会有两个选择：</p></li>
+<li>表示下载nginx，编译且安装，推荐这种方式安装.</li>
+<li>表示自定义安装Nginx,安装之后，nginx默认存放在/opt目录.</li>
+</ol>
+
+
+<p> 修改/opt/nginx/conf/nginx.conf，在最后一个}之前添加以下内容：</p>
+
+<p> ```</p>
+
+<pre><code>server {
+  listen 80;
+  server_name pmaster.i.12582.com;
+  root /usr/local/puppet-dashboard/public;
+  passenger_enabled on;
+}
+</code></pre>
+
+<p> ```</p>
+
+<ol>
+<li>重启Nginx
+```
+
+<h1>killall nginx</h1>
+
+<h1>/opt/nginx/sbin/nginx</h1>
+
+<p>```</p></li>
+</ol>
+
+
+<p>最后，你要是有任何疑问，请留言。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[基于KVM和Hyper-V的Windows系统测试报告]]></title>
+    <link href="http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test/"/>
+    <updated>2013-03-13T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test</id>
+    <content type="html"><![CDATA[<p>最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
+由于我们的新系统是采用的C#开发，故部署在Windows，从而</p>
+
+<p>引发这个测试，具体介绍如下：</p>
+
+<h2>测试环境</h2>
+
+<ul>
+<li>硬件资源</li>
+</ul>
+
+
+<table width="609" border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">IP
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">功能
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">OS
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">CPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">内存
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">备注
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.61
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">CentOS 6.3 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">
+<p align="center">KVM
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.120
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">8G
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.63
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">Hyper-v</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.136
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">4G
+</td>
+</tr>
+</tbody>
+</table>
+
+
+<ul>
+<li><p>版本信息</p>
+
+<ul>
+<li>Libvirtd: 0.9.10</span></li></li>
+<li>Hyper-V：6.1（基于Windows Server 2008的组件）</li>
+</ul>
+</li>
+<li><p>测试工具</p>
+
+<ul>
+<li>HD Tune Pro 5.0</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>性能测试结果</h2>
+
+<p>为了尽量保持客观及测试的准确性，本次主要测试：随机访问读、文件基准
+* 随机访问读
+基于KVM的Windows 2008，192.168.30.120测试结果如下：</p>
+
+<p><img src="/images/2013/03/k-h-test_01.png"></p>
+
+<p>基于Hyper-V的Windows 2008，192.168.30.136测试结果如下：</p>
+
+<p><img src="/images/2013/03/k-h-test_02.png"></p>
+
+<p>从以上两个结果集中的IOPS和平均读取速率两个参数可看出，基于Hyper-V随机读的明显要优于基于KVM随机读。</p>
+
+<ul>
+<li>文件基准
+基于KVM的Windows 2008，192.168.30.120，文件大小：10G，数据随机读写，测试结果如下：</li>
+</ul>
+
+
+<p><img src="/images/2013/03/k-h-test_03.png"></p>
+
+<p>基于Hyper-V的Windows 2008，192.168.30.136，文件大小：10G，数据随机读写，测试结果如下：</p>
+
+<p><img src="/images/2013/03/k-h-test_04.png"></p>
+
+<p>通过文件基准得出以下几个结论：</p>
+
+<ol>
+<li><p>基于KVM的小文件写要优于基于Hyper-V小文件写，而基于Hyper-V小文件读明显要好很多；</p></li>
+<li><p>从整体来看，基于Hyper-V连续的小文件传输速度的IOPS要明显优于基于KVM；</p></li>
+<li><p>通过块大小为64M的文件可看出，基于Hyper-V的读写都要强于基于KVM很多；</p></li>
+</ol>
+
+
+<p>以上的2个测试点几乎可判断出，基于Hyper-V的Windows客户机整体上来讲要占优势，如果客户机是Windows，强烈建议使用基于Hyper-V的虚拟化。最后欢迎各位吐槽。</p>
 ]]></content>
   </entry>
   

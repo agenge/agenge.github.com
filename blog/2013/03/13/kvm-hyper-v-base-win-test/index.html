@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>制作OpenStack CentOS 6.3 镜像 - TaurusHome</title>
+  <title>基于KVM和Hyper-V的Windows系统测试报告 - TaurusHome</title>
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
-OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。 准备一个镜像文件，即ISO文件，本示例所使用的为： CentOS-6.3-i386-minimal.iso 注： &hellip;">
+  <meta name="description" content="最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
+由于我们的新系统是采用的C#开发，故部署在Windows，从而 引发这个测试，具体介绍如下： 测试环境 硬件资源 IP 功能 OS CPU 内存 备注 192.168.30.61 宿主机 CentOS 6.3 64位 忽略 忽略 KVM &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +19,7 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。 准备�
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://agenge.github.io/blog/2013/07/20/make_openstack-centos-image">
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
@@ -83,7 +83,7 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。 准备�
   
   <header>
     
-      <h1 class="entry-title">制作OpenStack CentOS 6.3 镜像</h1>
+      <h1 class="entry-title">基于KVM和Hyper-V的Windows系统测试报告</h1>
     
     
       <p class="meta">
@@ -99,80 +99,176 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。 准备�
   
 
 
-<time datetime="2013-07-20T00:00:00+08:00" pubdate data-updated="true">Jul 20<span>th</span>, 2013</time>
+<time datetime="2013-03-13T00:00:00+08:00" pubdate data-updated="true">Mar 13<span>th</span>, 2013</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h1>前言</h1>
+<div class="entry-content"><p>最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
+由于我们的新系统是采用的C#开发，故部署在Windows，从而</p>
 
-<p>距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
-OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
+<p>引发这个测试，具体介绍如下：</p>
 
-<ol>
-<li><p>准备一个镜像文件，即ISO文件，本示例所使用的为：</p>
-
-<pre><code> CentOS-6.3-i386-minimal.iso
-</code></pre></li>
-</ol>
-
-
-<p> <em>注：无论您是内部测试环境还是生产环境，偶都强烈推荐使用64位操作系统。</em></p>
-
-<ol>
-<li><p>引导并安装系统</p>
-
-<pre><code> virt-install -n CentOS63 -r 2048 --cpu host \
-   -c /data/iso/CentOS-6.3-i386-minimal.iso \
-   --disk path=/data/kvm_data/centos6.3-openstack.img,device=disk,bus=virtio,size=10,format=qcow2 \
-   --vnc --vncport=5908 --vnclisten=0.0.0.0 -v \
-   --network bridge=br0
-</code></pre></li>
-</ol>
-
-
-<p> 这些参数的就请您先自行查找手册，后期有时间偶会补上关于KVM的相关实践手册。</p>
-
-<ol>
-<li>镜像相关设置（此处根据你的需求进行个性化定制，尽量保持简洁）：</li>
-<li><p>分区全部给根分区，防火墙和SELinux禁止.</p>
-
-<pre><code>     chkconfig iptables off
-</code></pre></li>
-</ol>
-
-
-<p> 将/etc/selinux/config 中的 SELINUX=enforcing修改成 SELINUX=disabled
- * 修改分区表：</p>
-
-<pre><code>        vi /etc/fstab
-        # 将UUID=这一行注释，加入：
-        LABEL=cec-rootfs                           / ext4 defaults&lt;b&gt; 0 0&lt;/b&gt;
-</code></pre>
+<h2>测试环境</h2>
 
 <ul>
-<li><p>修改网络配置：</p>
-
-<pre><code>     vi /etc/sysconfig/network-scripts/ifcfg-eth0
-     #将HWADDR=这行删除或注释即可，并且设置成BOOTPROTO=dhcp
-</code></pre></li>
-<li><p>删除网络规则，因为Centos6之后70-persistent-net.rules这个文件会自动添加除eth0之外的其他网络接口，</p>
-
-<pre><code>     rm -rf /etc/udev/rules.d/70-persistent-net.rules
-</code></pre></li>
-<li>还要把另外一个文件删除，不然上面这个文件还会自动创建滴：
-         mv /lib/udev/write_net_rules{,.bak}</li>
-<li><p>上传镜像</p>
-
-<pre><code> glance image-create --name centos63Image --is-public true --container-format ovf --disk-format qcow2 &amp;lt; /home/agen/centos63.img
-</code></pre></li>
+<li>硬件资源</li>
 </ul>
 
 
-<p> 至此，所有操作已经完成，如果一切正常，你所创建的实例访问正常。如网络还存在问题，可能
-和您的OpenStack网络设置有关，不过这已经超出本文的范畴。假如您对OpenStack的环境搭建不是很熟悉的话，建议您再多看看这篇文章：<a title="Openstack安装与部署(Folsom)" href="http://agenge.com/cloud-computing/openstack_install_with_deploy_for_folsom.html">Openstack安装与部署(Folsom)</a>。</p>
+<table width="609" border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">IP
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">功能
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">OS
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">CPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">内存
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">备注
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.61
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">CentOS 6.3 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">
+<p align="center">KVM
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.120
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">8G
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.63
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">Hyper-v</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.136
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">4G
+</td>
+</tr>
+</tbody>
+</table>
+
+
+<ul>
+<li><p>版本信息</p>
+
+<ul>
+<li>Libvirtd: 0.9.10</span></li></li>
+<li>Hyper-V：6.1（基于Windows Server 2008的组件）</li>
+</ul>
+</li>
+<li><p>测试工具</p>
+
+<ul>
+<li>HD Tune Pro 5.0</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>性能测试结果</h2>
+
+<p>为了尽量保持客观及测试的准确性，本次主要测试：随机访问读、文件基准
+* 随机访问读
+基于KVM的Windows 2008，192.168.30.120测试结果如下：</p>
+
+<p><img src="/images/2013/03/k-h-test_01.png"></p>
+
+<p>基于Hyper-V的Windows 2008，192.168.30.136测试结果如下：</p>
+
+<p><img src="/images/2013/03/k-h-test_02.png"></p>
+
+<p>从以上两个结果集中的IOPS和平均读取速率两个参数可看出，基于Hyper-V随机读的明显要优于基于KVM随机读。</p>
+
+<ul>
+<li>文件基准
+基于KVM的Windows 2008，192.168.30.120，文件大小：10G，数据随机读写，测试结果如下：</li>
+</ul>
+
+
+<p><img src="/images/2013/03/k-h-test_03.png"></p>
+
+<p>基于Hyper-V的Windows 2008，192.168.30.136，文件大小：10G，数据随机读写，测试结果如下：</p>
+
+<p><img src="/images/2013/03/k-h-test_04.png"></p>
+
+<p>通过文件基准得出以下几个结论：</p>
+
+<ol>
+<li><p>基于KVM的小文件写要优于基于Hyper-V小文件写，而基于Hyper-V小文件读明显要好很多；</p></li>
+<li><p>从整体来看，基于Hyper-V连续的小文件传输速度的IOPS要明显优于基于KVM；</p></li>
+<li><p>通过块大小为64M的文件可看出，基于Hyper-V的读写都要强于基于KVM很多；</p></li>
+</ol>
+
+
+<p>以上的2个测试点几乎可判断出，基于Hyper-V的Windows客户机整体上来讲要占优势，如果客户机是Windows，强烈建议使用基于Hyper-V的虚拟化。最后欢迎各位吐槽。</p>
 </div>
 
 
@@ -195,12 +291,12 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
   
 
 
-<time datetime="2013-07-20T00:00:00+08:00" pubdate data-updated="true">Jul 20<span>th</span>, 2013</time>
+<time datetime="2013-03-13T00:00:00+08:00" pubdate data-updated="true">Mar 13<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/openstack/'>OpenStack</a>, <a class='category' href='/blog/categories/yun-ji-suan/'>云计算</a>
+    <a class='category' href='/blog/categories/xing-neng-ce-shi/'>性能测试</a>, <a class='category' href='/blog/categories/yun-wei/'>运维</a>
   
 </span>
 
@@ -235,10 +331,10 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/06/12/openstack_install_with_deploy_for_folsom/" title="Previous Post: Openstack安装与部署(Folsom)">&laquo; Openstack安装与部署(Folsom)</a>
+        <a class="basic-alignment left" href="/blog/2013/03/10/kindle-paperwhite-open/" title="Previous Post: Kindle PaperWhite开箱">&laquo; Kindle PaperWhite开箱</a>
       
       
-        <a class="basic-alignment right" href="/blog/2013/07/24/make_openstack-windows2008-image/" title="Next Post: 制作OpenStack Windows Server 2008 镜像">制作OpenStack Windows Server 2008 镜像 &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2013/04/12/puppet-dashboard-conf-with-web-server/" title="Next Post: Puppet Dashboard配置及apache和Nginx整合">Puppet Dashboard配置及apache和Nginx整合 &raquo;</a>
       
     </p>
   </footer>

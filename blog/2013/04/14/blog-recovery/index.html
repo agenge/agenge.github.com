@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>要体现在行动上之Blog恢复 - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="前几天偶打开自己blog时，突然发现无法打开，具体点说是显示数据库连接错误，第一反应是“被黑”，故而排查的第一步就是查看系统log，然而并没有看到相关错误信息，为尽快恢复，偶先尝试重启mysql，提示没有剩余空间，难道数据库数据文件太多导致？通过du后，发现果然如此，通过将过旧的数据文件（ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/04/14/blog-recovery">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-6520474-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">要体现在行动上之Blog恢复</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-14T00:00:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>前几天偶打开自己<a title="agenge" href="http://agenge.com">blog</a>时，突然发现无法打开，具体点说是显示数据库连接错误，第一反应是“被黑”，故而排查的第一步就是查看系统log，然而并没有看到相关错误信息，为尽快恢复，偶先尝试重启mysql，提示没有剩余空间，难道数据库数据文件太多导致？通过du后，发现果然如此，通过将过旧的数据文件（即Mysql bin log）删除即可。以下是整个恢复过程，仅供参考。</p>
+
+<p><strong> 1. 查看磁盘空间： </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# df -h
+</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
+</span><span class='line'>/dev/sda1 7.9G 7.9G 0M 100% /</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 2. 查看Mysql binlog 大小 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# pwd
+</span><span class='line'>/usr/local/mysql/var
+</span><span class='line'>[root@centos var]# ll | wc -l
+</span><span class='line'>1582
+</span><span class='line'>[root@centos var]# du -sh .
+</span><span class='line'>4.1G .</span></code></pre></td></tr></table></div></figure>
+
+
+<p>VPS的磁盘大小总共才8G，还包括操作系统所占空间，bin log占用足足4.1G。删除吧！</p>
+
+<p><strong> 3. 删除旧数据 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>Welcome to the MySQL monitor. Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 45959
+</span><span class='line'>Server version: 5.1.54-log Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective
+</span><span class='line'>owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; purge binary logs before '2013-01-01 00:00:00';
+</span><span class='line'>Query OK, 0 rows affected (10.39 sec)
+</span><span class='line'>mysql&gt; quit
+</span><span class='line'>Bye
+</span><span class='line'>[root@centos var]# df -h
+</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
+</span><span class='line'>/dev/sda1 7.9G 4.3G 3.3G 57% /</span></code></pre></td></tr></table></div></figure>
+
+
+<p>删除2013年1月1日之前的所有数据，剩余可用空间还有3.3G。</p>
+
+<p><strong> 4. 后记 </strong>
+如果以上操作就算完结，那无疑是在等待下一次磁盘被爆，为防止问题再次发生，必须主动监控来达到提前预防，所以偶部署了个小脚本，一旦磁盘达到90%，会mail通知偶。也许是对blog的不重视，之前一直未采取行动，或许惰性控制了我，最后问大家一个问题：如果某个东西对你非常重要，在危机来之前，各位都准备好迎接了吗？理想或想法体现到行动上了吗？</p>
+
+<p>2013/09/27 Update:</p>
+
+<p>如果只想写文章，而不想关心Mysql 及Http Server，甚至担心VPS被黑，偶强烈推荐使用 Octopress + Github，具体介绍及安装请见这里<a href="http://agenge.com/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-14T00:00:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/sheng-huo/'>生活</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/04/12/puppet-dashboard-conf-with-web-server/" title="Previous Post: Puppet Dashboard配置及apache和Nginx整合">&laquo; Puppet Dashboard配置及apache和Nginx整合</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/05/02/zabbix-source-install-conf/" title="Next Post: Zabbix 源码安装与配置">Zabbix 源码安装与配置 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
