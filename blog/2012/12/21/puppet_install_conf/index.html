@@ -285,15 +285,10 @@ Ruby所依赖的OpenSSL 库，运行以下命令来测试是否已经安装所�
 <p> 执行以上命令代表客户端已经成功生成证书，并把证书签名请求发送到Puppet服务端.</p>
 
 <ol>
-<li>登录到Puppet服务端，查看所有客户端的证书签名请求：</li>
+<li>登录到Puppet服务端，查看所有客户端的证书签名请求：
+<img src="/images/2012/12/4.png"></li>
 </ol>
 
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> puppetca  --list</span></code></pre></td></tr></table></div></figure>
-
-
-<p> <img src="/images/2012/12/4.png"></p>
 
 <p> 从结果可看出，已经看到client1.test.com客户端的证书签名请求，最后对所有的证书请求进行签名：
  <code>
