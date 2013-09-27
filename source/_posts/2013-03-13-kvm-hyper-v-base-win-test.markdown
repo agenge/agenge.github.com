@@ -1,0 +1,158 @@
+---
+layout: post
+title: 基于KVM和Hyper-V的Windows系统测试报告
+categories:
+- 性能测试
+- 运维
+tags:
+- HD Tune
+- Hyper-V
+- KVM
+- 性能测试
+- 虚拟化
+published: true
+comments: true
+
+---
+最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
+由于我们的新系统是采用的C#开发，故部署在Windows，从而
+
+引发这个测试，具体介绍如下：
+##测试环境
+* 硬件资源
+<table width="609" border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">IP
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">功能
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">OS
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">CPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">内存
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">备注
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.61
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">CentOS 6.3 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">
+<p align="center">KVM
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.120
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">8G
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.63
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">宿主机
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">忽略
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">忽略
+</td>
+<td rowspan="2" nowrap="nowrap" width="72">Hyper-v</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="129">
+<p align="center">192.168.30.136
+</td>
+<td nowrap="nowrap" width="81">
+<p align="center">Guest OS
+</td>
+<td nowrap="nowrap" width="140">
+<p align="center">Windows 2008 64位
+</td>
+<td nowrap="nowrap" width="115">
+<p align="center">4*VCPU
+</td>
+<td nowrap="nowrap" width="72">
+<p align="center">4G
+</td>
+</tr>
+</tbody>
+</table>
+
+* 版本信息
+    * Libvirtd: 0.9.10</span></li>
+	* Hyper-V：6.1（基于Windows Server 2008的组件）
+
+* 测试工具
+
+    * HD Tune Pro 5.0
+
+##性能测试结果
+为了尽量保持客观及测试的准确性，本次主要测试：随机访问读、文件基准
+* 随机访问读
+基于KVM的Windows 2008，192.168.30.120测试结果如下：
+
+{% img /images/2013/03/k-h-test_01.png %}
+
+基于Hyper-V的Windows 2008，192.168.30.136测试结果如下：
+
+{% img /images/2013/03/k-h-test_02.png %}
+
+从以上两个结果集中的IOPS和平均读取速率两个参数可看出，基于Hyper-V随机读的明显要优于基于KVM随机读。
+
+* 文件基准
+基于KVM的Windows 2008，192.168.30.120，文件大小：10G，数据随机读写，测试结果如下：
+
+{% img /images/2013/03/k-h-test_03.png %}
+
+基于Hyper-V的Windows 2008，192.168.30.136，文件大小：10G，数据随机读写，测试结果如下：
+
+{% img /images/2013/03/k-h-test_04.png %}
+
+通过文件基准得出以下几个结论：
+
+1. 基于KVM的小文件写要优于基于Hyper-V小文件写，而基于Hyper-V小文件读明显要好很多；
+
+2. 从整体来看，基于Hyper-V连续的小文件传输速度的IOPS要明显优于基于KVM；
+
+3. 通过块大小为64M的文件可看出，基于Hyper-V的读写都要强于基于KVM很多；
+
+以上的2个测试点几乎可判断出，基于Hyper-V的Windows客户机整体上来讲要占优势，如果客户机是Windows，强烈建议使用基于Hyper-V的虚拟化。最后欢迎各位吐槽。
