@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-28T00:23:53+08:00</updated>
+  <updated>2013-09-28T00:34:59+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -3994,7 +3994,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#x61;&#105;&#108;&#x74;&#111;&#58;&#116;&#101;&#115;&#116;&#x5f;&#x7a;&#x61;&#98;&#x62;&#105;&#120;&#64;&#x67;&#x6d;&#x61;&#105;&#108;&#x2e;&#99;&#111;&#x6d;">&#x74;&#101;&#x73;&#116;&#x5f;&#x7a;&#x61;&#98;&#98;&#x69;&#x78;&#x40;&#x67;&#109;&#97;&#x69;&#x6c;&#46;&#x63;&#x6f;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#x74;&#x65;&#115;&#116;&#95;&#122;&#97;&#98;&#x62;&#105;&#120;&#64;&#103;&#x6d;&#x61;&#x69;&#108;&#x2e;&#99;&#x6f;&#x6d;">&#x74;&#x65;&#115;&#x74;&#95;&#122;&#97;&#x62;&#98;&#105;&#120;&#64;&#103;&#x6d;&#97;&#x69;&#108;&#46;&#99;&#x6f;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -6473,7 +6473,16 @@ PassengerRuby /usr/bin/ruby
 <p>由于本文基于源码安装，使用二进制包的安装方式本文不打算介绍，如有需要请自行到网上搜索。好了，首先将facter-2.0.0rc4.tar.gz、puppet-2.7.19.tar.gz上传到 Puppet服务端(192.168.56.2)，具体步骤如下：</p>
 
 <ul>
-<li>安装facter：</li>
+<li>安装facter：
+&#8220;`
+
+<h1>wget <a href="http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz">http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz</a></h1>
+
+<h1>tar zxvf facter-2.0.0rc4.tar.gz</h1>
+
+<h1>cd facter-2.0.0rc4</h1>
+
+<h1>ruby install.rb</h1></li>
 </ul>
 
 
@@ -6481,128 +6490,138 @@ PassengerRuby /usr/bin/ruby
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz
-</span><span class='line'># tar zxvf facter-2.0.0rc4.tar.gz
-</span><span class='line'># cd facter-2.0.0rc4
-</span><span class='line'># ruby install.rb</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'> 安装后会提示是否有无问题，如下图所示，无任何错误：
+</span><span class='line'>
+</span><span class='line'> <img src="http://agenge.github.io/images/2012/12/1.png">
+</span><span class='line'>
+</span><span class='line'>* 安装Puppet:
+</span><span class='line'> 
+</span><span class='line'> ```
+</span><span class='line'> # wget http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz
+</span><span class='line'> # tar zxvf puppet-2.7.19.tar.gz
+</span><span class='line'> # cd puppet-2.7.19
+</span><span class='line'> # ruby install.rb
+</span><span class='line'> ```
+</span><span class='line'> 
+</span><span class='line'> 安装后会提示是否有无问题，如下图所示，无任何错误：
+</span><span class='line'>
+</span><span class='line'> <img src="http://agenge.github.io/images/2012/12/2.png">
+</span><span class='line'>
+</span><span class='line'> 到此，Puppet服务端安装已经结束。
+</span><span class='line'>
+</span><span class='line'>&lt;!-- more --&gt;
+</span><span class='line'>
+</span><span class='line'>##3. 安装Puppet客户端 For Linux
+</span><span class='line'>
+</span><span class='line'>Puppet客户端的安装方式与服务端一样，故不再详细介绍，详细请见第二章。
+</span><span class='line'>##4. 安装Puppet客户端 For Windows
+</span><span class='line'>暂时不打算写！
+</span><span class='line'>##5. 配置Puppet服务端和客户端
+</span><span class='line'>在配置之前，要确保Puppet服务端和所有Puppet客户端的本地时间一致，关于时间同步，推荐使用NTP(请参考网上的NTP详细介绍或MAN)。
+</span><span class='line'>
+</span><span class='line'>###5.1 配置Puppet服务端：
+</span><span class='line'>创建puppet组和用户：</span></code></pre></td></tr></table></div></figure>
 
 
-<p>安装后会提示是否有无问题，如下图所示，无任何错误：</p>
+<h1>groupadd puppet</h1>
 
-<p> <img src="http://agenge.github.io/images/2012/12/1.png"></p>
+<h1>useradd -g puppet -s /sbin/nologin puppet</h1>
 
-<ol>
-<li>安装Puppet:
-&#8220;`
-
-<h1>wget <a href="http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz">http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz</a></h1>
-
-<h1>tar zxvf puppet-2.7.19.tar.gz</h1>
-
-<h1>cd puppet-2.7.19</h1>
-
-<h1>ruby install.rb</h1>
-
-<p>&#8220;`
-安装后会提示是否有无问题，如下图所示，无任何错误：</p></li>
-</ol>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>设置/etc/hosts：</span></code></pre></td></tr></table></div></figure>
 
 
-<p> <img src="http://agenge.github.io/images/2012/12/2.png"></p>
+<h1>echo &ldquo;192.168.56.2 puppetmaster.test.com puppetmaster&rdquo; >> /etc/hosts</h1>
 
-<p> 到此，Puppet服务端安装已经结束。</p>
+<h1>echo &ldquo;192.168.56.10 client1.test.com client1&rdquo; >> /etc/hosts</h1>
 
-<!-- more -->
+<h1>cp conf/namespaceauth.conf /etc/puppet/</h1>
+
+<h1>cp conf/redhat/puppet.conf /etc/puppet/</h1>
+
+<h1>cp conf/redhat/server.init /etc/init.d/puppetmaster</h1>
+
+<h1>chmod +x /etc/init.d/puppetmaster</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>启动puppetmaster ，若无问题，显示如下：</span></code></pre></td></tr></table></div></figure>
 
 
-<h2>3. 安装Puppet客户端 For Linux</h2>
+<h1>/etc/init.d/puppetmaster start</h1>
 
-<p>Puppet客户端的安装方式与服务端一样，故不再详细介绍，详细请见第二章。</p>
+<p>Starting puppetmaster:                    [ OK ]</p>
 
-<h2>4. 安装Puppet客户端 For Windows</h2>
-
-<p>暂时不打算写！</p>
-
-<h2>5. 配置Puppet服务端和客户端</h2>
-
-<p>在配置之前，要确保Puppet服务端和所有Puppet客户端的本地时间一致，关于时间同步，推荐使用NTP(请参考网上的NTP详细介绍或MAN)。</p>
-
-<h3>5.1 配置Puppet服务端：</h3>
-
-<p>创建puppet组和用户：</p>
+<h1>chkconfig puppetmaster on</h1>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># groupadd puppet
-</span><span class='line'># useradd -g puppet -s /sbin/nologin puppet</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>###5.2  配置Puppet客户端：
+</span><span class='line'>除了以下命令不一样，其他全部和服务端一样的配置：
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>设置/etc/hosts：</p>
+<h1>cp conf/redhat/client.init /etc/init.d/puppet</h1>
+
+<h1>chmod +x /etc/init.d/puppet</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>服务端对应命令如下：</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>cp conf/redhat/server.init /etc/init.d/puppetmaster</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>启动puppet，若无问题，显示如下：</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>/etc/init.d/puppet start</h1>
+
+<p>Starting puppet:               [ OK ]</p>
+
+<h1>chkconfig puppet on</h1>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># echo "192.168.56.2 puppetmaster.test.com puppetmaster" &gt;&gt; /etc/hosts
-</span><span class='line'># echo "192.168.56.10 client1.test.com client1" &gt;&gt; /etc/hosts
-</span><span class='line'># cp conf/namespaceauth.conf /etc/puppet/
-</span><span class='line'># cp conf/redhat/puppet.conf /etc/puppet/
-</span><span class='line'># cp conf/redhat/server.init /etc/init.d/puppetmaster
-</span><span class='line'># chmod +x /etc/init.d/puppetmaster</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>###5.3 Puppet服务端和客户端测试：
+</span><span class='line'>Puppet客户端与服务器端是通过SSL隧道通信的，客户端安装完成后，需要向服务器端申请证书：
+</span><span class='line'>
+</span><span class='line'>1. 首次连接服务器端会发起证书申请，在客户端执行命令如下</span></code></pre></td></tr></table></div></figure>
 
 
-<p>启动puppetmaster ，若无问题，显示如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppetmaster start
-</span><span class='line'>Starting puppetmaster:                    [ OK ]
-</span><span class='line'># chkconfig puppetmaster on</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>5.2  配置Puppet客户端：</h3>
-
-<p>除了以下命令不一样，其他全部和服务端一样的配置：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cp conf/redhat/client.init /etc/init.d/puppet
-</span><span class='line'># chmod +x /etc/init.d/puppet</span></code></pre></td></tr></table></div></figure>
-
-
-<p>服务端对应命令如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cp conf/redhat/server.init /etc/init.d/puppetmaster</span></code></pre></td></tr></table></div></figure>
-
-
-<p>启动puppet，若无问题，显示如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppet start
-</span><span class='line'>Starting puppet:               [ OK ]
-</span><span class='line'># chkconfig puppet on</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>5.3 Puppet服务端和客户端测试：</h3>
-
-<p>Puppet客户端与服务器端是通过SSL隧道通信的，客户端安装完成后，需要向服务器端申请证书：</p>
-
-<ol>
-<li>首次连接服务器端会发起证书申请，在客户端执行命令如下:
-&#8220;`
-
-<h1>puppetd &mdash;server puppetmaster &mdash;test</h1>
-
-<p>&#8220;`
-<img src="http://agenge.github.io/images/2012/12/3.png"></p></li>
-</ol>
-
+<p> puppetd &mdash;server puppetmaster &mdash;test
+ &#8220;`
+ <img src="http://agenge.github.io/images/2012/12/3.png"></p>
 
 <p> 执行以上命令代表客户端已经成功生成证书，并把证书签名请求发送到Puppet服务端.</p>
 
@@ -6612,7 +6631,7 @@ PassengerRuby /usr/bin/ruby
 
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppetca  --list</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'> puppetca  --list</span></code></pre></td></tr></table></div></figure>
 
 
 <p> <img src="http://agenge.github.io/images/2012/12/4.png"></p>
