@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[文章分类: Database | TaurusHome]]></title>
+  <link href="http://agenge.github.io/blog/categories/database/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-09-28T00:23:53+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Win8通过PLSQL连接Oracle]]></title>
+    <link href="http://agenge.github.io/blog/2013/01/26/win8_plsql_conn_oracle/"/>
+    <updated>2013-01-26T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/01/26/win8_plsql_conn_oracle</id>
+    <content type="html"><![CDATA[<p>偶一直比较喜欢新产品并很愿意去尝试，虽说特喜欢Linux，但Win8正式版发布后，立即将公司的笔记本第一时间从Ubuntu 10.04迁移到Win8 64位企业版，本文不介绍Win8、不介绍安装Oracle11g，而是记录偶在Win8系统通过PL/SQL连接Oracle的经过，以便于各位看客少走弯路，此问题折腾偶整整一天，费话就此打住，开始：</p>
+
+<ol>
+<li><p>首先您得安装一个Oracle 11g 64位，建议只安装数据库软件，不创建数据库实例，偶安装后的路径：E:\app\agen\product\11.2.0\dbhome_1Oracle database 11g For Windows 共有2安装包，下载地址：<a href="http://download.oracle.com/otn/nt/oracle11g/112010/win64_11gR2_database_1of2.zip" title="iso1">iso1</a>  | <a href="http://download.oracle.com/otn/nt/oracle11g/112010/win64_11gR2_database_2of2.zip" title="iso2">iso2</a></p></li>
+<li><p>必须再安装一个Oracle 11g 32位的客户端，下载地址：<a href="http://download.oracle.com/otn/nt/instantclient/112010/instantclient-basic-win32-11.2.0.1.0.zip" title="instantclient-basic">instantclient-basic-win32-11.2.0.1.0</a>将 instantclient_11_2 解压到：E:\app\agen\product，并把 tnsnames.ora 复制到instantclient_11_2下；</p></li>
+<li><p>安装PL/SQL DEV，安装包、注册码及汉化包，请见：<a href="http://www.oracle.com.cn/viewthread.php?tid=158668" title="PLSQL DEV +注册机 + 汉">PL/SQL Dev + 注册机 + 官方简体中文</a>，安装后，在登录时选择取消，弹出PLSQL DEV的界面，选择：“工具”-&gt;“首选项”，分别设置如下：</p></li>
+<li><p>Oracle 主目录名：E:\app\agen\product\instantclient_11_2</p></li>
+<li><p>OCI库：E:\app\agen\product\instantclient_11_2\oci.dll</p></li>
+</ol>
+
+
+<p> 点击“应用”->“确定”，并关闭PL/SQL。</p>
+
+<ol>
+<li>设置环境变量：</li>
+<li>在系统环境变量，选择“Path”，点击“编辑”，在最前面加入以下路径：E:\app\agen\product\instantclient_11_2，并确认。</li>
+<li>新建变量名称：TNS_ADMIN， 变量值：E:\app\agen\product\instantclient_11_2(因为我们的tnsnames.ora在这里啦)。</li>
+<li>新建变量名称：NLS_LANG， 变量值：SIMPLIFIED CHINESE_CHINA.ZHS16GBK</li>
+</ol>
+
+
+<p> 请注意,此变量值通过以下SQL语句在数据库服务器得到：
+<code>
+SELECT userenv(‘language’) nls_lang FROM dual;
+</code>
+最后启动PLSQL，如果您所有步骤顺利通过，就可连接到数据库。</p>
+]]></content>
+  </entry>
+  
+</feed>
