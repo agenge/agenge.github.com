@@ -1,0 +1,586 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>awstats 安装与配置分析IIS日志 - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="1、准备环境： Windows Server 2003
+IIS 6
+ActivePerl-5.16
+awstats-7.0 2、安装ActivePerl 安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为： 32位：ActivePerl-5.16.2 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/02/04/awstats-install-conf">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-6520474-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Awstats 安装与配置分析IIS日志</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-04T00:00:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>1、准备环境：</h2>
+
+<ul>
+<li>Windows Server 2003</li>
+<li>IIS 6</li>
+<li>ActivePerl-5.16</li>
+<li>awstats-7.0</li>
+</ul>
+
+
+<h2>2、安装ActivePerl</h2>
+
+<p>安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为：</p>
+
+<p>32位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x86-296513.msi">ActivePerl-5.16.2</a>                    64位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x64-296513.msi">ActivePerl-5.16.2</a></p>
+
+<p>ActivePerl 的具体安装步骤就不再写出，只管点击“下一步”，安装完之后确认是否已经安装Perl，例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>C:\Documents and Settings\Administrator&gt;perl -v
+</span><span class='line'>
+</span><span class='line'>This is perl 5, version 16, subversion 2 (v5.16.2) built for MSWin32-x86-multi-t
+</span><span class='line'>hread
+</span><span class='line'>(with 1 registered patch, see perl -V for more detail)
+</span><span class='line'>
+</span><span class='line'>Copyright 1987-2012, Larry Wall
+</span><span class='line'>
+</span><span class='line'>Binary build 1602 [296513] provided by ActiveState http://www.ActiveState.com
+</span><span class='line'>Built Dec 19 2012 12:35:59
+</span><span class='line'>
+</span><span class='line'>Perl may be copied only under the terms of either the Artistic License or the
+</span><span class='line'>GNU General Public License, which may be found in the Perl 5 source kit.
+</span><span class='line'>
+</span><span class='line'>Complete documentation for Perl, including FAQ lists, should be found on
+</span><span class='line'>this system using "man perl" or "perldoc perl". If you have access to the
+</span><span class='line'>Internet, point your browser at http://www.perl.org/, the Perl Home Page.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如何没有以上类似信息输出，请确认环境变量是否正确。</p>
+
+<!-- more -->
+
+
+<h2>3、安装awstats</h2>
+
+<p>安装之后就会弹出一个DOS窗口，如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>----- AWStats awstats_configure 1.0 (build 1.9) (c) Laurent Destailleur -----
+</span><span class='line'>This tool will help you to configure AWStats to analyze statistics for
+</span><span class='line'>one web server. You can try to use it to let it do all that is possible
+</span><span class='line'>in AWStats setup, however following the step by step manual setup
+</span><span class='line'>documentation (docs/index.html) is often a better idea. Above all if:
+</span><span class='line'>- You are not an administrator user,
+</span><span class='line'>- You want to analyze downloaded log files without web server,
+</span><span class='line'>- You want to analyze mail or ftp log files instead of web log files,
+</span><span class='line'>- You need to analyze load balanced servers log files,
+</span><span class='line'>- You want to 'understand' all possible ways to use AWStats...
+</span><span class='line'>Read the AWStats documentation (docs/index.html).
+</span><span class='line'>
+</span><span class='line'>-----&gt; Running OS detected: Windows
+</span><span class='line'>
+</span><span class='line'>-----&gt; Check for web server install
+</span><span class='line'>awstats_configure did not find your Apache web main runtime.
+</span><span class='line'>
+</span><span class='line'>Please, enter full directory path of your Apache web server or
+</span><span class='line'>'none' to skip this step if you don't have local web server or
+</span><span class='line'>don't have permission to change its setup.
+</span><span class='line'>Example: c:\Program files\apache group\apache
+</span><span class='line'>Apache Web server path ('none' to skip):
+</span><span class='line'>&gt; none
+</span><span class='line'>
+</span><span class='line'>Your web server config file(s) could not be found.
+</span><span class='line'>You will need to setup your web server manually to declare AWStats
+</span><span class='line'>script as a CGI, if you want to build reports dynamically.
+</span><span class='line'>See AWStats setup documentation (file docs/index.html)
+</span><span class='line'>
+</span><span class='line'>-----&gt; Update model config file 'C:/Program Files/AWStats\wwwroot\cgi-bin\awstat
+</span><span class='line'>s.model.conf'
+</span><span class='line'>File awstats.model.conf updated.
+</span><span class='line'>
+</span><span class='line'>-----&gt; Need to create a new config file ?
+</span><span class='line'>Do you want me to build a new AWStats config/profile
+</span><span class='line'>file (required if first install) [y/N] ? y
+</span><span class='line'>
+</span><span class='line'>-----&gt; Define config file name to create
+</span><span class='line'>What is the name of your web site or profile analysis ?
+</span><span class='line'>Example: www.mysite.com
+</span><span class='line'>Example: demo
+</span><span class='line'>Your web site, virtual server or profile name:
+</span><span class='line'>&gt; yfb.10086.cn
+</span><span class='line'>
+</span><span class='line'>-----&gt; Create config file 'C:/Program Files/AWStats\wwwroot\cgi-bin\awstats.yfb.
+</span><span class='line'>10086.cn.conf'
+</span><span class='line'>Config file C:/Program Files/AWStats\wwwroot\cgi-bin\awstats.yfb.10086.cn.conf
+</span><span class='line'>created.
+</span><span class='line'>
+</span><span class='line'>-----&gt; Add update process inside a scheduler
+</span><span class='line'>Sorry, for Windows users, if you want to have statistics to be
+</span><span class='line'>updated on a regular basis, you have to add the update process
+</span><span class='line'>in a scheduler task manually (See AWStats docs/index.html).
+</span><span class='line'>Press ENTER to continue...      # 按回车
+</span><span class='line'>A SIMPLE config file has been created: C:/Program Files/AWStats\wwwroot\cgi-bin\
+</span><span class='line'>awstats.yfb.10086.cn.conf
+</span><span class='line'>You should have a look inside to check and change manually main parameters.
+</span><span class='line'>You can then manually update your statistics for 'yfb.10086.cn' with command:
+</span><span class='line'>&gt; perl awstats.pl -update -config=yfb.10086.cn
+</span><span class='line'>You can also build static report pages for 'yfb.10086.cn' with command:
+</span><span class='line'>&gt; perl awstats.pl -output=pagetype -config=yfb.10086.cn
+</span><span class='line'>
+</span><span class='line'>Press ENTER to finish...       # 按回车</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>4、awstats 配置</h2>
+
+<h3>4.1 配置日志格式</h3>
+
+<p>右击“yfb.10086.cn”->“属性”，在“网站”选项卡选择“W3C 扩展日志文件格式”，点击“属性”->“高级”，确保以下字段勾选，其他全部取消：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>date
+</span><span class='line'>time
+</span><span class='line'>c-ip
+</span><span class='line'>cs-username
+</span><span class='line'>cs-method
+</span><span class='line'>cs-uri-stem
+</span><span class='line'>cs-uri-query
+</span><span class='line'>sc-status
+</span><span class='line'>sc-bytes
+</span><span class='line'>cs-version
+</span><span class='line'>cs(User-Agent)
+</span><span class='line'>cs(Referer)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4.2 建立虚拟目录</h3>
+
+<ul>
+<li><p>建立虚拟目录cgi-bin,在网站节点下点击“yfb.10086.cn”->“新建”->“虚拟目录”，下一步，别名填写：cgi-bin，路径为C:\Program Files\AWStats\wwwroot\cgi-bin，权限设置为：读取、运行脚本、执行；</p></li>
+<li><p>建立虚拟目录icon,在网站节点下点击“yfb.10086.cn”->“新建”->“虚拟目录”，下一步，别名填写：icon，路径为C:\Program Files\AWStats\wwwroot\icon，权限设置为：读取、运行脚本、执行；</p></li>
+</ul>
+
+
+<h3>4.3 修改awstats.domain_name.conf</h3>
+
+<p>例如：awstats.yfb.10086.cn.conf，路径为网站根目录下的cgi-bin，打开awstats.yfb.10086.cn.conf并修改以下几个变量值：</p>
+
+<ul>
+<li>LogFile修改为：LogFile=&ldquo;C:/WINDOWS/system32/LogFiles/W3SVC1237985490/ex%YY-24%MM-24%DD-24.log&#8221;，修改之前确保C:/WINDOWS/system32/LogFiles/W3SVC1237985490 这个路径已经存在。</li>
+<li>LogType 默认值（W）即可，W表示 web log ，S 为流日志，M为邮件日志，F为FTP日志。</li>
+<li>LogFormat 修改为LogFormat=2，表示IIS日志，1表示Apache日志。</li>
+</ul>
+
+
+<p>更新：根据IIS在实际情况下来看，此处设置2仍然无法按照我们之前设置的日志格式打印日志，所以设置成：</span></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>LogFormat="date time cs-method cs-uri-stem cs-username c-ip cs-version cs(User-Agent) cs(Referer) sc-status sc-bytes"</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>AllowToUpdateStatsFromBrowser 设置为1，表示允许从浏览器手动更新，但需要修改日志目录的权限为&#8221;IUSR_XXX&#8221; 读写，设置为0表示只允许从命令行更新；</li>
+<li>将LoadPlugin=&ldquo;timezone +2&#8221;修改为LoadPlugin=&#8221;timezone +8&#8221;，并将最前面的“#”号删除。</li>
+</ul>
+
+
+<h3>4.4 重启IIS</h3>
+
+<p>重启IIS后，并删除C:/WINDOWS/system32/LogFiles/W3SVC1237985490目录下所有的日志。</p>
+
+<h2>5、生成awstats数据</h2>
+
+<h3>5.1 手动生成awstats 数据</h3>
+
+<p>打开一个DOS窗口，并切换到网站根目录/cgi-bin，执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt;perl awstats.pl -config=yfb.10086.cn -update
+</span><span class='line'>
+</span><span class='line'>Create/Update database for config "./awstats.yfb.10086.cn.conf" by AWStats versi
+</span><span class='line'>on 7.0 (build 1.971)
+</span><span class='line'>From data in log file "C:/WINDOWS/system32/LogFiles/W3SVC1237985490/ex130130.log
+</span><span class='line'>"...
+</span><span class='line'>Phase 1 : First bypass old records, searching new record...
+</span><span class='line'>Searching new records from beginning of log file...
+</span><span class='line'>Phase 2 : Now process new records (Flush history on disk after 20000 hosts)...
+</span><span class='line'>Jumped lines in file: 0
+</span><span class='line'>Parsed lines in file: 84
+</span><span class='line'>Found 0 dropped records,
+</span><span class='line'>Found 4 comments,
+</span><span class='line'>Found 0 blank records,
+</span><span class='line'>Found 0 corrupted records,
+</span><span class='line'>Found 0 old records,
+</span><span class='line'>Found 80 new qualified records.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果报以下错误：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Create/Update database for config "./awstats.yfb.10086.cn.conf" by AWStats versi
+</span><span class='line'>on 7.0 (build 1.971)
+</span><span class='line'>From data in log file "C:/WINNT/system32/LogFiles/W3SVC1237985490/ex130130.log".
+</span><span class='line'>..
+</span><span class='line'>Error: Couldn't open server log file "C:/WINNT/system32/LogFiles/W3SVC1237985490
+</span><span class='line'>/ex130130.log" : No such file or directory
+</span><span class='line'>Setup ('./awstats.yfb.10086.cn.conf' file, web server or permissions) may be wrong.
+</span><span class='line'>Check config file, permissions and AWStats documentation (in 'docs' directory).</span></code></pre></td></tr></table></div></figure>
+
+
+<p>请确保你的日志文件路径是否写正确，日志目录是否有权限等；</p>
+
+<p>由于每次都需要手动生成数据，对于我们这种懒人来讲是不可接受的，那怎么自动生成数据呢？</p>
+
+<p>5.2 自动生成awstats数据</p>
+
+<p>首先，您得在C:\Program Files\AWStats\wwwroot\cgi-bin目录创建一个批处理：awstatsUpdate.bat，内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd C:/
+</span><span class='line'>cd C:\Program Files \AWStats\wwwroot\cgi-bin
+</span><span class='line'>perl awstats.pl -config=yfb.10086.cn -update</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意：以上部分需要根据您的实际情况修改，yfb.10086.cn是需要偶自己的内网域名，千万不可盲目复制。</p>
+
+<p>创建之后，您最好在DOS窗口单独测试下是否能正常运行，如无问题再添加计划任务。</p>
+
+<p>如何增加一个计划任务的具体步骤由于过于简单此不再写出，相信您肯定会添加计划任务，至于任务的调度时间要根据您的需求来定，5分钟也好、5小时也罢，适合您的需求就好，例如本人就是设置的5分钟。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-04T00:00:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ri-zhi-fen-xi/'>日志分析</a>, <a class='category' href='/blog/categories/yun-wei/'>运维</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/03/08/hyper-v-01/" title="Next Post: Hyper-V使用手册之部署与安装">Hyper-V使用手册之部署与安装 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

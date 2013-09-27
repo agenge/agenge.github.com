@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-09-27T10:26:20+08:00</updated>
+  <updated>2013-09-27T15:00:27+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -3994,7 +3994,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#116;&#101;&#115;&#x74;&#x5f;&#x7a;&#x61;&#98;&#x62;&#105;&#x78;&#x40;&#x67;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;">&#116;&#101;&#115;&#x74;&#95;&#122;&#x61;&#x62;&#98;&#x69;&#120;&#x40;&#103;&#109;&#97;&#105;&#x6c;&#46;&#99;&#x6f;&#109;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#x74;&#101;&#x73;&#116;&#95;&#x7a;&#97;&#98;&#x62;&#105;&#x78;&#64;&#x67;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#116;&#101;&#115;&#116;&#x5f;&#x7a;&#97;&#x62;&#x62;&#105;&#120;&#64;&#103;&#109;&#97;&#x69;&#x6c;&#x2e;&#99;&#111;&#109;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -5776,6 +5776,634 @@ PassengerRuby /usr/bin/ruby
 <p>介个时间分布的统计方式有严重Bug，偶每天6:50起床，00:00&mdash;6:50之间的数据何来？现在看来此问题只有多看团队能够解答。</p>
 
 <p>最后，希望多看团队再接再厉吧，尽管Kindle原生系统已经非常优秀，但偶更喜欢对中文支持最好的多看系统。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hyper-V使用手册之部署与安装]]></title>
+    <link href="http://agenge.github.io/blog/2013/03/08/hyper-v-01/"/>
+    <updated>2013-03-08T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/03/08/hyper-v-01</id>
+    <content type="html"><![CDATA[<h2>安装Hyper-V前提条件</h2>
+
+<ul>
+<li>先决条件一：基于Windows Server 2008 64bit的标准版、企业版、数据中心版.</li>
+<li>先决条件二：硬件辅助虚拟化，即只有特定的CPU虚拟化选项，通常Intel 的技术叫：Intel-VT(Vanderpool Technology)，而AMD称为：AMD-V。 通常，绝大部分主板的BIOS在默认情况下未开启VT技术，需要自行进入BIOS修改。</li>
+<li>先决条件三：硬件数据执行保护（DEP. 需要开启，如果CPU支持Windwos Server 2008，默认即开启。</li>
+<li>快速检测系统是否支持虚拟化：</li>
+<li>使用工具securable可轻松检测，三个选项必须全部支持，即全部是绿色的。</li>
+<li>使用工具EVEREST（需要安装. 也可检测CPU是否支持VT，即Menu->Motherboard->CPUID->Virtual Machine Extensions(Vanderpool)，例如下图：</li>
+</ul>
+
+
+<p><img src="http://agenge.github.io/images/2013/03/vtdisabled.png"></p>
+
+<p>表示此计算机不支持VT。</p>
+
+<h2>2、安装Hyper-V及虚拟机</h2>
+
+<h3>2.1 安装Hyper-V</h3>
+
+<p>默认情况下，Windows Server 2008 R2 没有安装Hyper-V相关包，需要手动安装才可使用，过程如下：</p>
+
+<p>点击系统任务栏的“服务器管理器”，在左侧的菜单栏点击角色，这里右侧会相应的显示角色相关信息，在角色摘要下的右边，点击”添加角色”，如：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/c2-01.png"></p>
+
+<p>点击”添加角色”之后，将会进入“添加角色向导”，点击下一步，在”选择服务器角色”页，勾选Hyper-V，如下图所示：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/c2-02.png"></p>
+
+<p>默认一直点“下一步”->“安装”，完成后需要重启服务器，如图所示：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/c2-03.png"></p>
+
+<p>点击“关闭”再确定“重启服务器”就已经完成Hyper-V的安装。如果服务器不支持Hyper-V，则会提示无法安装，如下图所示：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/c2-04.png"></p>
+
+<h3>2.2 安装虚拟机</h3>
+
+<h4>2.1.1 连接Hyper-V管理器</h4>
+
+<p>安装Hyper-V之后，必然要进行安装虚拟操作系统，即虚拟机，首先打开”服务器管器”(Windows7、8可直接打开Hyper-V管理器,依次展开：角色=>Hyper-V=>Hyper-V管理器，
+在最右边的“操作”面板点击“连接到服务器”，在随即出来的“选择计算机”对话框点击“确定”，如下图所示：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/c2-05.png"></p>
+
+<ul>
+<li>第一步、新建虚拟机（以下为Win8英文环境. ：
+点击最右侧“Action”栏下面的“New”：</li>
+</ul>
+
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-06.png"></p>
+
+<p> 点击后将会有3个选择：虚拟机(Virtual Machine)、磁盘(Hard Disk)、软盘(Floppy Disk)，选择“Virtual Machine”进入第二步。</p>
+
+<ul>
+<li>第二步、虚拟机命名：</li>
+</ul>
+
+
+<p> 在”New Virtual Machine Wizard”页的”Name”处键入虚拟机的名称，如MS2008：</p>
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-07.png"></p>
+
+<p> 点击“Next”。</p>
+
+<ul>
+<li>第三步、内存分配：</li>
+</ul>
+
+
+<p> 在“分配内存”页键入需要的内存，例如输入“1024”：</p>
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-08.png"></p>
+
+<p> 点击“Next”。</p>
+
+<ul>
+<li>第四步、网络配置：</li>
+</ul>
+
+
+<p> 在“网络配置”页暂时不选择,如下图：</p>
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-09.png"></p>
+
+<p> 点击“Next”。</p>
+
+<ul>
+<li>第五步、创建虚拟磁盘：</li>
+</ul>
+
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-10.png"></p>
+
+<p> 创建一个虚拟磁盘</li>
+  * Name:：虚拟磁盘的名字，一个虚拟机可配置多个硬盘，在同一个目录下，虚拟磁盘名字必须唯一；
+  * Location：虚拟磁盘存储位置，默认存放在C盘，点击右侧的“Browser”可自定义虚拟磁盘存储位置；</p>
+
+<p> <strong><em>建议：如果在有条件的环境下，建议将每个虚拟机对应的虚拟磁盘单独放在一个磁盘分区，甚至将每个虚拟磁盘单独存放在单独的磁盘分区。如果条件有限，建议将虚拟磁盘文件尽量放在空闲的系统分区。</em></strong></p>
+
+<ul>
+<li>Size：默认情况下是 127GB，单个虚拟磁盘最大值为64T；</li>
+</ul>
+
+
+<p> 注：此处127GB并不会马上扩展，而是动态扩展，也可自定义大小，最小值依所安装的操作系统而定。
+ * 选择一个已存在的虚拟磁盘</li></p>
+
+<p>  <img src="http://agenge.github.io/images/2013/03/c2-11.png"></p>
+
+<p>  <!-- more -->
+  选择已存在的虚拟磁盘，所下图：</p>
+
+<p>  <img src="http://agenge.github.io/images/2013/03/c2-12.png"></p>
+
+<p>  点击“下一步”=>“完成”，开始创建虚拟机。</p>
+
+<ul>
+<li>稍后添加一个虚拟磁盘</li>
+</ul>
+
+
+<p>  选择此选项的原因可能有多方面：</p>
+
+<ul>
+<li> 第一，可能已经存在需要的虚拟磁盘；</li>
+<li><p> 第二，可能计划在此后通过”新建虚拟磁盘向导”自定义创建磁盘，例如创建固定大小的磁盘，而非创建动态虚拟磁盘。</p></li>
+<li><p>第六步、安装虚拟机选项：</p></li>
+</ul>
+
+
+<p> 此处共3个选项：</p>
+
+<ul>
+<li>稍后安装操作系统：在完成创建虚拟机后选择引导方式.</li>
+<li>从CD/DVD-ROM引导并安装操作系统，可分两种方式引导.</li>
+<li>Media：通过物理CD/DVD引导.</li>
+<li>Image file(.iso)：通过镜像文件引导操作系统，即.ISO文件.</li>
+</ul>
+
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-131.png"></p>
+
+<ul>
+<li><p>从软盘引导并安装操作系统: 不过多介绍，现在几乎不用此方式，也不推荐使用.</p></li>
+<li><p>第七步、完成创建虚拟机向导，即摘要：</p></li>
+</ul>
+
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-14.png"></p>
+
+<p> 点击“Finish”开始创建，此时可看到整个过程的执行进度，创建完成后可在Hyper-V管理器中看到刚才创建的虚拟机“MS2008”：</p>
+
+<p> <img src="http://agenge.github.io/images/2013/03/c2-15.png"></p>
+
+<h4>2.1.2 连接并创建虚拟机</h4>
+
+<p>连接刚才所创建的虚拟机，并启动及引导安装操作系统，连接虚拟机方式：</p>
+
+<ul>
+<li><p>双击要启动的虚拟机；</p></li>
+<li><p>点击Hyper-V管理器右下方的Connect；</p></li>
+</ul>
+
+
+<p><img src="http://agenge.github.io/images/2013/03/c2-16.png"></p>
+
+<p>点击
+<img src="http://agenge.github.io/images/2013/03/c2-17.png">
+即可启动引导安装操作系统，之后的操作系统安装步骤本文不做介绍同，如有需要，请自行到网络上查找。</p>
+
+<h2>3. Hyper-V网络管理</h2>
+
+<p>在默认情况下，新建的虚拟机无法连接网络，那要如何配置才能上网？ 在介绍之前先说下Hyper-V的三种网络类型：</p>
+
+<p>在Hyper-V中，有3种不同的网络配置方式(本例主要介绍 External 类型，其他类型请读者自行测试)：</p>
+
+<ol>
+<li><p>External：让虚拟机与外部的网络连通，即使用单独的IP地址；</p></li>
+<li><p>Internal：让多台虚拟机之间内部连通，也可通过VLan将多个网络隔开；</p></li>
+<li><p>Private：独立的网络，不与任何外部网络连接；</p></li>
+</ol>
+
+
+<p><em><em>_注意：由于在创建虚拟网络过程中，会导致服务器的网络暂时中断不到1分钟，故在创建虚拟网络之前，一定要确保是在服务器本地操作，远程桌面连接的同学一定要注意。</em>)</em></p>
+
+<p>创建External 网络类型示例如下：</p>
+
+<ol>
+<li>在Hyper-V管理器主界面的右边的”Virtual Switch Manager”之后，出现如下图：</li>
+</ol>
+
+
+<p> <img src="http://agenge.github.io/images/2013/03/c3-01.png"></p>
+
+<ol>
+<li>选中(默认)“External”后，点击“Create Virtual Switch”，如下所示：</li>
+</ol>
+
+
+<p> <img src="http://agenge.github.io/images/2013/03/c3-02.png"></p>
+
+<p> 这里有两个地方需要注意：</p>
+
+<ul>
+<li><p>“Name”可以自定义，示例中叫：MyExternal。</p></li>
+<li><p>在外部网络(External network)选项下面点击图中第二个红色框的下拉菜单选择具体的网卡，</p></li>
+</ul>
+
+
+<p> 点击“Apply”，再点击“Yes”(点击Yes之前，请仔细阅读本章开始处的提醒)，开始创建虚拟网络，
+在创建完之后，点击“Ok”即完成创建虚拟网络的整个过程。</p>
+
+<h2>3、Hyper-V 存储设置</h2>
+
+<p>对于虚拟机来说，存储的设计及设置无疑成为了Hyper-V管理员最为头疼的问题，存储的设置好与坏直接决定着虚拟机的性能，甚至整个虚拟化项目的性能。本节主要从两方面介绍磁盘创建和管理相关设置。</p>
+
+<h3>3.1 磁盘管理</h3>
+
+<p>在Hyper-V管理器主界面点击“编辑磁盘”，在弹出的“编辑虚拟磁盘向导”点击浏览，并选择要进行</p>
+
+<p>编辑的虚拟磁盘，如下图所示：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/c4-01.png"></p>
+
+<p>点击“下一步”后将会有3个选择：</p>
+
+<p><img src="http://agenge.github.io/images/2013/03/c4-02.png"></p>
+
+<p>三个选项的详细介绍如下：</p>
+
+<ol>
+<li>压缩：该选项通过删除从磁盘中删除数据时留下的空白空间来减小虚拟硬盘文件的大小。</li>
+</ol>
+
+
+<p> 这里再通过一个例子来解释一下：假如原来的虚拟磁盘因为种种原因，已经从最开始的20G占用空间增加到60G占用空间，而现在为了节省虚拟机的磁盘空间，要删除约20G的垃圾数据以便留出空间（还有40G数据. ，但删除后，对应的虚拟磁盘文件在宿主机看来并不会因为虚拟机的数据删除而减少空间（还有60G. ，此时就需要通过压缩来减小虚拟磁盘的文件大小，压缩后的大小约为40G。直接点“下一步”=&gt;”完成”，就完成虚拟磁盘的压缩操作。</p>
+
+<ol>
+<li><p>转换：该选项主要是将动态扩展的虚拟磁盘文件转换为固定大小的磁盘文件，该操作是无损的，即转换时不会对虚拟磁盘文件造成任何损坏。点击“下一步”，选择要存储虚拟磁盘文件的名称和具体位置，再点击“完成”。</p></li>
+<li><p>扩展：该选项可扩展虚拟磁盘的容量。这个比较好理解，即在原有的基础上增加虚拟磁盘的大小，例如原来有50G的虚拟磁盘空间不够使用，通过扩展增加到80G或者更多，最大为2T。点击“下一步”，并输入虚拟磁盘空间的大小，最大值为2T。</p></li>
+</ol>
+
+
+<p> 另，为了数据的安全性及虚拟机的稳定性，建议选择在业务空闲时关闭虚拟机操作。如果只是测试，那可随意操作。</p>
+
+<h3>3.2 磁盘创建</h3>
+
+<p>Hyper-V支持两种磁盘类型：虚拟磁盘和物理磁盘，两种磁盘类型的性能不用多说，物理磁盘肯定强过虚拟磁盘N倍，但并不是说虚拟磁盘并无任何优势，虚拟磁盘的优势主要有以下几点：</p>
+
+<ul>
+<li><p>VHD文件类型较多: 固定虚拟磁盘、动态虚拟磁盘及差异虚拟磁盘，可灵活选择。固定和动态
+虚拟磁盘不过多介绍，而差异虚拟磁盘主要存储所关联的父盘修改后的数据。</p></li>
+<li><p>管理简单、维护成本低：随时备份VHD文件、随时迁移VHD文件、可很方便调整VHD文件的大小 ，从而也使得维护成本较低。</p></li>
+</ul>
+
+
+<p>创建虚拟磁盘可通过两种方式：</p>
+
+<ol>
+<li><p>在Hyper-V管理器左面板的服务器节点右击，“新建”=&gt;“硬盘”。</p></li>
+<li><p>点击右面板的“新建”=&gt;“硬盘”，连续单击“下一步”，选择虚拟磁盘类型，”下一步”再选择虚拟磁盘名称和文件存储位置，再次单击“下一步”转到“配置磁盘”，所下图所示：</p></li>
+</ol>
+
+
+<p><img src="http://agenge.github.io/images/2013/03/c4-03.png"></p>
+
+<p>本次先讲到这里，下次将介绍Hyper-V的高级知识，例如动态内存管理、动态迁移等；</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[awstats 安装与配置分析IIS日志]]></title>
+    <link href="http://agenge.github.io/blog/2013/02/04/awstats-install-conf/"/>
+    <updated>2013-02-04T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/02/04/awstats-install-conf</id>
+    <content type="html"><![CDATA[<h2>1、准备环境：</h2>
+
+<ul>
+<li>Windows Server 2003</li>
+<li>IIS 6</li>
+<li>ActivePerl-5.16</li>
+<li>awstats-7.0</li>
+</ul>
+
+
+<h2>2、安装ActivePerl</h2>
+
+<p>安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为：</p>
+
+<p>32位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x86-296513.msi">ActivePerl-5.16.2</a>                    64位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x64-296513.msi">ActivePerl-5.16.2</a></p>
+
+<p>ActivePerl 的具体安装步骤就不再写出，只管点击“下一步”，安装完之后确认是否已经安装Perl，例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>C:\Documents and Settings\Administrator&gt;perl -v
+</span><span class='line'>
+</span><span class='line'>This is perl 5, version 16, subversion 2 (v5.16.2) built for MSWin32-x86-multi-t
+</span><span class='line'>hread
+</span><span class='line'>(with 1 registered patch, see perl -V for more detail)
+</span><span class='line'>
+</span><span class='line'>Copyright 1987-2012, Larry Wall
+</span><span class='line'>
+</span><span class='line'>Binary build 1602 [296513] provided by ActiveState http://www.ActiveState.com
+</span><span class='line'>Built Dec 19 2012 12:35:59
+</span><span class='line'>
+</span><span class='line'>Perl may be copied only under the terms of either the Artistic License or the
+</span><span class='line'>GNU General Public License, which may be found in the Perl 5 source kit.
+</span><span class='line'>
+</span><span class='line'>Complete documentation for Perl, including FAQ lists, should be found on
+</span><span class='line'>this system using "man perl" or "perldoc perl". If you have access to the
+</span><span class='line'>Internet, point your browser at http://www.perl.org/, the Perl Home Page.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如何没有以上类似信息输出，请确认环境变量是否正确。</p>
+
+<!-- more -->
+
+
+<h2>3、安装awstats</h2>
+
+<p>安装之后就会弹出一个DOS窗口，如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>----- AWStats awstats_configure 1.0 (build 1.9) (c) Laurent Destailleur -----
+</span><span class='line'>This tool will help you to configure AWStats to analyze statistics for
+</span><span class='line'>one web server. You can try to use it to let it do all that is possible
+</span><span class='line'>in AWStats setup, however following the step by step manual setup
+</span><span class='line'>documentation (docs/index.html) is often a better idea. Above all if:
+</span><span class='line'>- You are not an administrator user,
+</span><span class='line'>- You want to analyze downloaded log files without web server,
+</span><span class='line'>- You want to analyze mail or ftp log files instead of web log files,
+</span><span class='line'>- You need to analyze load balanced servers log files,
+</span><span class='line'>- You want to 'understand' all possible ways to use AWStats...
+</span><span class='line'>Read the AWStats documentation (docs/index.html).
+</span><span class='line'>
+</span><span class='line'>-----&gt; Running OS detected: Windows
+</span><span class='line'>
+</span><span class='line'>-----&gt; Check for web server install
+</span><span class='line'>awstats_configure did not find your Apache web main runtime.
+</span><span class='line'>
+</span><span class='line'>Please, enter full directory path of your Apache web server or
+</span><span class='line'>'none' to skip this step if you don't have local web server or
+</span><span class='line'>don't have permission to change its setup.
+</span><span class='line'>Example: c:\Program files\apache group\apache
+</span><span class='line'>Apache Web server path ('none' to skip):
+</span><span class='line'>&gt; none
+</span><span class='line'>
+</span><span class='line'>Your web server config file(s) could not be found.
+</span><span class='line'>You will need to setup your web server manually to declare AWStats
+</span><span class='line'>script as a CGI, if you want to build reports dynamically.
+</span><span class='line'>See AWStats setup documentation (file docs/index.html)
+</span><span class='line'>
+</span><span class='line'>-----&gt; Update model config file 'C:/Program Files/AWStats\wwwroot\cgi-bin\awstat
+</span><span class='line'>s.model.conf'
+</span><span class='line'>File awstats.model.conf updated.
+</span><span class='line'>
+</span><span class='line'>-----&gt; Need to create a new config file ?
+</span><span class='line'>Do you want me to build a new AWStats config/profile
+</span><span class='line'>file (required if first install) [y/N] ? y
+</span><span class='line'>
+</span><span class='line'>-----&gt; Define config file name to create
+</span><span class='line'>What is the name of your web site or profile analysis ?
+</span><span class='line'>Example: www.mysite.com
+</span><span class='line'>Example: demo
+</span><span class='line'>Your web site, virtual server or profile name:
+</span><span class='line'>&gt; yfb.10086.cn
+</span><span class='line'>
+</span><span class='line'>-----&gt; Create config file 'C:/Program Files/AWStats\wwwroot\cgi-bin\awstats.yfb.
+</span><span class='line'>10086.cn.conf'
+</span><span class='line'>Config file C:/Program Files/AWStats\wwwroot\cgi-bin\awstats.yfb.10086.cn.conf
+</span><span class='line'>created.
+</span><span class='line'>
+</span><span class='line'>-----&gt; Add update process inside a scheduler
+</span><span class='line'>Sorry, for Windows users, if you want to have statistics to be
+</span><span class='line'>updated on a regular basis, you have to add the update process
+</span><span class='line'>in a scheduler task manually (See AWStats docs/index.html).
+</span><span class='line'>Press ENTER to continue...      # 按回车
+</span><span class='line'>A SIMPLE config file has been created: C:/Program Files/AWStats\wwwroot\cgi-bin\
+</span><span class='line'>awstats.yfb.10086.cn.conf
+</span><span class='line'>You should have a look inside to check and change manually main parameters.
+</span><span class='line'>You can then manually update your statistics for 'yfb.10086.cn' with command:
+</span><span class='line'>&gt; perl awstats.pl -update -config=yfb.10086.cn
+</span><span class='line'>You can also build static report pages for 'yfb.10086.cn' with command:
+</span><span class='line'>&gt; perl awstats.pl -output=pagetype -config=yfb.10086.cn
+</span><span class='line'>
+</span><span class='line'>Press ENTER to finish...       # 按回车</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>4、awstats 配置</h2>
+
+<h3>4.1 配置日志格式</h3>
+
+<p>右击“yfb.10086.cn”->“属性”，在“网站”选项卡选择“W3C 扩展日志文件格式”，点击“属性”->“高级”，确保以下字段勾选，其他全部取消：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>date
+</span><span class='line'>time
+</span><span class='line'>c-ip
+</span><span class='line'>cs-username
+</span><span class='line'>cs-method
+</span><span class='line'>cs-uri-stem
+</span><span class='line'>cs-uri-query
+</span><span class='line'>sc-status
+</span><span class='line'>sc-bytes
+</span><span class='line'>cs-version
+</span><span class='line'>cs(User-Agent)
+</span><span class='line'>cs(Referer)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4.2 建立虚拟目录</h3>
+
+<ul>
+<li><p>建立虚拟目录cgi-bin,在网站节点下点击“yfb.10086.cn”->“新建”->“虚拟目录”，下一步，别名填写：cgi-bin，路径为C:\Program Files\AWStats\wwwroot\cgi-bin，权限设置为：读取、运行脚本、执行；</p></li>
+<li><p>建立虚拟目录icon,在网站节点下点击“yfb.10086.cn”->“新建”->“虚拟目录”，下一步，别名填写：icon，路径为C:\Program Files\AWStats\wwwroot\icon，权限设置为：读取、运行脚本、执行；</p></li>
+</ul>
+
+
+<h3>4.3 修改awstats.domain_name.conf</h3>
+
+<p>例如：awstats.yfb.10086.cn.conf，路径为网站根目录下的cgi-bin，打开awstats.yfb.10086.cn.conf并修改以下几个变量值：</p>
+
+<ul>
+<li>LogFile修改为：LogFile=&ldquo;C:/WINDOWS/system32/LogFiles/W3SVC1237985490/ex%YY-24%MM-24%DD-24.log&#8221;，修改之前确保C:/WINDOWS/system32/LogFiles/W3SVC1237985490 这个路径已经存在。</li>
+<li>LogType 默认值（W）即可，W表示 web log ，S 为流日志，M为邮件日志，F为FTP日志。</li>
+<li>LogFormat 修改为LogFormat=2，表示IIS日志，1表示Apache日志。</li>
+</ul>
+
+
+<p>更新：根据IIS在实际情况下来看，此处设置2仍然无法按照我们之前设置的日志格式打印日志，所以设置成：</span></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>LogFormat="date time cs-method cs-uri-stem cs-username c-ip cs-version cs(User-Agent) cs(Referer) sc-status sc-bytes"</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>AllowToUpdateStatsFromBrowser 设置为1，表示允许从浏览器手动更新，但需要修改日志目录的权限为&#8221;IUSR_XXX&#8221; 读写，设置为0表示只允许从命令行更新；</li>
+<li>将LoadPlugin=&ldquo;timezone +2&#8221;修改为LoadPlugin=&#8221;timezone +8&#8221;，并将最前面的“#”号删除。</li>
+</ul>
+
+
+<h3>4.4 重启IIS</h3>
+
+<p>重启IIS后，并删除C:/WINDOWS/system32/LogFiles/W3SVC1237985490目录下所有的日志。</p>
+
+<h2>5、生成awstats数据</h2>
+
+<h3>5.1 手动生成awstats 数据</h3>
+
+<p>打开一个DOS窗口，并切换到网站根目录/cgi-bin，执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt;perl awstats.pl -config=yfb.10086.cn -update
+</span><span class='line'>
+</span><span class='line'>Create/Update database for config "./awstats.yfb.10086.cn.conf" by AWStats versi
+</span><span class='line'>on 7.0 (build 1.971)
+</span><span class='line'>From data in log file "C:/WINDOWS/system32/LogFiles/W3SVC1237985490/ex130130.log
+</span><span class='line'>"...
+</span><span class='line'>Phase 1 : First bypass old records, searching new record...
+</span><span class='line'>Searching new records from beginning of log file...
+</span><span class='line'>Phase 2 : Now process new records (Flush history on disk after 20000 hosts)...
+</span><span class='line'>Jumped lines in file: 0
+</span><span class='line'>Parsed lines in file: 84
+</span><span class='line'>Found 0 dropped records,
+</span><span class='line'>Found 4 comments,
+</span><span class='line'>Found 0 blank records,
+</span><span class='line'>Found 0 corrupted records,
+</span><span class='line'>Found 0 old records,
+</span><span class='line'>Found 80 new qualified records.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果报以下错误：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Create/Update database for config "./awstats.yfb.10086.cn.conf" by AWStats versi
+</span><span class='line'>on 7.0 (build 1.971)
+</span><span class='line'>From data in log file "C:/WINNT/system32/LogFiles/W3SVC1237985490/ex130130.log".
+</span><span class='line'>..
+</span><span class='line'>Error: Couldn't open server log file "C:/WINNT/system32/LogFiles/W3SVC1237985490
+</span><span class='line'>/ex130130.log" : No such file or directory
+</span><span class='line'>Setup ('./awstats.yfb.10086.cn.conf' file, web server or permissions) may be wrong.
+</span><span class='line'>Check config file, permissions and AWStats documentation (in 'docs' directory).</span></code></pre></td></tr></table></div></figure>
+
+
+<p>请确保你的日志文件路径是否写正确，日志目录是否有权限等；</p>
+
+<p>由于每次都需要手动生成数据，对于我们这种懒人来讲是不可接受的，那怎么自动生成数据呢？</p>
+
+<p>5.2 自动生成awstats数据</p>
+
+<p>首先，您得在C:\Program Files\AWStats\wwwroot\cgi-bin目录创建一个批处理：awstatsUpdate.bat，内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd C:/
+</span><span class='line'>cd C:\Program Files \AWStats\wwwroot\cgi-bin
+</span><span class='line'>perl awstats.pl -config=yfb.10086.cn -update</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意：以上部分需要根据您的实际情况修改，yfb.10086.cn是需要偶自己的内网域名，千万不可盲目复制。</p>
+
+<p>创建之后，您最好在DOS窗口单独测试下是否能正常运行，如无问题再添加计划任务。</p>
+
+<p>如何增加一个计划任务的具体步骤由于过于简单此不再写出，相信您肯定会添加计划任务，至于任务的调度时间要根据您的需求来定，5分钟也好、5小时也罢，适合您的需求就好，例如本人就是设置的5分钟。</p>
 ]]></content>
   </entry>
   
