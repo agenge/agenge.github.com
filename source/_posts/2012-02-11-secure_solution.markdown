@@ -22,7 +22,7 @@ comments: true
 
 把OpenSSH 上传到服务器，检查升级前版本(以下所有操作均在root下完成)：
 
-```u
+```
 shell> ssh -V # 此命令会显示OpenSSL、OpenSSH的詳細版本号
 ```
 
