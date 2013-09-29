@@ -31,29 +31,25 @@ ___注意：在安装Puppet之前，如果需要，必须将服务器主机名�
 由于本文基于源码安装，使用二进制包的安装方式本文不打算介绍，如有需要请自行到网上搜索。好了，首先将facter-2.0.0rc4.tar.gz、puppet-2.7.19.tar.gz上传到 Puppet服务端(192.168.56.2)，具体步骤如下
 
 * 安装facter：
-
- ```
- # wget http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz
- # tar zxvf facter-2.0.0rc4.tar.gz
- # cd facter-2.0.0rc4
- # ruby install.rb
- ```
+```
+# wget http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz
+# tar zxvf facter-2.0.0rc4.tar.gz
+# cd facter-2.0.0rc4
+# ruby install.rb
+```
 
  安装后会提示是否有无问题，如下图所示，无任何错误：
-
  {% img /images/2012/12/1.png %}
 
 * 安装Puppet:
- 
- ```
- # wget http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz
- # tar zxvf puppet-2.7.19.tar.gz
- # cd puppet-2.7.19
- # ruby install.rb
- ```
+```
+# wget http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz
+# tar zxvf puppet-2.7.19.tar.gz
+# cd puppet-2.7.19
+# ruby install.rb
+```
  
  安装后会提示是否有无问题，如下图所示，无任何错误：
-
  {% img /images/2012/12/2.png %}
 
  到此，Puppet服务端安装已经结束。
@@ -63,21 +59,21 @@ ___注意：在安装Puppet之前，如果需要，必须将服务器主机名�
 ##3. 安装Puppet客户端 For Linux
 
 Puppet客户端的安装方式与服务端一样，故不再详细介绍，详细请见第二章。
+
 ##4. 安装Puppet客户端 For Windows
 暂时不打算写！
+
 ##5. 配置Puppet服务端和客户端
 在配置之前，要确保Puppet服务端和所有Puppet客户端的本地时间一致，关于时间同步，推荐使用NTP(请参考网上的NTP详细介绍或MAN)。
 
 ###5.1 配置Puppet服务端：
 创建puppet组和用户：
-
 ```
 # groupadd puppet
 # useradd -g puppet -s /sbin/nologin puppet
 ```
 
 设置/etc/hosts：
-
 ```
 # echo "192.168.56.2 puppetmaster.test.com puppetmaster" >> /etc/hosts
 # echo "192.168.56.10 client1.test.com client1" >> /etc/hosts
@@ -88,7 +84,6 @@ Puppet客户端的安装方式与服务端一样，故不再详细介绍，详�
 ```
 
 启动puppetmaster ，若无问题，显示如下：
-
 ```
 # /etc/init.d/puppetmaster start
 Starting puppetmaster:                    [ OK ]
@@ -97,20 +92,17 @@ Starting puppetmaster:                    [ OK ]
 
 ###5.2  配置Puppet客户端：
 除了以下命令不一样，其他全部和服务端一样的配置：
-
 ```
 # cp conf/redhat/client.init /etc/init.d/puppet
 # chmod +x /etc/init.d/puppet
 ```
 
 服务端对应命令如下：
-
 ```
 # cp conf/redhat/server.init /etc/init.d/puppetmaster
 ```
 
 启动puppet，若无问题，显示如下：
-
 ```
 # /etc/init.d/puppet start
 Starting puppet:               [ OK ]
@@ -120,54 +112,52 @@ Starting puppet:               [ OK ]
 ###5.3 Puppet服务端和客户端测试：
 Puppet客户端与服务器端是通过SSL隧道通信的，客户端安装完成后，需要向服务器端申请证书：
 
-1. 首次连接服务器端会发起证书申请，在客户端执行命令如下
-
+* 首次连接服务器端会发起证书申请，在客户端执行命令如下
 ```
  puppetd --server puppetmaster --test
- ```
- 
+```
+
  {% img /images/2012/12/3.png %}
 
  执行以上命令代表客户端已经成功生成证书，并把证书签名请求发送到Puppet服务端.
 
-2. 登录到Puppet服务端，查看所有客户端的证书签名请求：
+* 登录到Puppet服务端，查看所有客户端的证书签名请求：
+
  {% img /images/2012/12/4.png %} 
 
  从结果可看出，已经看到client1.test.com客户端的证书签名请求，最后对所有的证书请求进行签名：
- 
- ```
- # puppetca -s -a
- ```
+```
+# puppetca -s -a
+```
  
  {% img /images/2012/12/5.png %} 
 
 ###5.4 示例：同步hosts文件(modules实现)
-1. 同步之前，先看下未使用module实现的简单示例：
+* 同步之前，先看下未使用module实现的简单示例：
 
- ```
- # 默认的节点配置
- node default {
-         file {
-                 "/tmp/temp1.txt":
-                 content => "Hello,Puppet!"; }
- }
+```
+# 默认的节点配置
+node default {
+     file {
+             "/tmp/temp1.txt":
+             content => "Hello,Puppet!"; }
+}
 
- # 同步/root/temp01.txt文件
- node "client1.test.com" {
-         host { "host1":
-         ip => "192.168.1.1",
-         target => "/root/temp01.txt",
-         ensure => present; }
- }
- node "feinno-hgg" {
-         host { "host2":
-         ip => "192.168.1.1",
-         target => "/root/temp01.txt",
-         ensure => present; }
- }
- ```
-
- 以上示例表示配置两个客户端，分别是“client1.test.com”和“feinno-hgg”，同时还有一个默认的node节点，后期如果有新客户端加入，在文件末尾加入一个新的node即可。但请再深入的思考一下，从后期的维护或管理角度来看，必须考虑下面两个重点的问题：
+# 同步/root/temp01.txt文件
+node "client1.test.com" {
+     host { "host1":
+     ip => "192.168.1.1",
+     target => "/root/temp01.txt",
+     ensure => present; }
+}
+node "feinno-hgg" {
+     host { "host2":
+     ip => "192.168.1.1",
+     target => "/root/temp01.txt",
+     ensure => present; }
+}
+```
+以上示例表示配置两个客户端，分别是“client1.test.com”和“feinno-hgg”，同时还有一个默认的node节点，后期如果有新客户端加入，在文件末尾加入一个新的node即可。但请再深入的思考一下，从后期的维护或管理角度来看，必须考虑下面两个重点的问题：
 
  * 问题1：假设您管理的不是10台，而是100台或者1000台，甚至更多，此种配置方式是否最优？
  * 问题2：假设您管理的客户端是多架构平台的，例如Debian、CentOS、Solaris、AIX或
@@ -176,62 +166,60 @@ Puppet客户端与服务器端是通过SSL隧道通信的，客户端安装完�
 
  使用示例1的配置方式，显示无法解决上面这两个问题，所以这就是我们下面要介绍的模块化实现。
 
-2. 创建所须目录：
-
- ```
- #/bin/mkdir -p /etc/puppet/modules/hosts/{files,lib,manifests,templates}
- #/bin/mkdir -p /etc/puppet/modules/hosts/files/hosts/etc
- ```
-
-3. 创建所须文件：
-
- ```
- # ll /etc/puppet/manifests/
- total 8
- -rw-r--r-- 1 root root 103 Oct 15 17:08 nodes.pp
- -rw-r--r-- 1 root root 52 Oct 15 17:04 site.pp
- ```
-
- ```
- # cat site.pp
- # 导入nodes.pp
- import 'nodes.pp'
- $puppetserver="master.test.com"
- ```
-
- ```
- # cat nodes.pp
- # 匹配所有以字母开头、.test.com结尾的客户端，并包含一个 hosts 的类文件
- node /^\w+\.test\.com$/  {    
-         include hosts
- }
- node 'feinno-hgg'  {
-         include hosts
- }
+* 创建所须目录：
+```
+#/bin/mkdir -p /etc/puppet/modules/hosts/{files,lib,manifests,templates}
+#/bin/mkdir -p /etc/puppet/modules/hosts/files/hosts/etc
 ```
 
- nodes.pp中使用了正则表达式，这使得一个非常 简单的node可以匹配多个客户端，而对于特殊主机来讲，可单独在文件结尾添加node即可，从而解决我们刚才提到的第一个问题。再来看看modules下的2类文件：
- 
- ```
- # ls -l /etc/puppet/modules/hosts/manifests
- -rw-r--r-- 1 root root 654 Oct 15 17:16 config.pp
- -rw-r--r-- 1 root root 47 Oct 12 11:20 init.pp
- ```
- 
- ```
- #cat init.pp
+3. 创建所须文件：
+```
+# ll /etc/puppet/manifests/
+total 8
+-rw-r--r-- 1 root root 103 Oct 15 17:08 nodes.pp
+-rw-r--r-- 1 root root 52 Oct 15 17:04 site.pp
+```
+
+```
+# cat site.pp
+# 导入nodes.pp
+import 'nodes.pp'
+$puppetserver="master.test.com"
+```
+
+```
+# cat nodes.pp
+# 匹配所有以字母开头、.test.com结尾的客户端，并包含一个 hosts 的类文件
+node /^\w+\.test\.com$/  {    
+     include hosts
+}
+node 'feinno-hgg'  {
+     include hosts
+}
+```
+
+nodes.pp中使用了正则表达式，这使得一个非常 简单的node可以匹配多个客户端，而对于特殊主机来讲，可单独在文件结尾添加node即可，从而解决我们刚才提到的第一个问题。再来看看modules下的2类文件：
+
+```
+# ls -l /etc/puppet/modules/hosts/manifests
+-rw-r--r-- 1 root root 654 Oct 15 17:16 config.pp
+-rw-r--r-- 1 root root 47 Oct 12 11:20 init.pp
+```
+
+查看init.pp
+```
  #cat init.pp
  # 定义一个hosts的类，并包括它的一个子类：hosts::config
  class hosts {
      include hosts::config
  }
- ```
- 
- ```
+```
+
+查看config.pp
+```
 # cat config.pp
 # 定义一个hosts::config的子类，父类为 hosts
 class hosts::config inherits hosts {
-
     if $operatingsystem in [ "RedHat","CentOS","Ubuntu","Fedora" ] {
 
             file { "/etc/hosts":
@@ -253,18 +241,16 @@ class hosts::config inherits hosts {
 ```
 从config.pp中可看出，通过一个if/elsif决断语句，结合Puppet内置变量$operatingsystem可同步任何跨平台的操作系统的hosts文件，从而解决我们刚才提到的第二个问题。
 
-4. 配置modules
+* 配置modules
 
  细心的读者可能会问：Puppet如何识别的module？ 问的相当好，Puppet默认是无法识别自定义modules的，需要我们在puppet.conf的 [main]中配置一个参数：modulepath，例如：
- 
 ```
 # cat puppet.conf | grep module
 modulepath = /etc/puppet/modules
 ```
  通过简单的参加配置，Puppet就可识别自定义模块。
 
-5. 配置 Fileserver：
-
+* 配置 Fileserver：
 ```
 # /etc/puppet/fileserver.conf
 [hosts]
@@ -287,23 +273,18 @@ puppet://$puppetserver/hosts/etc/hosts
 6. Puppet客户端 for Windows 8客户端测试：
 
 ```
- D:\Program Files (x86)\Puppet Labs\Puppet\bin>puppet.bat agent --test --server master.test.com
- info: Retrieving plugin
- info: Caching catalog for feinno-hgg
- info: Applying configuration version '1350292129'
- notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/content:
-  
- info: FileBucket got a duplicate file {md5}2c0dd3682bc4dbab317365a88af6177a
- info: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]: Fi
- lebucketed C:/Windows/System32/drivers/etc/hosts to puppet with sum 2c0dd3682bc4
- dbab317365a88af6177a
- notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/c
- ontent: content changed '{md5}2c0dd3682bc4dbab317365a88af6177a' to '{md5}09636a0
- 6eea3999e8b02ca831923f3d6'
- notice: this OS: windows.  Sync complete.
- notice: /Stage[main]/Hosts::Config/Notify[this OS: windows.  Sync complete.]/mes
- sage: defined 'message' as 'this OS: windows.  Sync complete.'
- notice: Finished catalog run in 0.85 seconds
+D:\Program Files (x86)\Puppet Labs\Puppet\bin>puppet.bat agent --test --server master.test.com
+info: Retrieving plugin
+info: Caching catalog for feinno-hgg
+info: Applying configuration version '1350292129'
+notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/content:
+ 
+info: FileBucket got a duplicate file {md5}2c0dd3682bc4dbab317365a88af6177a
+info: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]: Filebucketed C:/Windows/System32/drivers/etc/hosts to puppet with sum 2c0dd3682bc4dbab317365a88af6177a
+notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/content: content changed '{md5}2c0dd3682bc4dbab317365a88af6177a' to '{md5}09636a06eea3999e8b02ca831923f3d6'
+notice: this OS: windows.  Sync complete.
+notice: /Stage[main]/Hosts::Config/Notify[this OS: windows.  Sync complete.]/message: defined 'message' as 'this OS: windows.  Sync complete.'
+notice: Finished catalog run in 0.85 seconds
 ```
 通过日志可看出，已经成功同步win_host到C:/Windows/System32/drivers/etc/hosts 。
 
@@ -326,9 +307,10 @@ ___提示：在MS 2008或Win 7、Win 8客户端同步时，注意C:/Windows/Syst
 # /etc/init.d/puppet restart
 ```
 ###6.3 Puppet For Windows客户端设置：
-在Windows下安装Puppet客户端后，会自动在系统服务中添加一个Puppet Agent服务，并已经设置为开机自启动，如果不是，请自行修改。
-###6.4 设置Puppet服务端开机自启动：
 
+在Windows下安装Puppet客户端后，会自动在系统服务中添加一个Puppet Agent服务，并已经设置为开机自启动，如果不是，请自行修改。
+
+###6.4 设置Puppet服务端开机自启动：
 ```
 # chkconfig puppetmaster on
 # chkconfig --list puppetmaster
@@ -336,26 +318,26 @@ ___提示：在MS 2008或Win 7、Win 8客户端同步时，注意C:/Windows/Syst
 
 ##7. 常见错误
 ###7.1 语法错误 puppetd -s puppetmaster.test.com –t
-
 ```
 /usr/lib/ruby/site_ruby/1.8/puppet/application/agent.rb:54:in `handle_serve': uninitialized constant Puppet::Network::Handler (NameError)
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `send'
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `parse_options'
-        from /usr/lib/ruby/1.8/optparse.rb:1247:in `call'
-        from /usr/lib/ruby/1.8/optparse.rb:1247:in `order!'
-        from /usr/lib/ruby/1.8/optparse.rb:1205:in `catch'
-        from /usr/lib/ruby/1.8/optparse.rb:1205:in `order!'
-        from /usr/lib/ruby/1.8/optparse.rb:1279:in `permute!'
-        from /usr/lib/ruby/1.8/optparse.rb:1300:in `parse!'
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:370:in `parse_options'
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:416:in `hook'
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:407:in `exit_on_fail'
-        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-        from /usr/sbin/puppetd:4
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `send'
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `parse_options'
+    from /usr/lib/ruby/1.8/optparse.rb:1247:in `call'
+    from /usr/lib/ruby/1.8/optparse.rb:1247:in `order!'
+    from /usr/lib/ruby/1.8/optparse.rb:1205:in `catch'
+    from /usr/lib/ruby/1.8/optparse.rb:1205:in `order!'
+    from /usr/lib/ruby/1.8/optparse.rb:1279:in `permute!'
+    from /usr/lib/ruby/1.8/optparse.rb:1300:in `parse!'
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:370:in `parse_options'
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:416:in `hook'
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:407:in `exit_on_fail'
+    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
+    from /usr/sbin/puppetd:4
 ```
 答：此问题由于版本太低导致，或修改参数形式，例如将-t  -s 修改成 --test --server。
+
 
 ###7.2  Could not load openssl Ruby library; cannot install
 
@@ -418,7 +400,7 @@ err: Could not send report: Connection refused - connect(2)
 
  发现Puppet客户端的hosts文件存在一个让本人都不好意思写出来的错误：
  
- ```
+```
  # Do not remove the following line, or various programs
  # that require network functionality will fail.
  127.0.0.1 master.test.com master localhost.localdomain localhost
@@ -428,10 +410,10 @@ err: Could not send report: Connection refused - connect(2)
  192.168.56.10 client1.test.com
  192.168.10.188 feinno-hgg
 ```
+
 终于发现问题所在，客户端的hosts写成这样，也确实不易，保存退出后，经测试问题已解决。这种低级错误都是平常不够严谨才造成的，且还花大量时间，所以当出现问题后，一定要非常仔细检查每个操作或步骤，只有这样，才能更高效的找到根源并解决。
 
 ###7.5 Could not evaluate: Error 400 on SERVER: Not authorized to call find
-
 ```
 info: Caching catalog for client1.test.com
 info: Applying configuration version '1350282880'
@@ -446,10 +428,9 @@ err: /Stage[main]/Hosts::Config/File[/etc/hosts]: Could not evaluate: Error 400 
 [hosts]
         path /etc/puppet/modules/hosts/files
         allow client1.test.com
-
 ```
-###7.6 Failed to generate additional resources using 'eval_generate: SSL_connect
 
+###7.6 Failed to generate additional resources using 'eval_generate: SSL_connect
 ```
 D:\Program Files (x86)\Puppet Labs\Puppet\bin>puppet.bat agent --test --server master.test.com
 info: Retrieving plugin
@@ -615,14 +596,13 @@ gem self.name, :version => (self.respond_to?(:requirement) ? self.requirement : 
 * 证书确认是否正确配置正确，重新配置的过程如下：
 
  Puppet服务端：
- 
  ```
  # puppetd -r -c client01.domain.com
  ```
- Puppet客户端：
-* Windows 2003：
-C:\Documents and Settings\All Users\Application Data\PuppetLabs\puppet\etc\ssl
-* Windows 2008：
-C:\ProgramData\PuppetLabs\puppet\etc\ssl
-* Linux 客户端:
-/var/lib/puppet/ssl
+ 
+Puppet客户端：
+
+* Windows 2003：C:\Documents and Settings\All Users\Application Data\PuppetLabs\puppet\etc\ssl
+* Windows 2008：C:\ProgramData\PuppetLabs\puppet\etc\ssl
+* Linux 客户端: /var/lib/puppet/ssl
+ 
