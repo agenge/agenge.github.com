@@ -9,10 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="注意：以下所有操作須确认后再实施：
-1. OpenSSH 相关漏洞  解决方案
-升级OpenSSH为最新版本,目前为5.9,首先到官网(http://www.openssh.com/portable.html#http)下载:openssh-5.9p1.tar.gz
-把OpenSSH 上传到服务器 &hellip;">
+  <meta name="description" content="注意：以下所有操作須确认后再实施： OpenSSH 相关漏洞   解决方案 升级OpenSSH为最新版本,目前为5.9,首先到官网下载:openssh-5.9p1.tar.gz 把OpenSSH 上传到服务器，检查升级前版本(以下所有操作均在root下完成)： 1
+shell&gt; ssh -V &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -108,79 +106,151 @@
   </header>
 
 
-<div class="entry-content"><p>注意：以下所有操作須确认后再实施：
-1. OpenSSH 相关漏洞  解决方案
-升级OpenSSH为最新版本,目前为5.9,首先到官网(<a href="http://www.openssh.com/portable.html#http">http://www.openssh.com/portable.html#http</a>)下载:openssh-5.9p1.tar.gz
-把OpenSSH 上传到服务器，首先检查升级前版本(以下所有操作均在root下完成)：
-shell> ssh -V # 此命令会显示OpenSSL、OpenSSH的詳細版本号
-首先安装OpenSSH:
-shell> tar xvf openssh-5.9p1.tar.gz
-shell> cd openssh-5.9p1
-shell> sed -i -e &#8216;s/_5.9//&#8217; version.h
-查询信赖包是否安装：
-shell> rpm -qa | grep zlib #如果能看到zlib、zlib-devel，请继续，否则安装后再继续。
-shell> ./configure &#8211;sysconfdir=/etc/ssh
-shell> make &amp;&amp; make install
-开始配置：
-shell> /bin/cp /usr/local/sbin/sshd /etc/init.d/sshd
-shell> mkdir /root/ssh_bak  #创建备份目录
-shell> mv /etc/ssh/<em> /root/ssh_bak/  #移动到备份目录
-shell> /bin/cp /usr/local/etc/</em> /etc/ssh/
-shell> sed -e &#8216;s@/usr/bin/ssh-keygen.*@#@&#8217; /etc/init.d/sshd
-shell> /etc/init.d/sshd restart
-shell> ssh -V 检查是否是 OpenSSHp1 开头，如果是，则OpenSSH升级成功。</p>
+<div class="entry-content"><p>注意：以下所有操作須确认后再实施：</p>
 
-<p>2.远端WEB服务器上存在/robots.txt文件 解决方案：
-解决方案： 可直接删除（可参考：<a title="robots.txt" href="http://zh.wikipedia.org/wiki/Robots.txt"><a href="http://zh.wikipedia.org/wiki/Robots.txt">http://zh.wikipedia.org/wiki/Robots.txt</a></a>）</p>
+<ul>
+<li>OpenSSH 相关漏洞  </li>
+</ul>
 
-<p>3.ICMP timestamp请求响应漏洞 解决方案：
-shell> echo &#8220;1&#8243; > /proc/sys/net/ipv4/icmp_echo_ignore_all
-shell> echo &#8220;echo &#8220;1&#8243; > /proc/sys/net/ipv4/icmp_echo_ignore_all&#8221; >> /etc/rc.local
-Windows Server 2008 参考: <a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html"><a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html">http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html</a></a>
-Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099"><a href="http://zhidao.baidu.com/question/41992099">http://zhidao.baidu.com/question/41992099</a></a></p>
+
+<p>解决方案</p>
+
+<p>升级OpenSSH为最新版本,目前为5.9,首先到官网下载:<a href="http://www.openssh.com/portable.html#http">openssh-5.9p1.tar.gz</a></p>
+
+<p>把OpenSSH 上传到服务器，检查升级前版本(以下所有操作均在root下完成)：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; ssh -V # 此命令会显示OpenSSL、OpenSSH的詳細版本号</span></code></pre></td></tr></table></div></figure>
+
+
+<p>首先安装OpenSSH:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; tar xvf openssh-5.9p1.tar.gz
+</span><span class='line'>shell&gt; cd openssh-5.9p1
+</span><span class='line'>shell&gt; sed -i -e &#8216;s/_5.9//&#8217; version.h</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查询信赖包是否安装：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; rpm -qa | grep zlib #如果能看到zlib、zlib-devel，请继续，否则安装后再继续。
+</span><span class='line'>shell&gt; ./configure &#8211;sysconfdir=/etc/ssh
+</span><span class='line'>shell&gt; make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>开始配置：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; /bin/cp /usr/local/sbin/sshd /etc/init.d/sshd
+</span><span class='line'>shell&gt; mkdir /root/ssh_bak  #创建备份目录
+</span><span class='line'>shell&gt; mv /etc/ssh/* /root/ssh_bak/  #移动到备份目录
+</span><span class='line'>shell&gt; /bin/cp /usr/local/etc/* /etc/ssh/
+</span><span class='line'>shell&gt; sed -e &#8216;s@/usr/bin/ssh-keygen.*@#@&#8217; /etc/init.d/sshd
+</span><span class='line'>shell&gt; /etc/init.d/sshd restart
+</span><span class='line'>shell&gt; ssh -V 检查是否是 OpenSSHp1 开头，如果是，则OpenSSH升级成功。</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>远端WEB服务器上存在/robots.txt文件</li>
+</ul>
+
+
+<p>解决方案： 可直接删除（可参考：<a href="http://zh.wikipedia.org/wiki/Robots.txt" title="robots.txt">http://zh.wikipedia.org/wiki/Robots.txt</a></p>
+
+<ul>
+<li>ICMP timestamp请求响应漏洞</li>
+</ul>
+
+
+<p>解决方案：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; echo 0 &gt; /proc/sys/net/ipv4/icmp_echo_ignore_all
+</span><span class='line'>shell&gt; echo 0  &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Windows Server 2008 参考: <a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html">http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html</a>
+Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">http://zhidao.baidu.com/question/41992099</a></p>
+
+<ul>
+<li>Apache Tomcat 相关漏洞</li>
+</ul>
+
+
+<p>解决方案：</p>
+
+<p>根据安全厂商给的解决方案链接：<a href="http://www.ocert.org/advisories/ocert-2011-003.html">http://www.ocert.org/advisories/ocert-2011-003.html</a> 从此页面可得知，有问题的Tomcat版本如下：&lt;= 5.5.34, &lt;= 6.0.34, &lt;= 7.0.22，而无安全漏洞的 Tomcat版本如下： 5.5.35, >= 6.0.35, >= 7.0.23</p>
+
+<p>访问：<a href="http://tomcat.apache.org/index.html" title="Apache Tomcat">Tomcat</a>, 下载对应的Tomcat版本，例如经分在使用 Tomcat 5.5.34，下载对应的Tomcat 5.5.35,如在使用Tomcat 6.0.34，下载对应的 Tomcat 6.0.35，依此类推。</p>
+
+<ul>
+<li>Apache Tomcat sendfile请求安全限制绕过和拒绝服务漏洞：此漏洞也是通过上面的版本升级方式解决。具体请参考官方解释：</li>
+</ul>
+
+
+<p><a href="http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35">http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35</a> 和 <a href="http://secunia.com/advisories/45232/">http://secunia.com/advisories/45232/</a></p>
 
 <!-- more -->
 
 
-<ol>
-<li>Apache Tomcat 相关漏洞  解决方案：
-根据安全厂商给的解决方案链接：<a href="http://www.ocert.org/advisories/ocert-2011-003.html"><a href="http://www.ocert.org/advisories/ocert-2011-003.html">http://www.ocert.org/advisories/ocert-2011-003.html</a></a>  从此页面可得知，有问题的Tomcat版本如下：
-&lt;= 5.5.34, &lt;= 6.0.34, &lt;= 7.0.22，而无安全漏洞的 Tomcat版本如下： 5.5.35, >= 6.0.35, >= 7.0.23
-访问：<a href="http://tomcat.apache.org/index.html"><a href="http://tomcat.apache.org/index.html">http://tomcat.apache.org/index.html</a></a> 下载对应的Tomcat版本，例如经分在使用 Tomcat 5.5.34，下载对应的Tomcat 5.5.35；
-如在使用Tomcat 6.0.34，下载对应的 Tomcat 6.0.35，依此类推。
-4.1  Apache Tomcat sendfile请求安全限制绕过和拒绝服务漏洞：此漏洞也是通过上面的版本升级方式解决。具体请参考官方解释：
-<a href="http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35">http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35</a> 和 <a href="http://secunia.com/advisories/45232/">http://secunia.com/advisories/45232/</a></li>
-</ol>
+<ul>
+<li>SNMP服务存在可读口令</li>
+</ul>
 
 
-<p>5.SNMP服务存在可读口令  解决方案：
-可按照漏洞扫描結果中的过程操作，如问困难，可向系统组同事请教。</p>
+<p>解决方案：</p>
 
-<ol>
-<li>rpc相关漏洞 解决方案：
-(和项目组确认没有使用NFS后再操作)
-shell> /etc/init.d/portmap stop &amp;&amp; chkconfig portmap off
-shell> /etc/init.d/rpcidmapd stop  &amp;&amp;  chkconfig rpcidmapd off
-shell> /etc/init.d/nfslock stop &amp;&amp; chkconfig nfslock off</li>
-</ol>
+<p>可按照漏洞扫描結果中的过程操作，如问困难，可向系统组同事请教。</p>
+
+<ul>
+<li>rpc相关漏洞</li>
+</ul>
 
 
-<p>7.利用SMTP/EXPN命令可猜测目标主机上的用户名 <span style="color: #ff0000;">解决方案（待确认）：</p>
+<p>解决方案：</p>
 
-<p>8.Oracle数据库服务器CREATE ANY DIRECTORY权限提升漏洞  <span style="color: #ff0000;">暂时没有解决方案。</p>
+<p>(和项目组确认没有使用NFS后再操作)</p>
 
-<p>9. SNMP服务可以通过SNMPV1访问  <span style="color: #ff0000;"> 解决方案（待确认）</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; /etc/init.d/portmap stop && chkconfig portmap off
+</span><span class='line'>shell&gt; /etc/init.d/rpcidmapd stop  &&  chkconfig rpcidmapd off
+</span><span class='line'>shell&gt; /etc/init.d/nfslock stop && chkconfig nfslock off</span></code></pre></td></tr></table></div></figure>
 
-<ol>
-<li>Apache HTTP Server相关漏洞  解决方案：
-通过下载使用Apache HTTP Server 2.2.22或以上可解决，详情参考：<a href="http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser"><a href="http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser">http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser</a></a>
-此页面显示了2.2.22或以上这个版本修复了哪些安全漏洞。官方下载地址：<a href="http://www.apache.org/dyn/closer.cgi"><a href="http://www.apache.org/dyn/closer.cgi">http://www.apache.org/dyn/closer.cgi</a></a>
-10.1 Apache Apache::Status和Apache2::Status模块跨站脚本漏洞
-<a href="http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E"><a href="http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E">http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E</a></a>
-10.2  Apache服务器不完整HTTP请求拒绝服务漏洞[精确扫描]:
-更改httpd.conf中 TimeOut 的值为30秒</li>
-</ol>
 
+<ul>
+<li><p>利用SMTP/EXPN命令可猜测目标主机上的用户名 <span style="color: #ff0000;">解决方案（待确认）：</p></li>
+<li><p>Oracle数据库服务器CREATE ANY DIRECTORY权限提升漏洞  <span style="color: #ff0000;">暂时没有解决方案。</p></li>
+<li><p>SNMP服务可以通过SNMPV1访问  <span style="color: #ff0000;"> 解决方案（待确认）</p></li>
+<li><p>Apache HTTP Server相关漏洞</p></li>
+</ul>
+
+
+<p>解决方案：</p>
+
+<p>通过下载使用Apache HTTP Server 2.2.22或以上可解决，详情参考：<a href="http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser">http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser</a></p>
+
+<p>此页面显示了2.2.22或以上这个版本修复了哪些安全漏洞。官方下载地址：<a href="http://www.apache.org/dyn/closer.cgi">http://www.apache.org/dyn/closer.cgi</a></p>
+
+<p>10.1 Apache Apache::Status和Apache2::Status模块跨站脚本漏洞</p>
+
+<p><a href="http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E">http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E</a></p>
+
+<p>10.2  Apache服务器不完整HTTP请求拒绝服务漏洞[精确扫描]:
+更改httpd.conf中 TimeOut 的值为30秒</p>
 
 <p>11.远端WWW服务支持TRACE请求 解决方案 请参考第10点。</p>
 
@@ -221,13 +291,14 @@ shell> /etc/init.d/nfslock stop &amp;&amp; chkconfig nfslock off</li>
 关闭XDMCP服务</p>
 
 <ol>
-<li>PHP相关漏洞  解决方案：
-根据<a href="http://www.venustech.com.cn/NewsInfo/124/6459.Html"><a href="http://www.venustech.com.cn/NewsInfo/124/6459.Html">http://www.venustech.com.cn/NewsInfo/124/6459.Html</a></a> 可得知，受影响版本是：
-PHP 5.2 &lt;= 5.2.13
-PHP 5.3 &lt;= 5.3.2
-目前最好的办法是升级PHP版本。官方最新稳定是：PHP 5.3.10。 而5.2.X 最高版本是：PHP 5.2.17</li>
+<li><p>PHP相关漏洞  解决方案：
+根据<a href="http://www.venustech.com.cn/NewsInfo/124/6459.Html">http://www.venustech.com.cn/NewsInfo/124/6459.Html</a> 可得知，受影响版本是：</p></li>
+<li><p>PHP 5.2 &lt;= 5.2.13</p></li>
+<li>PHP 5.3 &lt;= 5.3.2</li>
 </ol>
 
+
+<p>目前最好的办法是升级PHP版本。官方最新稳定是：PHP 5.3.10。 而5.2.X 最高版本是：PHP 5.2.17</p>
 </div>
 
 

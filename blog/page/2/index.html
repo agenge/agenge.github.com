@@ -829,867 +829,48 @@
 
 <h2>2. 安装Puppet服务器端</h2>
 
-<p>由于本文基于源码安装，使用二进制包的安装方式本文不打算介绍，如有需要请自行到网上搜索。好了，首先将facter-2.0.0rc4.tar.gz、puppet-2.7.19.tar.gz上传到 Puppet服务端(192.168.56.2)，具体步骤如下：</p>
+<p>由于本文基于源码安装，使用二进制包的安装方式本文不打算介绍，如有需要请自行到网上搜索。好了，首先将facter-2.0.0rc4.tar.gz、puppet-2.7.19.tar.gz上传到 Puppet服务端(192.168.56.2)，具体步骤如下</p>
 
 <ul>
-<li>安装facter：
-&#8220;`
-
-<h1>wget <a href="http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz">http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz</a></h1>
-
-<h1>tar zxvf facter-2.0.0rc4.tar.gz</h1>
-
-<h1>cd facter-2.0.0rc4</h1>
-
-<h1>ruby install.rb</h1></li>
+<li>安装facter：</li>
 </ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> 安装后会提示是否有无问题，如下图所示，无任何错误：
-</span><span class='line'>
-</span><span class='line'> <img src="/images/2012/12/1.png">
-</span><span class='line'>
-</span><span class='line'>* 安装Puppet:
-</span><span class='line'> 
-</span><span class='line'> ```
-</span><span class='line'> # wget http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz
-</span><span class='line'> # tar zxvf puppet-2.7.19.tar.gz
-</span><span class='line'> # cd puppet-2.7.19
-</span><span class='line'> # ruby install.rb
-</span><span class='line'> ```
-</span><span class='line'> 
-</span><span class='line'> 安装后会提示是否有无问题，如下图所示，无任何错误：
-</span><span class='line'>
-</span><span class='line'> <img src="/images/2012/12/2.png">
-</span><span class='line'>
-</span><span class='line'> 到此，Puppet服务端安装已经结束。
-</span><span class='line'>
-</span><span class='line'>&lt;!-- more --&gt;
-</span><span class='line'>
-</span><span class='line'>##3. 安装Puppet客户端 For Linux
-</span><span class='line'>
-</span><span class='line'>Puppet客户端的安装方式与服务端一样，故不再详细介绍，详细请见第二章。
-</span><span class='line'>##4. 安装Puppet客户端 For Windows
-</span><span class='line'>暂时不打算写！
-</span><span class='line'>##5. 配置Puppet服务端和客户端
-</span><span class='line'>在配置之前，要确保Puppet服务端和所有Puppet客户端的本地时间一致，关于时间同步，推荐使用NTP(请参考网上的NTP详细介绍或MAN)。
-</span><span class='line'>
-</span><span class='line'>###5.1 配置Puppet服务端：
-</span><span class='line'>创建puppet组和用户：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>groupadd puppet</h1>
-
-<h1>useradd -g puppet -s /sbin/nologin puppet</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>设置/etc/hosts：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>echo &ldquo;192.168.56.2 puppetmaster.test.com puppetmaster&rdquo; >> /etc/hosts</h1>
-
-<h1>echo &ldquo;192.168.56.10 client1.test.com client1&rdquo; >> /etc/hosts</h1>
-
-<h1>cp conf/namespaceauth.conf /etc/puppet/</h1>
-
-<h1>cp conf/redhat/puppet.conf /etc/puppet/</h1>
-
-<h1>cp conf/redhat/server.init /etc/init.d/puppetmaster</h1>
-
-<h1>chmod +x /etc/init.d/puppetmaster</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>启动puppetmaster ，若无问题，显示如下：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>/etc/init.d/puppetmaster start</h1>
-
-<p>Starting puppetmaster:                    [ OK ]</p>
-
-<h1>chkconfig puppetmaster on</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>###5.2  配置Puppet客户端：
-</span><span class='line'>除了以下命令不一样，其他全部和服务端一样的配置：
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>cp conf/redhat/client.init /etc/init.d/puppet</h1>
-
-<h1>chmod +x /etc/init.d/puppet</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>服务端对应命令如下：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>cp conf/redhat/server.init /etc/init.d/puppetmaster</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>启动puppet，若无问题，显示如下：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>/etc/init.d/puppet start</h1>
-
-<p>Starting puppet:               [ OK ]</p>
-
-<h1>chkconfig puppet on</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>###5.3 Puppet服务端和客户端测试：
-</span><span class='line'>Puppet客户端与服务器端是通过SSL隧道通信的，客户端安装完成后，需要向服务器端申请证书：
-</span><span class='line'>
-</span><span class='line'>1. 首次连接服务器端会发起证书申请，在客户端执行命令如下</span></code></pre></td></tr></table></div></figure>
-
-
-<p> puppetd &mdash;server puppetmaster &mdash;test
- &#8220;`
- <img src="/images/2012/12/3.png"></p>
-
-<p> 执行以上命令代表客户端已经成功生成证书，并把证书签名请求发送到Puppet服务端.</p>
-
-<ol>
-<li>登录到Puppet服务端，查看所有客户端的证书签名请求：
-<img src="/images/2012/12/4.png"></li>
-</ol>
-
-
-<p> 从结果可看出，已经看到client1.test.com客户端的证书签名请求，最后对所有的证书请求进行签名：
- <code>
- # puppetca -s -a
-</code>
- <img src="/images/2012/12/5.png"></p>
-
-<h3>5.4 示例：同步hosts文件(modules实现)</h3>
-
-<ol>
-<li>同步之前，先看下未使用module实现的简单示例：</li>
-</ol>
-
-
-<p> &#8220;`</p>
-
-<p> # 默认的节点配置
- node default {</p>
-
-<pre><code>     file {
-             "/tmp/temp1.txt":
-             content =&gt; "Hello,Puppet!"; }
-</code></pre>
-
-<p> }</p>
-
-<p> # 同步/root/temp01.txt文件
- node &ldquo;client1.test.com&rdquo; {</p>
-
-<pre><code>     host { "host1":
-     ip =&gt; "192.168.1.1",
-     target =&gt; "/root/temp01.txt",
-     ensure =&gt; present; }
-</code></pre>
-
-<p> }
- node &ldquo;feinno-hgg&rdquo; {</p>
-
-<pre><code>     host { "host2":
-     ip =&gt; "192.168.1.1",
-     target =&gt; "/root/temp01.txt",
-     ensure =&gt; present; }
-</code></pre>
-
-<p> }
- &#8220;`</p>
-
-<p> 以上示例表示配置两个客户端，分别是“client1.test.com”和“feinno-hgg”，同时还有一个默认的node节点，后期如果有新客户端加入，在文件末尾加入一个新的node即可。但请再深入的思考一下，从后期的维护或管理角度来看，必须考虑下面两个重点的问题：</p>
-
-<ul>
-<li>问题1：假设您管理的不是10台，而是100台或者1000台，甚至更多，此种配置方式是否最优？</li>
-<li>问题2：假设您管理的客户端是多架构平台的，例如Debian、CentOS、Solaris、AIX或</li>
-</ul>
-
-
-<p> Windows，如何解决跨平台的文件同步？</p>
-
-<p> 使用示例1的配置方式，显示无法解决上面这两个问题，所以这就是我们下面要介绍的模块化实现。</p>
-
-<ol>
-<li><p>创建所须目录：
-&#8220;`</p>
-
-<h1>/bin/mkdir -p /etc/puppet/modules/hosts/{files,lib,manifests,templates}</h1>
-
-<h1>/bin/mkdir -p /etc/puppet/modules/hosts/files/hosts/etc</h1>
-
-<p>&#8220;`</p></li>
-<li><p>创建所须文件：</p></li>
-</ol>
 
 
 <p> <code>
- # ll /etc/puppet/manifests/
- total 8
- -rw-r--r-- 1 root root 103 Oct 15 17:08 nodes.pp
- -rw-r--r-- 1 root root 52 Oct 15 17:04 site.pp
+ # wget http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz
+ # tar zxvf facter-2.0.0rc4.tar.gz
+ # cd facter-2.0.0rc4
+ # ruby install.rb
 </code></p>
+
+<p> 安装后会提示是否有无问题，如下图所示，无任何错误：</p>
+
+<p> <img src="/images/2012/12/1.png"></p>
+
+<ul>
+<li>安装Puppet:</li>
+</ul>
+
 
 <p> <code>
- # cat site.pp
- # 导入nodes.pp
- import 'nodes.pp'
- $puppetserver="master.test.com"
+ # wget http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz
+ # tar zxvf puppet-2.7.19.tar.gz
+ # cd puppet-2.7.19
+ # ruby install.rb
 </code></p>
 
-<p> &#8220;`
- # cat nodes.pp
- # 匹配所有以字母开头、.test.com结尾的客户端，并包含一个 hosts 的类文件
- node /^\w+.test.com$/  {</p>
+<p> 安装后会提示是否有无问题，如下图所示，无任何错误：</p>
 
-<pre><code>     include hosts
-</code></pre>
+<p> <img src="/images/2012/12/2.png"></p>
 
-<p> }
- node &lsquo;feinno-hgg&rsquo;  {</p>
+<p> 到此，Puppet服务端安装已经结束。</p>
 
-<pre><code>     include hosts
-</code></pre>
-
-<p> }</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'> nodes.pp中使用了正则表达式，这使得一个非常 简单的node可以匹配多个客户端，而对于特殊主机来讲，可单独在文件结尾添加node即可，从而解决我们刚才提到的第一个问题。再来看看modules下的2类文件：
-</span><span class='line'> 
-</span><span class='line'> ```
-</span><span class='line'> # ls -l /etc/puppet/modules/hosts/manifests
-</span><span class='line'> -rw-r--r-- 1 root root 654 Oct 15 17:16 config.pp
-</span><span class='line'> -rw-r--r-- 1 root root 47 Oct 12 11:20 init.pp
-</span><span class='line'> ```
-</span><span class='line'> 
-</span><span class='line'> ```
-</span><span class='line'> #cat init.pp
-</span><span class='line'> #cat init.pp
-</span><span class='line'> # 定义一个hosts的类，并包括它的一个子类：hosts::config
-</span><span class='line'> class hosts {
-</span><span class='line'>     include hosts::config
-</span><span class='line'> }
-</span><span class='line'> ```
-</span><span class='line'> 
-</span><span class='line'> ```
-</span><span class='line'># cat config.pp
-</span><span class='line'># 定义一个hosts::config的子类，父类为 hosts
-</span><span class='line'>class hosts::config inherits hosts {
-</span><span class='line'>
-</span><span class='line'>    if $operatingsystem in [ "RedHat","CentOS","Ubuntu","Fedora" ] {
-</span><span class='line'>
-</span><span class='line'>            file { "/etc/hosts":
-</span><span class='line'>                owner =&gt; "root",
-</span><span class='line'>                group =&gt; "root",
-</span><span class='line'>                mode =&gt; 644,
-</span><span class='line'>                source =&gt; "puppet://$puppetserver/hosts/etc/hosts",
-</span><span class='line'>            }
-</span><span class='line'>    }  elsif $operatingsystem == "Windows" {
-</span><span class='line'>            file { "C:/Windows/System32/drivers/etc/hosts":
-</span><span class='line'>                owner =&gt; "xm_Administrator",
-</span><span class='line'>                group =&gt; "Administrators",
-</span><span class='line'>                source =&gt; "puppet://$puppetserver/hosts/etc/win_hosts";
-</span><span class='line'>            }
-</span><span class='line'>    } else {
-</span><span class='line'>        fail("Doesn't support this OS: $operatingsystem")
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>从config.pp中可看出，通过一个if/elsif决断语句，结合Puppet内置变量$operatingsystem可同步任何跨平台的操作系统的hosts文件，从而解决我们刚才提到的第二个问题。</p>
-
-<ol>
-<li>配置modules</li>
-</ol>
-
-
-<p> 细心的读者可能会问：Puppet如何识别的module？ 问的相当好，Puppet默认是无法识别自定义modules的，需要我们在puppet.conf的 [main]中配置一个参数：modulepath，例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cat puppet.conf | grep module
-</span><span class='line'>modulepath = /etc/puppet/modules</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 通过简单的参加配置，Puppet就可识别自定义模块。</p>
-
-<ol>
-<li>配置 Fileserver：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/puppet/fileserver.conf
-</span><span class='line'>[hosts]
-</span><span class='line'>        path /etc/puppet/modules/hosts/files
-</span><span class='line'>        allow *</span></code></pre></td></tr></table></div></figure>
-
-
-<p>此处配置一个hosts的文件服务，及指定文件存放位置，同时允许所有客户端同步，生产环境不建议直接对所有客户端开放。而我们之前在config.pp中的source后面的路径格式为：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>puppet://$puppetserver/mount_point/path</span></code></pre></td></tr></table></div></figure>
-
-
-<p>例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>puppet://$puppetserver/hosts/etc/hosts</span></code></pre></td></tr></table></div></figure>
-
-
-<p>对应的绝对路径为：/etc/puppet/modules/hosts/files/etc/hosts</p>
-
-<ol>
-<li>Puppet客户端 for Windows 8客户端测试：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> D:\Program Files (x86)\Puppet Labs\Puppet\bin&gt;puppet.bat agent --test --server master.test.com
-</span><span class='line'> info: Retrieving plugin
-</span><span class='line'> info: Caching catalog for feinno-hgg
-</span><span class='line'> info: Applying configuration version '1350292129'
-</span><span class='line'> notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/content:
-</span><span class='line'>  
-</span><span class='line'> info: FileBucket got a duplicate file {md5}2c0dd3682bc4dbab317365a88af6177a
-</span><span class='line'> info: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]: Fi
-</span><span class='line'> lebucketed C:/Windows/System32/drivers/etc/hosts to puppet with sum 2c0dd3682bc4
-</span><span class='line'> dbab317365a88af6177a
-</span><span class='line'> notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/c
-</span><span class='line'> ontent: content changed '{md5}2c0dd3682bc4dbab317365a88af6177a' to '{md5}09636a0
-</span><span class='line'> 6eea3999e8b02ca831923f3d6'
-</span><span class='line'> notice: this OS: windows.  Sync complete.
-</span><span class='line'> notice: /Stage[main]/Hosts::Config/Notify[this OS: windows.  Sync complete.]/mes
-</span><span class='line'> sage: defined 'message' as 'this OS: windows.  Sync complete.'
-</span><span class='line'> notice: Finished catalog run in 0.85 seconds</span></code></pre></td></tr></table></div></figure>
-
-
-<p>通过日志可看出，已经成功同步win_host到C:/Windows/System32/drivers/etc/hosts 。</p>
-
-<p><strong><em>提示：在MS 2008或Win 7、Win 8客户端同步时，注意C:/Windows/System32/drivers/etc的目录需要有写权限。</em></strong></p>
-
-<h2>6. 管理Puppet服务</h2>
-
-<h3>6.1 Puppet服务端启动、停止、重启过程如下：</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppetmaster start # 启动
-</span><span class='line'># /etc/init.d/puppetmaster stop # 停止
-</span><span class='line'># /etc/init.d/puppetmaster restart # 重启</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>6.2 Puppet客户端启动、停止、重启过程如下：</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppet start
-</span><span class='line'># /etc/init.d/puppet stop
-</span><span class='line'># /etc/init.d/puppet restart</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>6.3 Puppet For Windows客户端设置：</h3>
-
-<p>在Windows下安装Puppet客户端后，会自动在系统服务中添加一个Puppet Agent服务，并已经设置为开机自启动，如果不是，请自行修改。</p>
-
-<h3>6.4 设置Puppet服务端开机自启动：</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># chkconfig puppetmaster on
-</span><span class='line'># chkconfig --list puppetmaster</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>7. 常见错误</h2>
-
-<h3>7.1 语法错误 puppetd -s puppetmaster.test.com –t</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/usr/lib/ruby/site_ruby/1.8/puppet/application/agent.rb:54:in `handle_serve': uninitialized constant Puppet::Network::Handler (NameError)
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `send'
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `parse_options'
-</span><span class='line'>        from /usr/lib/ruby/1.8/optparse.rb:1247:in `call'
-</span><span class='line'>        from /usr/lib/ruby/1.8/optparse.rb:1247:in `order!'
-</span><span class='line'>        from /usr/lib/ruby/1.8/optparse.rb:1205:in `catch'
-</span><span class='line'>        from /usr/lib/ruby/1.8/optparse.rb:1205:in `order!'
-</span><span class='line'>        from /usr/lib/ruby/1.8/optparse.rb:1279:in `permute!'
-</span><span class='line'>        from /usr/lib/ruby/1.8/optparse.rb:1300:in `parse!'
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:370:in `parse_options'
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:416:in `hook'
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:407:in `exit_on_fail'
-</span><span class='line'>        from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-</span><span class='line'>        from /usr/sbin/puppetd:4</span></code></pre></td></tr></table></div></figure>
-
-
-<p>答：此问题由于版本太低导致，或修改参数形式，例如将-t  -s 修改成 &mdash;test &mdash;server。</p>
-
-<h3>7.2  Could not load openssl Ruby library; cannot install</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># tar xvf openssl-0.9.8p.tar.gz
-</span><span class='line'># cd openssl-0.9.8p
-</span><span class='line'># cp ssl/ssl.h /root/ruby-1.8.7/ext/openssl/
-</span><span class='line'># ./config -fPIC --prefix=/usr/local --openssldir=/usr/local/openssl enable-shared
-</span><span class='line'># make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>进入到ruby源码目录下的ext/openssl/：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cd /root/ruby-1.8.7/ext/openssl/
-</span><span class='line'># ruby extconf.rb --with-openssl-include=/usr/local/openssl/include --with-openssl-lib=/usr/local/openssl/lib 
-</span><span class='line'># make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.3   Error 400 on SERVER: Cannot find file: Invalid mount</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@client1 puppet]# puppetd --test
-</span><span class='line'>info: Caching catalog for client1.test.com
-</span><span class='line'>info: Applying configuration version '1349933729'
-</span><span class='line'>err: /Stage[main]//Node[client1.test.com]/File[/etc/puppet/files/temp01.txt]: Could not evaluate: Error 400 on SERVER: Cannot find file: Invalid mount 'temp01.txt' Could not retrieve file metadata for puppet:///temp01.txt: Error 400 on SERVER: Cannot find file: Invalid mount 'temp01.txt' at /etc/puppet/manifests/site.pp:20
-</span><span class='line'>notice: Finished catalog run in 0.45 seconds</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.4 err: Could not retrieve catalog from remote server: Connection refused</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@client1 puppet]# puppetd --test --server master.test.com
-</span><span class='line'>err: Could not retrieve catalog from remote server: Connection refused - connect(2)
-</span><span class='line'>warning: Not using cache on failed catalog
-</span><span class='line'>err: Could not retrieve catalog; skipping run
-</span><span class='line'>err: Could not send report: Connection refused - connect(2)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>该错误表示无法连接到Master，即Puppet服务端，由以下两个原因造成：</p>
-
-<ol>
-<li><p>Puppet服务端拒绝连接，通常是由于防火墙或selinux造成；</p></li>
-<li><p>Puppet客户端本地防火墙导致</p></li>
-</ol>
-
-
-<p>本人在测试时遇到此问题，但经检查上述原因后，仍然报拒绝连接错误，经过约2小时的仔细排查，终于找到问题，原因却让我差点吐血， 以下是排查过程：</p>
-
-<ul>
-<li>第一步：查看Puppet服务端防火墙，发现是开启的，但无任何规则，关闭防火墙后，到客户端尝试，无果! 再查看Linux，问题仍在。</li>
-<li>第二步：查看Puppet客户端防火墙，已是关闭状态，SELinux同样关闭状态。</li>
-<li>第三步：尝试修改Puppet服务端的auth.conf文件，并重启puppetmaster后，问题仍在。</li>
-<li>第四步：查看Puppet客户端所连接的服务端是否正确：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppet agent --configprint server</span></code></pre></td></tr></table></div></figure>
-
-
-<p>打印的域名和hosts文件一致。</p>
-
-<ul>
-<li>第五步：查看Puppet服务端和Puppet客户端的hosts文件是否正确</li>
-</ul>
-
-
-<p> 在第一次查看这两个文件的时候，发现没问题，后来再从其他地方折腾回来看hosts文件的时候，</p>
-
-<p> 发现Puppet客户端的hosts文件存在一个让本人都不好意思写出来的错误：</p>
-
-<p> &#8220;`
- # Do not remove the following line, or various programs
- # that require network functionality will fail.
- 127.0.0.1 master.test.com master localhost.localdomain localhost
- #::1 localhost6.localdomain6 localhost6</p>
-
-<p> 192.168.56.2 master.test.com
- 192.168.56.10 client1.test.com
- 192.168.10.188 feinno-hgg</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>终于发现问题所在，客户端的hosts写成这样，也确实不易，保存退出后，经测试问题已解决。这种低级错误都是平常不够严谨才造成的，且还花大量时间，所以当出现问题后，一定要非常仔细检查每个操作或步骤，只有这样，才能更高效的找到根源并解决。
-</span><span class='line'>
-</span><span class='line'>###7.5 Could not evaluate: Error 400 on SERVER: Not authorized to call find</span></code></pre></td></tr></table></div></figure>
-
-
-<p>info: Caching catalog for client1.test.com
-info: Applying configuration version &lsquo;1350282880&rsquo;
-notice: this OS: RedHat.  Sync complete.
-notice: /Stage[main]/Hosts::Config/Notify[this OS: RedHat.  Sync complete.]/message: defined &lsquo;message&rsquo; as &lsquo;this OS: RedHat.  Sync complete.&rsquo;
-err: /Stage[main]/Hosts::Config/File[/etc/hosts]: Could not evaluate: Error 400 on SERVER: Not authorized to call find on /file_metadata/hosts/etc/hosts Could not retrieve file metadata for puppet://master.test.com/hosts/etc/hosts: Error 400 on SERVER: Not authorized to call find on /file_metadata/hosts/etc/hosts at /etc/puppet/modules/hosts/manifests/config.pp:10</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>该问题由于没有通过Puppet服务端fileserver的认证造成，由于要同步文件资源，故需要在Puppet服务端Fileserver对应的mount point加上认证，例如：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>cat /etc/puppet/fileserver.conf</h1>
-
-<p>[hosts]</p>
-
-<pre><code>    path /etc/puppet/modules/hosts/files
-    allow client1.test.com
-</code></pre>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>###7.6 Failed to generate additional resources using 'eval_generate: SSL_connect</span></code></pre></td></tr></table></div></figure>
-
-
-<p>D:\Program Files (x86)\Puppet Labs\Puppet\bin>puppet.bat agent &mdash;test &mdash;server master.test.com
-info: Retrieving plugin
-err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Failed to generate additional resources using &lsquo;eval_generate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]
-err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Could not evaluate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com] Could not retrieve file metadata for puppet://master.test.com/plugins: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]</p>
-
-<p>err: Could not retrieve catalog from remote server: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]
-warning: Not using cache on failed catalog
-err: Could not retrieve catalog; skipping run
-err: Could not send report: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>此问题由于Puppet服务端和Puppet客户端的时间不一致导致，将服务端和客户端的时间修改成一致即可解决，如果确保时间一致，问题仍在，请重新生成证书，重新生成证书过程如下：
-</span><span class='line'>
-</span><span class='line'>1. 在Puppet服务端清除证书：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>puppetca -c feinno-hgg</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>2. 在Puppet客户端删除证书：
-</span><span class='line'>
-</span><span class='line'> Linux客户端证书路径：
-</span><span class='line'>
-</span><span class='line'>  * MS2003：%ALLUSERSPROFILE%\Application Data\PuppetLabs\puppet\etc\ssl
-</span><span class='line'>
-</span><span class='line'>  * MS2008：%PROGRAMDATA%\PuppetLabs\puppet\etc\ssl\
-</span><span class='line'>  
-</span><span class='line'> 例如删除Linux客户端下的证书：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>rm -fr /var/lib/puppet/ssl/*</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>3. 在Puppet客户端执行：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>puppetca &mdash;test &mdash;server master.test.com</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>4. 在Puppet客户端执行：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>puppetca –l</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>如果有显示客户端的认证请求签名，则输入：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>puppetca -s feinno-hgg    #意思为客户端feinno-hgg的证书请求进行签名</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>或：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>puppetca -s -a # 对所有的客户端进行证书签名</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>###7.7 Could not retrieve information from environment production source(s)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>D:\Program Files (x8 6)\Puppet Labs\Puppet\bin>puppet.bat agent &mdash;test &mdash;server master.test.com
-info: Caching certificate for feinno-hgg
-info: Retrieving plugin
-info: Caching certificate_revocation_list for ca
-err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Could not evaluate: Could
-not retrieve information from environment production source(s) puppet://master.t
-est.com/plugins
-info: Caching catalog for feinno-hgg
-info: Applying configuration version &lsquo;1350284808&rsquo;
-info: Creating state file C:/ProgramData/PuppetLabs/puppet/var/state/state.yaml
-notice: Finished catalog run in 0.18 seconds</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>此问题是属于2.7.x 的一个Bug导致，即在Windows平台下Puppet客户端向Puppet服务端同步文件时，默认情况下会同步Puppet服务端的plug，那要怎么解决呢？操作如下：
-</span><span class='line'>
-</span><span class='line'>在modules_name的目录下创建一个 lib的空目录即可。例如：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>mkdir /etc/puppet/modules/mymodule/lib</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>也可参考以下官方地址：[https://projects.puppetlabs.com/issues/2244](https://projects.puppetlabs.com/issues/2244)
-</span><span class='line'>
-</span><span class='line'>###7.8 notice: Run of Puppet configuration client already in progress; skipping
-</span><span class='line'>
-</span><span class='line'>解决方法： 部分情况下puppet服务会无法启动，且会提示puppet已经启动，这个时候需要删除一个文件puppetdlock：
-</span><span class='line'>
-</span><span class='line'>* Linux客户端绝对路径： /var/lib/puppet/state/puppetdlock
-</span><span class='line'>* Windows 2003客户端绝对路径：C:\Documents and Settings\All Users\Application Data\PuppetLabs\puppet\var\state\ puppetdlock
-</span><span class='line'>* Windows 2008客户端绝对路径：C:\ ProgramData\PuppetLabs\puppet\var\state\ puppetdlock
-</span><span class='line'>
-</span><span class='line'>###7.9 certificate verify failed: [CRL is not yet valid for /CN</span></code></pre></td></tr></table></div></figure>
-
-
-<p>err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Failed to generate additional resources using &lsquo;eval_generate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]
-err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Could not evaluate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com] Could not retrieve file metadata for puppet://pmaster.i.12582.com/plugins: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]
-err: Could not retrieve catalog from remote server: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]
-warning: Not using cache on failed catalog
-err: Could not retrieve catalog; skipping run
-err: Could not send report: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>原因：
-</span><span class='line'>
-</span><span class='line'>在配置证书时可能由于CA证书不匹配或被删除导致。
-</span><span class='line'>
-</span><span class='line'>解决办法：
-</span><span class='line'>
-</span><span class='line'>Master执行：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>puppet cert clean c02.i.12582.com</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>客户端执行：</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>rm -f C:/ProgramData/PuppetLabs/puppet/etc/ssl/certs/c02.i.12582.com.pem</h1>
-
-<h1>puppetca –test</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>此处需要注意一定别删除整个SSL目录，只需要删除指定的pem文件即可，另上面请根据实际情况修改。
-</span><span class='line'>
-</span><span class='line'>###7.10 charset: utf8, collation: utf8_unicode_ci
-</span><span class='line'>
-</span><span class='line'>详细错误信息：</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Couldn&rsquo;t create database for {&ldquo;encoding&rdquo;=>&ldquo;utf8&rdquo;, &ldquo;adapter&rdquo;=>&ldquo;mysql&rdquo;, &ldquo;username&rdquo;=>&ldquo;dashboard&rdquo;, &ldquo;database&rdquo;=>&ldquo;dashboard&rdquo;, &ldquo;password&rdquo;=>&ldquo;dashboard&rdquo;}, charset: utf8, collation: utf8_unicode_ci (if you set the charset manually, make sure you have a matching collation)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>解决方法：</span></code></pre></td></tr></table></div></figure>
-
-
-<p>[root@pmaster puppet-dashboard-1.2.20]# ln -s /var/lib/mysql/mysql.sock /tmp/mysql.sock</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>###7.11 undefined method `more_results' for #&lt;Mysql&gt;
-</span><span class='line'>
-</span><span class='line'>解决方法：注释mysql_adapter.rb中的318和       642</span></code></pre></td></tr></table></div></figure>
-
-
-<p>@connection.more_results &amp;&amp; @connection.next_result    # invoking stored procedures with CLIENT_MULTI_RESULTS requires this
- to tidy up else connection will be dropped</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>###7.12 undefined method `requirement' for #&lt;Rails: 
-</span><span class='line'>
-</span><span class='line'>解决方法：修改gem_dependency.rb
-</span><span class='line'>注释掉81行 </span></code></pre></td></tr></table></div></figure>
-
-
-<h1>gem self.name, self.requirement # &lt;  1.8 unhappy way</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>修改为：</span></code></pre></td></tr></table></div></figure>
-
-
-<p>gem self.name, :version => (self.respond_to?(:requirement) ? self.requirement : self.version_requirements)
-&#8220;`</p>
-
-<h2>8. 排错思路</h2>
-
-<ul>
-<li><p>服务器端、客户端之间和本身的防火墙确认无问题；</p></li>
-<li><p>服务器端的SELinux确认禁用；</p></li>
-<li><p>证书确认是否正确配置正确，重新配置的过程如下：</p></li>
-</ul>
-
-
-<p> Puppet服务端：
- <code>
- # puppetd -r -c client01.domain.com
-</code>
- Puppet客户端：
-* Windows 2003：
-C:\Documents and Settings\All Users\Application Data\PuppetLabs\puppet\etc\ssl
-* Windows 2008：
-C:\ProgramData\PuppetLabs\puppet\etc\ssl
-* Linux 客户端:
-/var/lib/puppet/ssl</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/21/puppet_install_conf/">阅读全文 &rarr;</a>
+    </footer>
   
 
 
@@ -1723,36 +904,101 @@ C:\ProgramData\PuppetLabs\puppet\etc\ssl
   </header>
 
 
-  <div class="entry-content"><p>注意：以下所有操作須确认后再实施：
-1. OpenSSH 相关漏洞  解决方案
-升级OpenSSH为最新版本,目前为5.9,首先到官网(<a href="http://www.openssh.com/portable.html#http">http://www.openssh.com/portable.html#http</a>)下载:openssh-5.9p1.tar.gz
-把OpenSSH 上传到服务器，首先检查升级前版本(以下所有操作均在root下完成)：
-shell> ssh -V # 此命令会显示OpenSSL、OpenSSH的詳細版本号
-首先安装OpenSSH:
-shell> tar xvf openssh-5.9p1.tar.gz
-shell> cd openssh-5.9p1
-shell> sed -i -e &#8216;s/_5.9//&#8217; version.h
-查询信赖包是否安装：
-shell> rpm -qa | grep zlib #如果能看到zlib、zlib-devel，请继续，否则安装后再继续。
-shell> ./configure &#8211;sysconfdir=/etc/ssh
-shell> make &amp;&amp; make install
-开始配置：
-shell> /bin/cp /usr/local/sbin/sshd /etc/init.d/sshd
-shell> mkdir /root/ssh_bak  #创建备份目录
-shell> mv /etc/ssh/<em> /root/ssh_bak/  #移动到备份目录
-shell> /bin/cp /usr/local/etc/</em> /etc/ssh/
-shell> sed -e &#8216;s@/usr/bin/ssh-keygen.*@#@&#8217; /etc/init.d/sshd
-shell> /etc/init.d/sshd restart
-shell> ssh -V 检查是否是 OpenSSHp1 开头，如果是，则OpenSSH升级成功。</p>
+  <div class="entry-content"><p>注意：以下所有操作須确认后再实施：</p>
 
-<p>2.远端WEB服务器上存在/robots.txt文件 解决方案：
-解决方案： 可直接删除（可参考：<a title="robots.txt" href="http://zh.wikipedia.org/wiki/Robots.txt"><a href="http://zh.wikipedia.org/wiki/Robots.txt">http://zh.wikipedia.org/wiki/Robots.txt</a></a>）</p>
+<ul>
+<li>OpenSSH 相关漏洞  </li>
+</ul>
 
-<p>3.ICMP timestamp请求响应漏洞 解决方案：
-shell> echo &#8220;1&#8243; > /proc/sys/net/ipv4/icmp_echo_ignore_all
-shell> echo &#8220;echo &#8220;1&#8243; > /proc/sys/net/ipv4/icmp_echo_ignore_all&#8221; >> /etc/rc.local
-Windows Server 2008 参考: <a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html"><a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html">http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html</a></a>
-Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099"><a href="http://zhidao.baidu.com/question/41992099">http://zhidao.baidu.com/question/41992099</a></a></p>
+
+<p>解决方案</p>
+
+<p>升级OpenSSH为最新版本,目前为5.9,首先到官网下载:<a href="http://www.openssh.com/portable.html#http">openssh-5.9p1.tar.gz</a></p>
+
+<p>把OpenSSH 上传到服务器，检查升级前版本(以下所有操作均在root下完成)：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; ssh -V # 此命令会显示OpenSSL、OpenSSH的詳細版本号</span></code></pre></td></tr></table></div></figure>
+
+
+<p>首先安装OpenSSH:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; tar xvf openssh-5.9p1.tar.gz
+</span><span class='line'>shell&gt; cd openssh-5.9p1
+</span><span class='line'>shell&gt; sed -i -e &#8216;s/_5.9//&#8217; version.h</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查询信赖包是否安装：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; rpm -qa | grep zlib #如果能看到zlib、zlib-devel，请继续，否则安装后再继续。
+</span><span class='line'>shell&gt; ./configure &#8211;sysconfdir=/etc/ssh
+</span><span class='line'>shell&gt; make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>开始配置：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; /bin/cp /usr/local/sbin/sshd /etc/init.d/sshd
+</span><span class='line'>shell&gt; mkdir /root/ssh_bak  #创建备份目录
+</span><span class='line'>shell&gt; mv /etc/ssh/* /root/ssh_bak/  #移动到备份目录
+</span><span class='line'>shell&gt; /bin/cp /usr/local/etc/* /etc/ssh/
+</span><span class='line'>shell&gt; sed -e &#8216;s@/usr/bin/ssh-keygen.*@#@&#8217; /etc/init.d/sshd
+</span><span class='line'>shell&gt; /etc/init.d/sshd restart
+</span><span class='line'>shell&gt; ssh -V 检查是否是 OpenSSHp1 开头，如果是，则OpenSSH升级成功。</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>远端WEB服务器上存在/robots.txt文件</li>
+</ul>
+
+
+<p>解决方案： 可直接删除（可参考：<a href="http://zh.wikipedia.org/wiki/Robots.txt" title="robots.txt">http://zh.wikipedia.org/wiki/Robots.txt</a></p>
+
+<ul>
+<li>ICMP timestamp请求响应漏洞</li>
+</ul>
+
+
+<p>解决方案：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; echo 0 &gt; /proc/sys/net/ipv4/icmp_echo_ignore_all
+</span><span class='line'>shell&gt; echo 0  &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Windows Server 2008 参考: <a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html">http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html</a>
+Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">http://zhidao.baidu.com/question/41992099</a></p>
+
+<ul>
+<li>Apache Tomcat 相关漏洞</li>
+</ul>
+
+
+<p>解决方案：</p>
+
+<p>根据安全厂商给的解决方案链接：<a href="http://www.ocert.org/advisories/ocert-2011-003.html">http://www.ocert.org/advisories/ocert-2011-003.html</a> 从此页面可得知，有问题的Tomcat版本如下：&lt;= 5.5.34, &lt;= 6.0.34, &lt;= 7.0.22，而无安全漏洞的 Tomcat版本如下： 5.5.35, >= 6.0.35, >= 7.0.23</p>
+
+<p>访问：<a href="http://tomcat.apache.org/index.html" title="Apache Tomcat">Tomcat</a>, 下载对应的Tomcat版本，例如经分在使用 Tomcat 5.5.34，下载对应的Tomcat 5.5.35,如在使用Tomcat 6.0.34，下载对应的 Tomcat 6.0.35，依此类推。</p>
+
+<ul>
+<li>Apache Tomcat sendfile请求安全限制绕过和拒绝服务漏洞：此漏洞也是通过上面的版本升级方式解决。具体请参考官方解释：</li>
+</ul>
+
+
+<p><a href="http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35">http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35</a> 和 <a href="http://secunia.com/advisories/45232/">http://secunia.com/advisories/45232/</a></p>
 
 </div>
   
