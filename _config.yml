@@ -102,3 +102,6 @@ facebook_like: false
 
 
 weibo_share: true
+
+# Post License
+post_license: true
