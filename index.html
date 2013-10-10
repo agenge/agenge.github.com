@@ -9,16 +9,12 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="安装环境 操作系统：CentOS 6.3 64位
-Redis：最新版本 2.6.14 Redis安装 下载Redis 1
+  <meta name="description" content="设置导航栏 编辑octopress\source_includes\custom\navigation.html, 并加入以下内容： 1
 2
 3
 4
 5
-6
-yum -y install make gcc
-wget http://download.redis.io/redis-stable.tar.gz
-tar &hellip;">
+&lt;ul class="main-navigation"&gt; &lt;li&gt;&lt;a href="/"&gt;首页&lt;/a& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -88,6 +84,147 @@ tar &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-10T13:39:00+08:00" pubdate data-updated="true">Oct 10<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>设置导航栏</h2>
+
+<p>编辑octopress\source_includes\custom\navigation.html, 并加入以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;ul class="main-navigation"&gt;
+</span><span class='line'>  &lt;li&gt;&lt;a href="/"&gt;首页&lt;/a&gt;&lt;/li&gt;
+</span><span class='line'>  &lt;li&gt;&lt;a href="/blog/archives"&gt;归档&lt;/a&gt;&lt;/li&gt;
+</span><span class='line'>    &lt;li&gt;&lt;a href="/about"&gt;关于我&lt;/a&gt;&lt;/li&gt;
+</span><span class='line'>&lt;/ul&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>添加 &ldquo;关于我&#8221;导航页</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ rake new_page['about']
+</span><span class='line'>mkdir -p source/about
+</span><span class='line'>Creating new page: source/about/index.markdown</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>侧边栏文章分类</h2>
+
+<p>创建文件：octopress\plugins\category_list_tab.rb，内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>module Jekyll 
+</span><span class='line'>  class CategoryListTag &lt; Liquid::Tag 
+</span><span class='line'>    def render(context) 
+</span><span class='line'>      html = "" 
+</span><span class='line'>      categories = context.registers[:site].categories.keys 
+</span><span class='line'>      categories.sort.each do |category| 
+</span><span class='line'>        posts_in_category = context.registers[:site].categories[category].size 
+</span><span class='line'>        category_dir = context.registers[:site].config['category_dir'] 
+</span><span class='line'>        category_url = File.join(category_dir, category.gsub(/_|\P{Word}/, '-').gsub(/-{2,}/, '-').downcase) 
+</span><span class='line'>        html &lt;&lt; "&lt;li class='category'&gt;&lt;a href='/#{category_url}/'&gt;#{category} (#{posts_in_category})&lt;/a&gt;&lt;/li&gt;\n" 
+</span><span class='line'>      end 
+</span><span class='line'>      html 
+</span><span class='line'>    end 
+</span><span class='line'>  end 
+</span><span class='line'>end
+</span><span class='line'>
+</span><span class='line'>Liquid::Template.register_tag('category_list', Jekyll::CategoryListTag)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>新建文件 octopress\source_includes\custom\category_list.html,并添加以下内容(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;section&gt; 
+</span><span class='line'>  &lt;h1&gt;文章分类&lt;/h1&gt; 
+</span><span class='line'>  &lt;ul id="categories"&gt; 
+</span><span class='line'>    {\% category_list \%} 
+</span><span class='line'>  &lt;/ul&gt; 
+</span><span class='line'>&lt;/section&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改 _config.yml文件 ：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>default_asides: [asides/recent_posts.html, asides/category_list.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改octopress\source_includes\asides\recent_posts.html</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  &lt;h1&gt;Recent Posts&lt;/h1&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改为</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;h1&gt;最新文章&lt;/h1&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>显示 文章以摘要形式展示</h2>
+
+<p>在markdown文件需要显示的地址添加 </div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/10/octopress-personalization-customization/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1119,189 +1256,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/02/zabbix-source-install-conf/">Zabbix 源码安装与配置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-02T00:00:00+08:00" pubdate data-updated="true">May 2<span>nd</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1、安装环境</h2>
-
-<ul>
-<li>操作系统：:CentOS 5.5 64位</li>
-<li>Mysql：5.5.27</li>
-<li>Apache httpd：2.4.4</li>
-<li>Zabbix：2.0.6</li>
-</ul>
-
-
-<h2>2、源码安装</h2>
-
-<h3>安装Zabbix</h3>
-
-<h4>创建用户</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
-</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>源码安装Zabbix</h3>
-
-<p>下载页面请点击 <a href="http://www.zabbix.com/download.php">这里</a>。下载之后按照以下步骤执行：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>yum install wget curl-devel net-snmp-devel php-bcmath
-</span><span class='line'>tar zxvf zabbix-2.0.6.tar.gz
-</span><span class='line'>cd zabbix-2.0.6
-</span><span class='line'>./configure --prefix=/data/zabbix \
-</span><span class='line'>  --enable-server --enable-agent \
-</span><span class='line'>  --with-mysql --with-net-snmp \
-</span><span class='line'>  --with-libcurl --enable-proxy
-</span><span class='line'>
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果一切顺利，安装完成。</p>
-
-<h3>创建Zabbix 数据库</h3>
-
-<p>这里假设你已经安装好Mysql数据库，具体的安装方法请自己到网上搜索解决。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>mysql -uroot -p
-</span><span class='line'>Enter password:
-</span><span class='line'>
-</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
-</span><span class='line'>Your MySQL connection id is 63
-</span><span class='line'>Server version: 5.0.95 Source distribution
-</span><span class='line'>
-</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
-</span><span class='line'>
-</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
-</span><span class='line'>affiliates. Other names may be trademarks of their respective owners.
-</span><span class='line'>
-</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-</span><span class='line'>
-</span><span class='line'>mysql&gt; create database zabbix character set utf8;
-</span><span class='line'>mysql&gt; grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
-</span><span class='line'>Query OK, 1 row affected (0.00 sec)
-</span><span class='line'>
-</span><span class='line'>mysql&gt; quit
-</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/schema.sql
-</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/images.sql
-</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/data.sql</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>配置Zabbix</h3>
-
-<p>设置服务自启动：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cp misc/init.d/fedora/core/zabbix_server /etc/init.d/
-</span><span class='line'>chmod +x /etc/init.d/zabbix_server</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改zabbix_server中的BASEDIR=/data/zabbix</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --add zabbix_server
-</span><span class='line'>chkconfig zabbix_server on</span></code></pre></td></tr></table></div></figure>
-
-
-<p>设置zabbix 配置文件：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>vim /data/zabbix/etc/zabbix/zabbix_server.conf
-</span><span class='line'>DBName=zabbix
-</span><span class='line'>DBPassword=zabbix</span></code></pre></td></tr></table></div></figure>
-
-
-<p>只需要修改密码即可，其他都保持默认值。当然如果你的Mysql不是安装在本地，肯定也要修改相应的IP啦。</p>
-
-<h4>启动Zabbix Server</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/zabbix_server start</span></code></pre></td></tr></table></div></figure>
-
-
-<p>确认zabbix server是否已经启动：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>netstat -antulp | grep zabbix
-</span><span class='line'>
-</span><span class='line'>tcp        0      0 0.0.0.0:10051               0.0.0.0:*                   LISTEN      19087/zabbix_server</span></code></pre></td></tr></table></div></figure>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/05/02/zabbix-source-install-conf/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1317,6 +1271,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/08/redis-install-and-config/">Redis安装与配置</a>
       </li>
     
@@ -1330,10 +1288,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
     
       <li class="post">
         <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
       </li>
     
   </ul>

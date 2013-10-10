@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-10T13:29:46+08:00</updated>
+  <updated>2013-10-10T14:47:58+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,249 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[octopress个性化定制]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/10/octopress-personalization-customization/"/>
+    <updated>2013-10-10T13:39:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/10/octopress-personalization-customization</id>
+    <content type="html"><![CDATA[<h2>设置导航栏</h2>
+
+<p>编辑octopress\source_includes\custom\navigation.html, 并加入以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;ul class="main-navigation"&gt;
+</span><span class='line'>  &lt;li&gt;&lt;a href="http://agenge.github.io/"&gt;首页&lt;/a&gt;&lt;/li&gt;
+</span><span class='line'>  &lt;li&gt;&lt;a href="http://agenge.github.io/blog/archives"&gt;归档&lt;/a&gt;&lt;/li&gt;
+</span><span class='line'>    &lt;li&gt;&lt;a href="http://agenge.github.io/about"&gt;关于我&lt;/a&gt;&lt;/li&gt;
+</span><span class='line'>&lt;/ul&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>添加 &ldquo;关于我&#8221;导航页</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ rake new_page['about']
+</span><span class='line'>mkdir -p source/about
+</span><span class='line'>Creating new page: source/about/index.markdown</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>侧边栏文章分类</h2>
+
+<p>创建文件：octopress\plugins\category_list_tab.rb，内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>module Jekyll 
+</span><span class='line'>  class CategoryListTag &lt; Liquid::Tag 
+</span><span class='line'>    def render(context) 
+</span><span class='line'>      html = "" 
+</span><span class='line'>      categories = context.registers[:site].categories.keys 
+</span><span class='line'>      categories.sort.each do |category| 
+</span><span class='line'>        posts_in_category = context.registers[:site].categories[category].size 
+</span><span class='line'>        category_dir = context.registers[:site].config['category_dir'] 
+</span><span class='line'>        category_url = File.join(category_dir, category.gsub(/_|\P{Word}/, '-').gsub(/-{2,}/, '-').downcase) 
+</span><span class='line'>        html &lt;&lt; "&lt;li class='category'&gt;&lt;a href='http://agenge.github.io/#{category_url}/'&gt;#{category} (#{posts_in_category})&lt;/a&gt;&lt;/li&gt;\n" 
+</span><span class='line'>      end 
+</span><span class='line'>      html 
+</span><span class='line'>    end 
+</span><span class='line'>  end 
+</span><span class='line'>end
+</span><span class='line'>
+</span><span class='line'>Liquid::Template.register_tag('category_list', Jekyll::CategoryListTag)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>新建文件 octopress\source_includes\custom\category_list.html,并添加以下内容(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;section&gt; 
+</span><span class='line'>  &lt;h1&gt;文章分类&lt;/h1&gt; 
+</span><span class='line'>  &lt;ul id="categories"&gt; 
+</span><span class='line'>    {\% category_list \%} 
+</span><span class='line'>  &lt;/ul&gt; 
+</span><span class='line'>&lt;/section&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改 _config.yml文件 ：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>default_asides: [asides/recent_posts.html, asides/category_list.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改octopress\source_includes\asides\recent_posts.html</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  &lt;h1&gt;Recent Posts&lt;/h1&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改为</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;h1&gt;最新文章&lt;/h1&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>显示 文章以摘要形式展示</h2>
+
+<p>在markdown文件需要显示的地址添加 <!-- more -->，在发布文章后就会显示 Read On链接。
+如果想将Read On显示为：阅读全文，请修改_config.yml,将</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>excerpt_link: "Read on &rarr;" </span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改为</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>excerpt_link: "阅读全文 &rarr;" </span></code></pre></td></tr></table></div></figure>
+
+
+<h2>添加版权声明</h2>
+
+<p>在 source_includes\post 目录下创建一个文件：license.html，内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>
+</span><span class='line'>&lt;DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right&gt;
+</span><span class='line'>&lt;DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"&gt;&lt;/DIV&gt;
+</span><span class='line'>&lt;DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000"&gt;
+</span><span class='line'>作者： &lt;A href="http://agenge.com"&gt;agenge&lt;/A&gt; &lt;BR&gt;
+</span><span class='line'>出处： &lt;A href="http://agenge.com"&gt;http://agenge.com&lt;/A&gt; 
+</span><span class='line'>&lt;BR&gt;本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
+</span><span class='line'>&lt;a href=mailto:huanggeng.8552@gmail.com&gt; agenge &lt;/a&gt;。 &lt;/DIV&gt;&lt;/DIV&gt;
+</span><span class='line'>
+</span><span class='line'></span></code></pre></td></tr></table></div></figure>
+
+
+<p>在sass\custom_styles.scss  添加样式，内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>.oec2003right
+</span><span class='line'>{
+</span><span class='line'>    background: #C3D9FF;
+</span><span class='line'>    height:120px;
+</span><span class='line'>    border:1px solid #BBBBBB;
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>.oec2003right a:link 
+</span><span class='line'>{
+</span><span class='line'>    color: #0057b6;
+</span><span class='line'>    text-decoration: none;
+</span><span class='line'>}
+</span><span class='line'>.oec2003right a:visited 
+</span><span class='line'>{
+</span><span class='line'>    color: #0057b6;
+</span><span class='line'>    text-decoration: none;
+</span><span class='line'>}
+</span><span class='line'>.oec2003right a:active,a:hover
+</span><span class='line'>{
+</span><span class='line'>    color: #0057b6;
+</span><span class='line'>    text-decoration: underline;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改 source_layouts\post.html, 在第14行(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Include file 'post\/categories.html' contains invalid characters or sequences</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这行之后, 添加(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Include file 'post\/license.html' contains invalid characters or sequences</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在_config.yml最后一行添加以下内容，意思为控制是否显示页面的版权信息,True为显示</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>post_license: true</span></code></pre></td></tr></table></div></figure>
+
+
+<p>效果如下：</p>
+
+<DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right>
+<DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"></DIV>
+<DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000">
+作者： <A href="http://agenge.com">agenge</A> <BR>
+出处： <A href="http://agenge.com">http://agenge.com</A> 
+<BR>本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
+<a href=mailto:huanggeng.8552@gmail.com> agenge </a></DIV></DIV>
+
+
+<h2>域名设置</h2>
+
+<p>域名服务商设置</p>
+
+<p>主机名    记录类型   地址
+空     A记录     207.97.227.245
+www     CNAME       agenge.github.com</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "agenge.com" &gt;&gt; source/CNAME</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p>以上主要是 agenge.com 这个Blog的常见设置，如果你觉得设置很麻烦，请直接git源代码吧: github.com/agenge.github.com</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[redis安装与配置]]></title>
@@ -4192,7 +4435,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#x61;&#105;&#108;&#x74;&#111;&#58;&#116;&#x65;&#115;&#x74;&#95;&#x7a;&#x61;&#98;&#98;&#105;&#120;&#x40;&#103;&#109;&#x61;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#116;&#x65;&#115;&#x74;&#95;&#122;&#x61;&#x62;&#x62;&#x69;&#x78;&#x40;&#103;&#x6d;&#97;&#x69;&#x6c;&#46;&#x63;&#x6f;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#97;&#x69;&#108;&#x74;&#x6f;&#58;&#x74;&#x65;&#x73;&#116;&#95;&#x7a;&#x61;&#x62;&#x62;&#105;&#x78;&#64;&#103;&#109;&#x61;&#x69;&#x6c;&#46;&#99;&#x6f;&#109;">&#x74;&#101;&#x73;&#116;&#x5f;&#x7a;&#97;&#98;&#98;&#105;&#x78;&#64;&#103;&#x6d;&#97;&#x69;&#x6c;&#x2e;&#99;&#x6f;&#109;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

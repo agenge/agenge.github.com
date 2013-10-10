@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 生活 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/sheng-huo/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-10T13:29:46+08:00</updated>
+  <updated>2013-10-10T14:50:33+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -87,36 +87,36 @@ Filesystem Size Used Avail Use% Mounted on
 </ol>
 
 
-<p><img src="/images/2013/03/jy-01.jpg"></p>
+<p>{% img /images/2013/03/jy-01.jpg %}</p>
 
 <p>注：货是2013年02月08日下午收到的，由于刚好过春节，偶直到02月13日才上网确认收货。</p>
 
 <p>下面是整个物流传递信息，可以看到在2013年01月25日下单，2013年02月05日才发货(估计卖家订单量太多，无法及时处理)，不过整个传递速度还是非常快滴。</p>
 
-<p><img src="/images/2013/03/wl-01.jpg"></p>
+<p>{% img /images/2013/03/wl-01.jpg %}</p>
 
 <p>2.开箱
 包装正面图：</p>
 
-<p><img src="/images/2013/03/pw-01.jpg"></p>
+<p>{% img /images/2013/03/pw-01.jpg %}</p>
 
 <p>包装内部图1：</p>
 
-<p><img src="/images/2013/03/pw-03.jpg"></p>
+<p>{% img /images/2013/03/pw-03.jpg %}</p>
 
 <p>机身正面图：</p>
 
-<p><img src="/images/2013/03/pw-06.jpg"></p>
+<p>{% img /images/2013/03/pw-06.jpg %}</p>
 
 <p>细心的同学可能已经发现这是多看系统的屏保。 :)</p>
 
 <p>皮套正面图：</p>
 
-<p><img src="/images/2013/03/pw-05.jpg"></p>
+<p>{% img /images/2013/03/pw-05.jpg %}</p>
 
 <p>我的阅历：</p>
 
-<p><img src="/images/2013/03/pw-07.jpg"></p>
+<p>{% img /images/2013/03/pw-07.jpg %}</p>
 
 <p>介个时间分布的统计方式有严重Bug，偶每天6:50起床，00:00&mdash;6:50之间的数据何来？现在看来此问题只有多看团队能够解答。</p>
 

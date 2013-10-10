@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: Blog | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/blog/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-10T13:29:46+08:00</updated>
+  <updated>2013-10-10T14:50:33+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,218 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[octopress个性化定制]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/10/octopress-personalization-customization/"/>
+    <updated>2013-10-10T13:39:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/10/octopress-personalization-customization</id>
+    <content type="html"><![CDATA[<h2>设置导航栏</h2>
+
+<p>编辑octopress\source_includes\custom\navigation.html, 并加入以下内容：</p>
+
+<p>```</p>
+
+<ul class="main-navigation">
+  <li><a href="{{ root_url }}/">首页</a></li>
+  <li><a href="{{ root_url }}/blog/archives">归档</a></li>
+    <li><a href="{{ root_url }}/about">关于我</a></li>
+</ul>
+
+
+<p>```</p>
+
+<h2>添加 &ldquo;关于我"导航页</h2>
+
+<p><code>
+$ rake new_page['about']
+mkdir -p source/about
+Creating new page: source/about/index.markdown
+</code></p>
+
+<h2>侧边栏文章分类</h2>
+
+<p>创建文件：octopress\plugins\category_list_tab.rb，内容如下：</p>
+
+<p>```
+module Jekyll
+  class CategoryListTag &lt; Liquid::Tag</p>
+
+<pre><code>def render(context) 
+  html = "" 
+  categories = context.registers[:site].categories.keys 
+  categories.sort.each do |category| 
+    posts_in_category = context.registers[:site].categories[category].size 
+    category_dir = context.registers[:site].config['category_dir'] 
+    category_url = File.join(category_dir, category.gsub(/_|\P{Word}/, '-').gsub(/-{2,}/, '-').downcase) 
+    html &lt;&lt; "&lt;li class='category'&gt;&lt;a href='http://agenge.github.io/#{category_url}/'&gt;#{category} (#{posts_in_category})&lt;/a&gt;&lt;/li&gt;\n" 
+  end 
+  html 
+end 
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>Liquid::Template.register_tag(&lsquo;category_list&rsquo;, Jekyll::CategoryListTag)
+```</p>
+
+<p>新建文件 octopress\source_includes\custom\category_list.html,并添加以下内容(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)：</p>
+
+<p>```
+<section>
+  <h1>文章分类</h1>
+  <ul id="categories"></p>
+
+<pre><code>{\% category_list \%} 
+</code></pre>
+
+<p>  </ul>
+</section>
+```</p>
+
+<p>修改 _config.yml文件 ：</p>
+
+<p><code>
+default_asides: [asides/recent_posts.html, asides/category_list.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]
+</code></p>
+
+<p>修改octopress\source_includes\asides\recent_posts.html</p>
+
+<p><code>
+  &lt;h1&gt;Recent Posts&lt;/h1&gt;
+</code>
+修改为</p>
+
+<p>```</p>
+
+<h1>最新文章</h1>
+
+
+<p>```</p>
+
+<h2>显示 文章以摘要形式展示</h2>
+
+<p>在markdown文件需要显示的地址添加 <!-- more -->，在发布文章后就会显示 Read On链接。
+如果想将Read On显示为：阅读全文，请修改_config.yml,将</p>
+
+<p><code>
+excerpt_link: "Read on &amp;rarr;"
+</code></p>
+
+<p>修改为</p>
+
+<p><code>
+excerpt_link: "阅读全文 &amp;rarr;"
+</code></p>
+
+<h2>添加版权声明</h2>
+
+<p>在 source_includes\post 目录下创建一个文件：license.html，内容如下：</p>
+
+<p>```
+{% if site.post_license  %}</p>
+
+<DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right>
+<DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"></DIV>
+<DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000">
+作者： <A href="http://agenge.com">agenge</A> <BR>
+出处： <A href="http://agenge.com">http://agenge.com</A> 
+<BR>本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
+<a href=mailto:huanggeng.8552@gmail.com> agenge </a>。 </DIV></DIV>
+
+
+<p>{% endif %}
+```</p>
+
+<p>在sass\custom_styles.scss  添加样式，内容如下：</p>
+
+<p>```
+.oec2003right
+{</p>
+
+<pre><code>background: #C3D9FF;
+height:120px;
+border:1px solid #BBBBBB;
+</code></pre>
+
+<p>}</p>
+
+<p>.oec2003right a:link
+{</p>
+
+<pre><code>color: #0057b6;
+text-decoration: none;
+</code></pre>
+
+<p>}
+.oec2003right a:visited
+{</p>
+
+<pre><code>color: #0057b6;
+text-decoration: none;
+</code></pre>
+
+<p>}
+.oec2003right a:active,a:hover
+{</p>
+
+<pre><code>color: #0057b6;
+text-decoration: underline;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>修改 source_layouts\post.html, 在第14行(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)</p>
+
+<p>```</p>
+
+<pre><code>{% include post\/categories.html %}
+</code></pre>
+
+<p>```
+这行之后, 添加(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)</p>
+
+<p>```</p>
+
+<pre><code>{% include post\/license.html %}
+</code></pre>
+
+<p>```
+在_config.yml最后一行添加以下内容，意思为控制是否显示页面的版权信息,True为显示</p>
+
+<p><code>
+post_license: true
+</code></p>
+
+<p>效果如下：</p>
+
+<DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right>
+<DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"></DIV>
+<DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000">
+作者： <A href="http://agenge.com">agenge</A> <BR>
+出处： <A href="http://agenge.com">http://agenge.com</A> 
+<BR>本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
+<a href=mailto:huanggeng.8552@gmail.com> agenge </a></DIV></DIV>
+
+
+<h2>域名设置</h2>
+
+<p>域名服务商设置</p>
+
+<p>主机名    记录类型   地址
+空     A记录     207.97.227.245
+www     CNAME       agenge.github.com</p>
+
+<p>```
+echo &ldquo;agenge.com&rdquo; >> source/CNAME</p>
+
+<h2>```</h2>
+
+<p>以上主要是 agenge.com 这个Blog的常见设置，如果你觉得设置很麻烦，请直接git源代码吧: github.com/agenge.github.com</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[利用GitHub搭建免费的个人blog]]></title>
