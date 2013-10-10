@@ -26,34 +26,6 @@ $ rake new_page['about']
 mkdir -p source/about
 Creating new page: source/about/index.markdown
 ```
----
-layout: post
-title: "octopress个性化定制"
-date: 2013-10-10 13:39
-comments: true
-categories: 
-- Blog
-
----
-
-## 设置导航栏
-编辑octopress\source\_includes\custom\navigation.html, 并加入以下内容：
-
-```
-<ul class="main-navigation">
-  <li><a href="{{ root_url }}/">首页</a></li>
-  <li><a href="{{ root_url }}/blog/archives">归档</a></li>
-    <li><a href="{{ root_url }}/about">关于我</a></li>
-</ul>
-```
-
-## 添加 "关于我"导航页
-
-```
-$ rake new_page['about']
-mkdir -p source/about
-Creating new page: source/about/index.markdown
-```
 
 ## 侧边栏文章分类  
 创建文件：octopress\plugins\category_list_tab.rb，内容如下：
@@ -78,13 +50,13 @@ end
 Liquid::Template.register_tag('category_list', Jekyll::CategoryListTag)
 ```
 
-新建文件 octopress\source\_includes\custom\category_list.html,并添加以下内容：
+新建文件 octopress\source\_includes\custom\category_list.html,并添加以下内容(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛\)：
 
 ```
 <section> 
   <h1>文章分类</h1> 
   <ul id="categories"> 
-    {% category_list %} 
+    {\% category_list \%} 
   </ul> 
 </section>
 ```
@@ -164,12 +136,12 @@ excerpt_link: "阅读全文 &rarr;"
 }
 ```
 
-修改 source\_layouts\post.html, 在第14行
+修改 source\_layouts\post.html, 在第14行(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛\)
 
 ```
 	{% include post\/categories.html %}
 ```
-这行之后, 添加
+这行之后, 添加(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛\)
 
 ```
 	{% include post\/license.html %}
@@ -192,11 +164,13 @@ post_license: true
 
 ## 域名设置
 域名服务商设置
+
 主机名    记录类型	地址
 空		A记录		207.97.227.245
 www		CNAME		agenge.github.com
 
+```
 echo "agenge.com" >> source/CNAME
-
+```
 ---
 以上主要是 agenge.com 这个Blog的常见设置，如果你觉得设置很麻烦，请直接git源代码吧: github.com/agenge.github.com
