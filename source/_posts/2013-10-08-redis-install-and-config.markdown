@@ -17,14 +17,14 @@ categories:
 ## Redis安装
 1. 下载Redis
 
- ```
- yum -y install make gcc
- wget http://download.redis.io/redis-stable.tar.gz
- tar zxvf redis-stable.tar.gz
- cd redis-stable
- make
- make install
- ```
+```
+yum -y install make gcc
+wget http://download.redis.io/redis-stable.tar.gz
+tar zxvf redis-stable.tar.gz
+cd redis-stable
+make
+make install
+```
  这样即完成redis的安装,整个安装是否超级简单,至少偶认为不复杂。
 
 2. 启动和停止Redis
@@ -40,63 +40,62 @@ categories:
  
  启动redis,直接在命令行输入：
  
- ```
- redis-server
- ```
+```
+redis-server
+```
  
  如果启动正常，就会输出以下类似信息：
  
- ```
-  [2935] 08 Oct 20:29:05.156 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
- [2935] 08 Oct 20:29:05.158 * Max number of open files set to 10032
-                 _._                                                  
-            _.-``__ ''-._                                             
-       _.-``    `.  `_.  ''-._           Redis 2.6.14 (00000000/0) 64 bit
-   .-`` .-```.  ```\/    _.,_ ''-._                                   
-  (    '      ,       .-`  | `,    )     Running in stand alone mode
-  |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
-  |    `-._   `._    /     _.-'    |     PID: 2935
-   `-._    `-._  `-./  _.-'    _.-'                                   
-  |`-._`-._    `-.__.-'    _.-'_.-'|                                  
-  |    `-._`-._        _.-'_.-'    |           http://redis.io        
-   `-._    `-._`-.__.-'_.-'    _.-'                                   
-  |`-._`-._    `-.__.-'    _.-'_.-'|                                  
-  |    `-._`-._        _.-'_.-'    |                                  
-   `-._    `-._`-.__.-'_.-'    _.-'                                   
-       `-._    `-.__.-'    _.-'                                       
-           `-._        _.-'                                           
-               `-.__.-'                                               
- 
- [2935] 08 Oct 20:29:05.159 # Server started, Redis version 2.6.14
- [2935] 08 Oct 20:29:05.159 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
- [2935] 08 Oct 20:29:05.159 * The server is now ready to accept connections on port 6379
- ```
+```
+[2935] 08 Oct 20:29:05.156 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+[2935] 08 Oct 20:29:05.158 * Max number of open files set to 10032
+             _._                                                  
+        _.-``__ ''-._                                             
+   _.-``    `.  `_.  ''-._           Redis 2.6.14 (00000000/0) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in stand alone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 2935
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+   `-._    `-.__.-'    _.-'                                       
+       `-._        _.-'                                           
+           `-.__.-'                                               
+[2935] 08 Oct 20:29:05.159 # Server started, Redis version 2.6.14
+[2935] 08 Oct 20:29:05.159 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+[2935] 08 Oct 20:29:05.159 * The server is now ready to accept connections on port 6379
+```
  
  从输出信息可以看出redis已经启动成功，默认监听的6379端口。不过我们还有更好的办法来启动redis-server，Redis默认已经为我们提供一个系统启动脚本：
- 
- ```
- cp utils/redis_init_script /etc/init.d/redis_server_6379
- chmod +x /etc/init.d/redis_server_6379
- mkdir /etc/redis
- cp redis.conf /etc/redis/6379.conf
- echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
- /etc/init.d/redis_server_6379 start
- ```
+
+```
+cp utils/redis_init_script /etc/init.d/redis_server_6379
+chmod +x /etc/init.d/redis_server_6379
+mkdir /etc/redis
+cp redis.conf /etc/redis/6379.conf
+echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+/etc/init.d/redis_server_6379 start
+```
  
  ** 关闭Redis **
  相对启动来讲，关闭redis就更为简单，只需要输入：
  
- ```
- redis-cli SHUTDOWN
- ```
+```
+redis-cli SHUTDOWN
+```
  此命令输入完成后，首先会断开所有客户端的连接，然后根本配置进行持久化，如果关闭正常，就会输出以下类似信息：
  
- ```
- [2989] 08 Oct 20:46:08.156 # User requested shutdown...
- [2989] 08 Oct 20:46:08.156 * Saving the final RDB snapshot before exiting.
- [2989] 08 Oct 20:46:08.175 * DB saved on disk
- [2989] 08 Oct 20:46:08.175 # Redis is now ready to exit, bye bye...
- ```
+```
+[2989] 08 Oct 20:46:08.156 # User requested shutdown...
+[2989] 08 Oct 20:46:08.156 * Saving the final RDB snapshot before exiting.
+[2989] 08 Oct 20:46:08.175 * DB saved on disk
+[2989] 08 Oct 20:46:08.175 # Redis is now ready to exit, bye bye...
+```
 
 ---
 ## Redis 命令行客户端
@@ -104,11 +103,12 @@ categories:
 
 * 将要发送的命令作为 redis-cli 的参数，例如之前介绍过的  redis-cli SHUTDOWN, 此处的SHUTDOWN即是发送命令，也是一个参数。
 * 直接进入 redis-cli 交互式命令行执行命令，例如：
- ```
- redis-cli
- redis 127.0.0.1:6379> ping
- PONG
- ```
+ 
+```
+redis-cli
+redis 127.0.0.1:6379> ping
+PONG
+```
  其中“redis 127.0.0.1:6379>” 是redis-cli的命令提示符，类似Mysql中的“mysql> ” ，ping是Redis内置的命令，用来测试是否与服务器连接正常。 
 
 ## Redis多数据库
