@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[文章分类: NoSQL | TaurusHome]]></title>
+  <link href="http://agenge.github.io/blog/categories/nosql/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-10-10T13:16:36+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[redis安装与配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/08/redis-install-and-config/"/>
+    <updated>2013-10-08T20:05:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/08/redis-install-and-config</id>
+    <content type="html"><![CDATA[<h2>安装环境</h2>
+
+<ul>
+<li>操作系统：CentOS 6.3 64位</li>
+<li>Redis：最新版本 2.6.14</li>
+</ul>
+
+
+<h2>Redis安装</h2>
+
+<ol>
+<li>下载Redis</li>
+</ol>
+
+
+<p> <code>
+ yum -y install make gcc
+ wget http://download.redis.io/redis-stable.tar.gz
+ tar zxvf redis-stable.tar.gz
+ cd redis-stable
+ make
+ make install
+</code>
+ 这样即完成redis的安装,整个安装是否超级简单,至少偶认为不复杂。</p>
+
+<ol>
+<li><p>启动和停止Redis
+在Linux系统中，启动与停止服务也是非常简单，Redis主要提供以下几个可执行程序：</p></li>
+<li><p>redis-server     看名称就明白：Redis服务器</p></li>
+<li>redis-cli        Redis命令行客户端</li>
+<li>redis-benchmark  Redis性能测试工具</li>
+<li>redis-check-aof  AOF文件修复工具</li>
+<li>redis-check-dump RDB文件检查工具</li>
+</ol>
+
+
+<p> <strong> 启动Redis </strong></p>
+
+<p> 启动redis,直接在命令行输入：</p>
+
+<p> <code>
+ redis-server
+</code></p>
+
+<p> 如果启动正常，就会输出以下类似信息：</p>
+
+<p> ```
+  [2935] 08 Oct 20:29:05.156 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+ [2935] 08 Oct 20:29:05.158 * Max number of open files set to 10032</p>
+
+<pre><code>             _._                                                  
+        _.-``__ ''-._                                             
+   _.-``    `.  `_.  ''-._           Redis 2.6.14 (00000000/0) 64 bit
+</code></pre>
+
+<p>   .&ndash;<code>.-```.  ```\/    _.,_ ''-._                                   
+  (    '      ,       .-`  | `,    )     Running in stand alone mode
+  |`-._`-...-` __...-.</code>&ndash;.<em>|&lsquo;<code>_.-'|     Port: 6379
+  |   </code>&ndash;.</em>   <code>._    /     _.-'    |     PID: 2935
+  </code>&ndash;.<em>    <code>-._ </code>&ndash;./  </em>.&ndash;&rsquo;    <em>.&ndash;&lsquo;                                 <br/>
+  |<code>-._</code>&ndash;.</em>    <code>-.__.-'    _.-'_.-'|                                  
+  |   </code>&ndash;.<em><code>-._        _.-'_.-'    |           http://redis.io        
+  </code>&ndash;.</em>    <code>-._</code>&ndash;.<strong>.&ndash;&rsquo;<em>.&ndash;&lsquo;    </em>.&ndash;&rsquo;                                 <br/>
+  |<code>-._</code>&ndash;.<em>    <code>-.__.-'    _.-'_.-'|                                  
+  |   </code>&ndash;.</em><code>-._        _.-'_.-'    |                                  
+  </code>&ndash;._    <code>-._</code>&ndash;.</strong>.&ndash;&lsquo;<em>.&ndash;&rsquo;    </em>.&ndash;'</p>
+
+<pre><code>   `-._    `-.__.-'    _.-'                                       
+       `-._        _.-'                                           
+           `-.__.-'                                               
+</code></pre>
+
+<p> [2935] 08 Oct 20:29:05.159 # Server started, Redis version 2.6.14
+ [2935] 08 Oct 20:29:05.159 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add &lsquo;vm.overcommit_memory = 1&rsquo; to /etc/sysctl.conf and then reboot or run the command &lsquo;sysctl vm.overcommit_memory=1&rsquo; for this to take effect.
+ [2935] 08 Oct 20:29:05.159 * The server is now ready to accept connections on port 6379
+ ```</p>
+
+<p> 从输出信息可以看出redis已经启动成功，默认监听的6379端口。不过我们还有更好的办法来启动redis-server，Redis默认已经为我们提供一个系统启动脚本：</p>
+
+<p> <code>
+ cp utils/redis_init_script /etc/init.d/redis_server_6379
+ chmod +x /etc/init.d/redis_server_6379
+ mkdir /etc/redis
+ cp redis.conf /etc/redis/6379.conf
+ echo "vm.overcommit_memory = 1" &gt;&gt; /etc/sysctl.conf
+ /etc/init.d/redis_server_6379 start
+</code></p>
+
+<p> <strong> 关闭Redis </strong>
+ 相对启动来讲，关闭redis就更为简单，只需要输入：</p>
+
+<p> <code>
+ redis-cli SHUTDOWN
+</code>
+ 此命令输入完成后，首先会断开所有客户端的连接，然后根本配置进行持久化，如果关闭正常，就会输出以下类似信息：</p>
+
+<p> <code>
+ [2989] 08 Oct 20:46:08.156 # User requested shutdown...
+ [2989] 08 Oct 20:46:08.156 * Saving the final RDB snapshot before exiting.
+ [2989] 08 Oct 20:46:08.175 * DB saved on disk
+ [2989] 08 Oct 20:46:08.175 # Redis is now ready to exit, bye bye...
+</code></p>
+
+<hr />
+
+<h2>Redis 命令行客户端</h2>
+
+<p>前面已经介绍过redis-cli这个工具，通过redis-cli向 Redis服务端发送命令有两种方式：</p>
+
+<ul>
+<li>将要发送的命令作为 redis-cli 的参数，例如之前介绍过的  redis-cli SHUTDOWN, 此处的SHUTDOWN即是发送命令，也是一个参数。</li>
+<li>直接进入 redis-cli 交互式命令行执行命令，例如：
+<code>
+redis-cli
+redis 127.0.0.1:6379&gt; ping
+PONG
+</code>
+其中“redis 127.0.0.1:6379>” 是redis-cli的命令提示符，类似Mysql中的“mysql> ” ，ping是Redis内置的命令，用来测试是否与服务器连接正常。</li>
+</ul>
+
+
+<h2>Redis多数据库</h2>
+
+<p>和Mysql一样，Redis也是支持在同一台服务器启动多个redis server，之前已经有过介绍，在启动redis时，用到/etc/redis/6379.conf 这个配置文件，下面就来介绍如何在一台服务器启动多个redis数据库</p>
+
+<p><code>
+cd /etc/redis/
+cp 6379.conf 6380.conf
+</code>
+修改6380.conf 以下内容：</p>
+
+<p><code>
+pidfile /var/run/redis_6380.pid
+port 6380
+</code></p>
+
+<p>保存退出，修改启动服务：</p>
+
+<p><code>
+cp /etc/init.d/redis_server_6379 /etc/init.d/redis_server_6380
+</code>
+将 REDISPORT=6379  修改为 REDISPORT=6380</p>
+
+<p>启动redis server</p>
+
+<p><code>
+/etc/init.d/redis_server_6379 start
+/etc/init.d/redis_server_6380 start
+</code>
+上面代表将启动两个redis 数据库，分别监听6379和6380端口。</p>
+]]></content>
+  </entry>
+  
+</feed>

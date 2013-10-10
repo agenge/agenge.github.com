@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>redis安装与配置 - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="安装环境 操作系统：CentOS 6.3 64位
+Redis：最新版本 2.6.14 Redis安装 下载Redis yum -y install make gcc wget http://download.redis.io/redis-stable.tar.gz tar zxvf redis- &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/10/08/redis-install-and-config">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-6520474-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Redis安装与配置</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-08T20:05:00+08:00" pubdate data-updated="true">Oct 8<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>安装环境</h2>
+
+<ul>
+<li>操作系统：CentOS 6.3 64位</li>
+<li>Redis：最新版本 2.6.14</li>
+</ul>
+
+
+<h2>Redis安装</h2>
+
+<ol>
+<li>下载Redis</li>
+</ol>
+
+
+<p> <code>
+ yum -y install make gcc
+ wget http://download.redis.io/redis-stable.tar.gz
+ tar zxvf redis-stable.tar.gz
+ cd redis-stable
+ make
+ make install
+</code>
+ 这样即完成redis的安装,整个安装是否超级简单,至少偶认为不复杂。</p>
+
+<ol>
+<li><p>启动和停止Redis
+在Linux系统中，启动与停止服务也是非常简单，Redis主要提供以下几个可执行程序：</p></li>
+<li><p>redis-server     看名称就明白：Redis服务器</p></li>
+<li>redis-cli        Redis命令行客户端</li>
+<li>redis-benchmark  Redis性能测试工具</li>
+<li>redis-check-aof  AOF文件修复工具</li>
+<li>redis-check-dump RDB文件检查工具</li>
+</ol>
+
+
+<p> <strong> 启动Redis </strong></p>
+
+<p> 启动redis,直接在命令行输入：</p>
+
+<p> <code>
+ redis-server
+</code></p>
+
+<p> 如果启动正常，就会输出以下类似信息：</p>
+
+<p> &#8220;`
+  [2935] 08 Oct 20:29:05.156 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+ [2935] 08 Oct 20:29:05.158 * Max number of open files set to 10032</p>
+
+<pre><code>             _._                                                  
+        _.-``__ ''-._                                             
+   _.-``    `.  `_.  ''-._           Redis 2.6.14 (00000000/0) 64 bit
+</code></pre>
+
+<p>   .&ndash;<code>.-```.  ```\/    _.,_ ''-._                                   
+  (    '      ,       .-`  | `,    )     Running in stand alone mode
+  |`-._`-...-` __...-.</code>&ndash;.<em>|&lsquo;<code>_.-'|     Port: 6379
+  |   </code>&ndash;.</em>   <code>._    /     _.-'    |     PID: 2935
+  </code>&ndash;.<em>    <code>-._ </code>&ndash;./  </em>.&ndash;&rsquo;    <em>.&ndash;&lsquo;                                 <br/>
+  |<code>-._</code>&ndash;.</em>    <code>-.__.-'    _.-'_.-'|                                  
+  |   </code>&ndash;.<em><code>-._        _.-'_.-'    |           http://redis.io        
+  </code>&ndash;.</em>    <code>-._</code>&ndash;.<strong>.&ndash;&rsquo;<em>.&ndash;&lsquo;    </em>.&ndash;&rsquo;                                 <br/>
+  |<code>-._</code>&ndash;.<em>    <code>-.__.-'    _.-'_.-'|                                  
+  |   </code>&ndash;.</em><code>-._        _.-'_.-'    |                                  
+  </code>&ndash;._    <code>-._</code>&ndash;.</strong>.&ndash;&lsquo;<em>.&ndash;&rsquo;    </em>.&ndash;&#8217;</p>
+
+<pre><code>   `-._    `-.__.-'    _.-'                                       
+       `-._        _.-'                                           
+           `-.__.-'                                               
+</code></pre>
+
+<p> [2935] 08 Oct 20:29:05.159 # Server started, Redis version 2.6.14
+ [2935] 08 Oct 20:29:05.159 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add &lsquo;vm.overcommit_memory = 1&rsquo; to /etc/sysctl.conf and then reboot or run the command &lsquo;sysctl vm.overcommit_memory=1&rsquo; for this to take effect.
+ [2935] 08 Oct 20:29:05.159 * The server is now ready to accept connections on port 6379
+ &#8220;`</p>
+
+<p> 从输出信息可以看出redis已经启动成功，默认监听的6379端口。不过我们还有更好的办法来启动redis-server，Redis默认已经为我们提供一个系统启动脚本：</p>
+
+<p> <code>
+ cp utils/redis_init_script /etc/init.d/redis_server_6379
+ chmod +x /etc/init.d/redis_server_6379
+ mkdir /etc/redis
+ cp redis.conf /etc/redis/6379.conf
+ echo "vm.overcommit_memory = 1" &gt;&gt; /etc/sysctl.conf
+ /etc/init.d/redis_server_6379 start
+</code></p>
+
+<p> <strong> 关闭Redis </strong>
+ 相对启动来讲，关闭redis就更为简单，只需要输入：</p>
+
+<p> <code>
+ redis-cli SHUTDOWN
+</code>
+ 此命令输入完成后，首先会断开所有客户端的连接，然后根本配置进行持久化，如果关闭正常，就会输出以下类似信息：</p>
+
+<p> <code>
+ [2989] 08 Oct 20:46:08.156 # User requested shutdown...
+ [2989] 08 Oct 20:46:08.156 * Saving the final RDB snapshot before exiting.
+ [2989] 08 Oct 20:46:08.175 * DB saved on disk
+ [2989] 08 Oct 20:46:08.175 # Redis is now ready to exit, bye bye...
+</code></p>
+
+<hr />
+
+<h2>Redis 命令行客户端</h2>
+
+<p>前面已经介绍过redis-cli这个工具，通过redis-cli向 Redis服务端发送命令有两种方式：</p>
+
+<ul>
+<li>将要发送的命令作为 redis-cli 的参数，例如之前介绍过的  redis-cli SHUTDOWN, 此处的SHUTDOWN即是发送命令，也是一个参数。</li>
+<li>直接进入 redis-cli 交互式命令行执行命令，例如：
+<code>
+redis-cli
+redis 127.0.0.1:6379&gt; ping
+PONG
+</code>
+其中“redis 127.0.0.1:6379>” 是redis-cli的命令提示符，类似Mysql中的“mysql> ” ，ping是Redis内置的命令，用来测试是否与服务器连接正常。</li>
+</ul>
+
+
+<h2>Redis多数据库</h2>
+
+<p>和Mysql一样，Redis也是支持在同一台服务器启动多个redis server，之前已经有过介绍，在启动redis时，用到/etc/redis/6379.conf 这个配置文件，下面就来介绍如何在一台服务器启动多个redis数据库</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /etc/redis/
+</span><span class='line'>cp 6379.conf 6380.conf </span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改6380.conf 以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>pidfile /var/run/redis_6380.pid
+</span><span class='line'>port 6380</span></code></pre></td></tr></table></div></figure>
+
+
+<p>保存退出，修改启动服务：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp /etc/init.d/redis_server_6379 /etc/init.d/redis_server_6380</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将 REDISPORT=6379  修改为 REDISPORT=6380</p>
+
+<p>启动redis server</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/redis_server_6379 start
+</span><span class='line'>/etc/init.d/redis_server_6380 start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面代表将启动两个redis 数据库，分别监听6379和6380端口。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-08T20:05:00+08:00" pubdate data-updated="true">Oct 8<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/nosql/'>NoSQL</a>, <a class='category' href='/blog/categories/shu-ju-ku/'>数据库</a>
+  
+</span>
+
+
+	  
+
+<DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right>
+<DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"></DIV>
+<DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000">
+作者： <A href="http://agenge.com">agenge</A> <BR>
+出处： <A href="http://agenge.com">http://agenge.com</A> 
+<BR>本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
+<a href=mailto:huanggeng.8552@gmail.com> agenge </a>。 </DIV></DIV>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/09/12/write-blog-octopress-with-github/" title="Previous Post: 利用GitHub搭建免费的个人blog">&laquo; 利用GitHub搭建免费的个人blog</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/10/08/redis-install-and-config/">Redis安装与配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
