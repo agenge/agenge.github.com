@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: OpenStack | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/openstack/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-11T11:01:48+08:00</updated>
+  <updated>2013-10-11T11:08:19+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -77,19 +77,19 @@
 <p></p>
 
 <p> 使用VNC 客户端连接，例如192.168.30.211:9 
- <img src="images/2013/07/01.png"></p>
+ <img src="/images/2013/07/01.png"></p>
 
 <p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
 
-<p> <img src="images/2013/07/02.png"></p>
+<p> <img src="/images/2013/07/02.png"></p>
 
 <p> 点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：</p>
 
-<p> <img src="images/2013/07/03.png"></p>
+<p> <img src="/images/2013/07/03.png"></p>
 
 <p> 点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：</p>
 
-<p> <img src="images/2013/07/04.png"></p>
+<p> <img src="/images/2013/07/04.png"></p>
 
 <p> 安装之后并关机，进入下一步操作。</p>
 
