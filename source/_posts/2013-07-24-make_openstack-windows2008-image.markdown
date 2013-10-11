@@ -48,19 +48,21 @@ comments: true
 	- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。</span></li>
 	- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。</span></li>
 <!-- more -->  
- 使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a>
+ 
+ 使用VNC 客户端连接，例如192.168.30.211:9 
+ {% img images/2013/07/01.png %}
 
  连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：
 
- <a href="http://agenge.com/wp-content/uploads/2013/07/02.png"><img class="alignnone size-full wp-image-716" alt="02" src="http://agenge.com/wp-content/uploads/2013/07/02.png" width="621" height="489" /></a>
+ {% img images/2013/07/02.png %}
 
  点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：
 
- <a href="http://agenge.com/wp-content/uploads/2013/07/03.png"><img class="alignnone size-full wp-image-717" alt="03" src="http://agenge.com/wp-content/uploads/2013/07/03.png" width="337" height="319" /></a>
+ {% img images/2013/07/03.png %}
 
  点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：
 
- <a href="http://agenge.com/wp-content/uploads/2013/07/04.png"><img class="alignnone size-full wp-image-718" alt="04" src="http://agenge.com/wp-content/uploads/2013/07/04.png" width="597" height="449" /></a>
+ {% img images/2013/07/04.png %}
 
  安装之后并关机，进入下一步操作。
 
