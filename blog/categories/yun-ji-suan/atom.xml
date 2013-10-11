@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-10T14:50:33+08:00</updated>
+  <updated>2013-10-11T11:01:48+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -74,20 +74,22 @@
 <!-- more -->
 
 
-<p>
- 使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a></p>
+<p></p>
+
+<p> 使用VNC 客户端连接，例如192.168.30.211:9 
+ <img src="images/2013/07/01.png"></p>
 
 <p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
 
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/02.png"><img class="alignnone size-full wp-image-716" alt="02" src="http://agenge.com/wp-content/uploads/2013/07/02.png" width="621" height="489" /></a></p>
+<p> <img src="images/2013/07/02.png"></p>
 
 <p> 点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：</p>
 
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/03.png"><img class="alignnone size-full wp-image-717" alt="03" src="http://agenge.com/wp-content/uploads/2013/07/03.png" width="337" height="319" /></a></p>
+<p> <img src="images/2013/07/03.png"></p>
 
 <p> 点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：</p>
 
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/04.png"><img class="alignnone size-full wp-image-718" alt="04" src="http://agenge.com/wp-content/uploads/2013/07/04.png" width="597" height="449" /></a></p>
+<p> <img src="images/2013/07/04.png"></p>
 
 <p> 安装之后并关机，进入下一步操作。</p>
 
@@ -679,7 +681,7 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
 <p>如果没问题，输出内容类似下图：</p>
 
-<p>{% img /images/2013/06/01.png  %}</p>
+<p><img src="/images/2013/06/01.png" title="" ></p>
 
 <hr />
 
@@ -780,7 +782,7 @@ glance image-create --name myFirstVM --is-public true --container-format bare --
 
 <p>如果一切正常，会输出类似以下内容：</p>
 
-<p>{% img /images/2013/06/02.png  %}</p>
+<p><img src="/images/2013/06/02.png" title="" ></p>
 
 <hr />
 
@@ -1002,7 +1004,7 @@ glance image-create --name myFirstVM --is-public true --container-format bare --
 
 <p> 如果正常，会输出类似以下信息：</p>
 
-<p>{% img /images/2013/06/03.png  %}</p>
+<p><img src="/images/2013/06/03.png" title="" ></p>
 
 <ol>
 <li><p>创建fixed_ip（内网虚拟机IP）</p>
@@ -1214,7 +1216,7 @@ sudo /etc/init.d/memcached restart
 
 <p>在创建之后会输出以下类似信息：</p>
 
-<p>{% img /images/2013/06/04.png  %}</p>
+<p><img src="/images/2013/06/04.png" title="" ></p>
 
 <p>从图中可看出正在创建一个实例。</p>
 
@@ -1403,7 +1405,7 @@ sudo /etc/init.d/memcached restart
 </ul>
 
 
-<p>{% img /images/2013/03/vtdisabled.png %}</p>
+<p><img src="/images/2013/03/vtdisabled.png"></p>
 
 <p>表示此计算机不支持VT。</p>
 
@@ -1415,19 +1417,19 @@ sudo /etc/init.d/memcached restart
 
 <p>点击系统任务栏的“服务器管理器”，在左侧的菜单栏点击角色，这里右侧会相应的显示角色相关信息，在角色摘要下的右边，点击”添加角色”，如：</p>
 
-<p>{% img /images/2013/03/c2-01.png %}</p>
+<p><img src="/images/2013/03/c2-01.png"></p>
 
 <p>点击”添加角色”之后，将会进入“添加角色向导”，点击下一步，在”选择服务器角色”页，勾选Hyper-V，如下图所示：</p>
 
-<p>{% img /images/2013/03/c2-02.png %}</p>
+<p><img src="/images/2013/03/c2-02.png"></p>
 
 <p>默认一直点“下一步”->“安装”，完成后需要重启服务器，如图所示：</p>
 
-<p>{% img /images/2013/03/c2-03.png %}</p>
+<p><img src="/images/2013/03/c2-03.png"></p>
 
 <p>点击“关闭”再确定“重启服务器”就已经完成Hyper-V的安装。如果服务器不支持Hyper-V，则会提示无法安装，如下图所示：</p>
 
-<p>{% img /images/2013/03/c2-04.png %}</p>
+<p><img src="/images/2013/03/c2-04.png"></p>
 
 <h3>2.2 安装虚拟机</h3>
 
@@ -1436,7 +1438,7 @@ sudo /etc/init.d/memcached restart
 <p>安装Hyper-V之后，必然要进行安装虚拟操作系统，即虚拟机，首先打开”服务器管器”(Windows7、8可直接打开Hyper-V管理器,依次展开：角色=>Hyper-V=>Hyper-V管理器，
 在最右边的“操作”面板点击“连接到服务器”，在随即出来的“选择计算机”对话框点击“确定”，如下图所示：</p>
 
-<p>{% img /images/2013/03/c2-05.png %}</p>
+<p><img src="/images/2013/03/c2-05.png"></p>
 
 <ul>
 <li>第一步、新建虚拟机（以下为Win8英文环境. ：
@@ -1444,7 +1446,7 @@ sudo /etc/init.d/memcached restart
 </ul>
 
 
-<p> {% img /images/2013/03/c2-06.png %}</p>
+<p> <img src="/images/2013/03/c2-06.png"></p>
 
 <p> 点击后将会有3个选择：虚拟机(Virtual Machine)、磁盘(Hard Disk)、软盘(Floppy Disk)，选择“Virtual Machine”进入第二步。</p>
 
@@ -1455,7 +1457,7 @@ sudo /etc/init.d/memcached restart
 
 <p> 在”New Virtual Machine Wizard”页的”Name”处键入虚拟机的名称，如MS2008：</p>
 
-<p> {% img /images/2013/03/c2-07.png %}</p>
+<p> <img src="/images/2013/03/c2-07.png"></p>
 
 <p> 点击“Next”。</p>
 
@@ -1466,7 +1468,7 @@ sudo /etc/init.d/memcached restart
 
 <p> 在“分配内存”页键入需要的内存，例如输入“1024”：</p>
 
-<p> {% img /images/2013/03/c2-08.png %}</p>
+<p> <img src="/images/2013/03/c2-08.png"></p>
 
 <p> 点击“Next”。</p>
 
@@ -1477,7 +1479,7 @@ sudo /etc/init.d/memcached restart
 
 <p> 在“网络配置”页暂时不选择,如下图：</p>
 
-<p> {% img /images/2013/03/c2-09.png %}</p>
+<p> <img src="/images/2013/03/c2-09.png"></p>
 
 <p> 点击“Next”。</p>
 
@@ -1486,7 +1488,7 @@ sudo /etc/init.d/memcached restart
 </ul>
 
 
-<p> {% img /images/2013/03/c2-10.png %}</p>
+<p> <img src="/images/2013/03/c2-10.png"></p>
 
 <p> 创建一个虚拟磁盘</li>
   * Name:：虚拟磁盘的名字，一个虚拟机可配置多个硬盘，在同一个目录下，虚拟磁盘名字必须唯一；
@@ -1502,12 +1504,12 @@ sudo /etc/init.d/memcached restart
 <p> 注：此处127GB并不会马上扩展，而是动态扩展，也可自定义大小，最小值依所安装的操作系统而定。
  * 选择一个已存在的虚拟磁盘</li></p>
 
-<p>  {% img /images/2013/03/c2-11.png %}</p>
+<p>  <img src="/images/2013/03/c2-11.png"></p>
 
 <p>  <!-- more -->
   选择已存在的虚拟磁盘，所下图：</p>
 
-<p>  {% img /images/2013/03/c2-12.png %}</p>
+<p>  <img src="/images/2013/03/c2-12.png"></p>
 
 <p>  点击“下一步”=>“完成”，开始创建虚拟机。</p>
 
@@ -1535,7 +1537,7 @@ sudo /etc/init.d/memcached restart
 </ul>
 
 
-<p> {% img /images/2013/03/c2-131.png %}</p>
+<p> <img src="/images/2013/03/c2-131.png"></p>
 
 <ul>
 <li><p>从软盘引导并安装操作系统: 不过多介绍，现在几乎不用此方式，也不推荐使用.</p></li>
@@ -1543,11 +1545,11 @@ sudo /etc/init.d/memcached restart
 </ul>
 
 
-<p> {% img /images/2013/03/c2-14.png %}</p>
+<p> <img src="/images/2013/03/c2-14.png"></p>
 
 <p> 点击“Finish”开始创建，此时可看到整个过程的执行进度，创建完成后可在Hyper-V管理器中看到刚才创建的虚拟机“MS2008”：</p>
 
-<p> {% img /images/2013/03/c2-15.png %}</p>
+<p> <img src="/images/2013/03/c2-15.png"></p>
 
 <h4>2.1.2 连接并创建虚拟机</h4>
 
@@ -1559,10 +1561,10 @@ sudo /etc/init.d/memcached restart
 </ul>
 
 
-<p>{% img /images/2013/03/c2-16.png %}</p>
+<p><img src="/images/2013/03/c2-16.png"></p>
 
 <p>点击
-{% img /images/2013/03/c2-17.png %}
+<img src="/images/2013/03/c2-17.png">
 即可启动引导安装操作系统，之后的操作系统安装步骤本文不做介绍同，如有需要，请自行到网络上查找。</p>
 
 <h2>3. Hyper-V网络管理</h2>
@@ -1587,14 +1589,14 @@ sudo /etc/init.d/memcached restart
 </ol>
 
 
-<p> {% img /images/2013/03/c3-01.png %}</p>
+<p> <img src="/images/2013/03/c3-01.png"></p>
 
 <ol>
 <li>选中(默认)“External”后，点击“Create Virtual Switch”，如下所示：</li>
 </ol>
 
 
-<p> {% img /images/2013/03/c3-02.png %}</p>
+<p> <img src="/images/2013/03/c3-02.png"></p>
 
 <p> 这里有两个地方需要注意：</p>
 
@@ -1617,11 +1619,11 @@ sudo /etc/init.d/memcached restart
 
 <p>编辑的虚拟磁盘，如下图所示：</p>
 
-<p>{% img /images/2013/03/c4-01.png %}</p>
+<p><img src="/images/2013/03/c4-01.png"></p>
 
 <p>点击“下一步”后将会有3个选择：</p>
 
-<p>{% img /images/2013/03/c4-02.png %}</p>
+<p><img src="/images/2013/03/c4-02.png"></p>
 
 <p>三个选项的详细介绍如下：</p>
 
@@ -1659,7 +1661,7 @@ sudo /etc/init.d/memcached restart
 </ol>
 
 
-<p>{% img /images/2013/03/c4-03.png %}</p>
+<p><img src="/images/2013/03/c4-03.png"></p>
 
 <p>本次先讲到这里，下次将介绍Hyper-V的高级知识，例如动态内存管理、动态迁移等；</p>
 ]]></content>

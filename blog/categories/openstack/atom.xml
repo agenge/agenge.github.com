@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: OpenStack | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/openstack/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-10T14:50:33+08:00</updated>
+  <updated>2013-10-11T11:01:48+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -74,20 +74,22 @@
 <!-- more -->
 
 
-<p>
- 使用VNC 客户端连接，例如192.168.30.211:9 <a href="http://agenge.com/wp-content/uploads/2013/07/01.png"><img class="alignnone size-full wp-image-715" alt="01" src="http://agenge.com/wp-content/uploads/2013/07/01.png" width="386" height="167" /></a></p>
+<p></p>
+
+<p> 使用VNC 客户端连接，例如192.168.30.211:9 
+ <img src="images/2013/07/01.png"></p>
 
 <p> 连接成功之后，和常规安装操作系统没有任何区别，但在分区时会提示找到磁盘文件，如图：</p>
 
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/02.png"><img class="alignnone size-full wp-image-716" alt="02" src="http://agenge.com/wp-content/uploads/2013/07/02.png" width="621" height="489" /></a></p>
+<p> <img src="images/2013/07/02.png"></p>
 
 <p> 点击“<b>加载驱动程序</b>”，并按下图选择对应的驱动：</p>
 
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/03.png"><img class="alignnone size-full wp-image-717" alt="03" src="http://agenge.com/wp-content/uploads/2013/07/03.png" width="337" height="319" /></a></p>
+<p> <img src="images/2013/07/03.png"></p>
 
 <p> 点击“确定”，如果WIN8驱动找不到磁盘，重新选择WIN7即可。然后再点击“下一步”：</p>
 
-<p> <a href="http://agenge.com/wp-content/uploads/2013/07/04.png"><img class="alignnone size-full wp-image-718" alt="04" src="http://agenge.com/wp-content/uploads/2013/07/04.png" width="597" height="449" /></a></p>
+<p> <img src="images/2013/07/04.png"></p>
 
 <p> 安装之后并关机，进入下一步操作。</p>
 
@@ -679,7 +681,7 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
 <p>如果没问题，输出内容类似下图：</p>
 
-<p>{% img /images/2013/06/01.png  %}</p>
+<p><img src="/images/2013/06/01.png" title="" ></p>
 
 <hr />
 
@@ -780,7 +782,7 @@ glance image-create --name myFirstVM --is-public true --container-format bare --
 
 <p>如果一切正常，会输出类似以下内容：</p>
 
-<p>{% img /images/2013/06/02.png  %}</p>
+<p><img src="/images/2013/06/02.png" title="" ></p>
 
 <hr />
 
@@ -1002,7 +1004,7 @@ glance image-create --name myFirstVM --is-public true --container-format bare --
 
 <p> 如果正常，会输出类似以下信息：</p>
 
-<p>{% img /images/2013/06/03.png  %}</p>
+<p><img src="/images/2013/06/03.png" title="" ></p>
 
 <ol>
 <li><p>创建fixed_ip（内网虚拟机IP）</p>
@@ -1214,7 +1216,7 @@ sudo /etc/init.d/memcached restart
 
 <p>在创建之后会输出以下类似信息：</p>
 
-<p>{% img /images/2013/06/04.png  %}</p>
+<p><img src="/images/2013/06/04.png" title="" ></p>
 
 <p>从图中可看出正在创建一个实例。</p>
 
