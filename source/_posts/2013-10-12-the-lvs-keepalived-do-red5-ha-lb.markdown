@@ -9,22 +9,21 @@ categories:
 ---
 
 ## 前言
-此篇文章纯实践篇，只有部分关键配置会作解决，理论知识偶会专门写一篇来介绍。
+此篇文章纯实践篇，只有部分关键配置会作解决，理论知识偶会专门写一篇来介绍
 
-
-1. 准备环境
+### 准备环境
 
 ```
-192.168.30.136     lvs-dr_01	# LVS Director Master
-192.168.30.167     lvs-dr_02	# LVS Director Backup
-192.168.30.172     lvs-vip		# VIP  虚拟IP
+192.168.30.136     lvs-dr_01		# LVS Director Master
+192.168.30.167     lvs-dr_02		# LVS Director Backup
+192.168.30.172     lvs-vip			# VIP  虚拟IP
 192.168.30.171     realserver-01	# 后端Red5 服务器
 192.168.30.150     realserver-02	# 后端Red5 服务器
 ```
 
-2. 安装依赖包
+### 安装依赖包
 
-* 检查是否支持IPVS
+检查是否支持IPVS
 
 ```
 modprobe -l | grep ipvs 
@@ -46,14 +45,14 @@ kernel/net/netfilter/ipvs/ip_vs_nq.ko
 kernel/net/netfilter/ipvs/ip_vs_ftp.ko
 ```
 
-3. 安装ipvsadm
+### 安装ipvsadm
 SSH到主节点 lvs-dr_01 和 lvs-dr_02
 
 ```
 yum -y install ipvsadm
 ```
 
-4. 安装 Keepalived
+### 安装 Keepalived
 以下分别是安装依赖包、下载keepalived-1.2.8、以配置文件：
 
 ```
@@ -134,7 +133,7 @@ virtual_server 192.168.30.172 1935 {
 ```
 同样，在两台 Director 都需要安装与配置，注意的是两台keepalived.conf的配置所有不同。
 
-5. 设置Real Server
+### 设置Real Server
 以下操作如果没有特别说明，将针对 **所有Real Server**
 将以下内容添加到 /root/realserver.sh
 
@@ -180,7 +179,7 @@ chmod +x /root/realserver.sh
 echo "/root/realserver.sh start" >> /etc/rc.local
 ```
 
-6. 测试
+### 测试
 首先依次启动 lvs-dr_01 和 lvs-dr_02 的keepalived服务：
 
 ```
@@ -213,6 +212,6 @@ TCP  192.168.30.172:1935 rr persistent 50
   -> 192.168.30.171:1935          Route   1      1          0         
 ```
 
-7. 常见错误
+### 常见错误
 ip address associated with VRID not present in received packet
 这个错误主要原因是 在同一网段内virtual_router_id 值不能相同，如果相同会在messages中收到VRRP错误包，所以需要更改 virual_router_id，但如果只改一个，就等于是2个相对独立的集群，所以virual_router_id改成非51的相同值即可，例如都改成 52.
