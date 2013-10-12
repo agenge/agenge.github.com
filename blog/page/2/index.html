@@ -9,13 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="1、安装环境 操作系统：:CentOS 5.5 64位
-Mysql：5.5.27
-Apache httpd：2.4.4
-Zabbix：2.0.6 2、源码安装 安装Zabbix 创建用户 1
-2
-groupadd zabbix
-useradd -g zabbix -M -s /sbin/ &hellip;">
+  <meta name="description" content="前段时间总是忙于安装系统，对于偶这种懒人来说，一天安装两遍都无法承受，别说更多，基本上有两个原因造出： 时间很宝贵。
+偶比较懒惰。 一直习惯于 RedHat 家族产品，从最开始接触的RHEL，到后来同时使用的Fedora，及目前使用最多的CentOS，这无疑是偶最为熟悉的Linux， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +80,73 @@ useradd -g zabbix -M -s /sbin/ &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/23/linux-kickstart/">批量装机&#8212;Linux无人值守之Kickstart</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-23T00:00:00+08:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前段时间总是忙于安装系统，对于偶这种懒人来说，一天安装两遍都无法承受，别说更多，基本上有两个原因造出：</p>
+
+<ul>
+<li>时间很宝贵。</li>
+<li>偶比较懒惰。</li>
+</ul>
+
+
+<p>一直习惯于 RedHat 家族产品，从最开始接触的RHEL，到后来同时使用的Fedora，及目前使用最多的CentOS，这无疑是偶最为熟悉的Linux，为啥偶要提这些捏？因为以下操作是基于这些Linux操作的啦，费话在此打住，以下为详细操作步骤.</p>
+
+<h2>安装基础包</h2>
+
+<p>_注：以下Yum操作是基于偶本地的ftp 仓库源，&mdash;enablerepo是告诉yum使用这个指定的安装源，
+默认情况下，CentOS自带的仓库源也是可以用滴，优先推荐各位使用哦，有个前提条件：连网！
+What？服务器不能上网？公司不许随意连公网？能说脏话吗？Fuck! _</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install dhcp-* --enablerepo=centos5.5
+</span><span class='line'>yum -y install tftp-* --enablerepo=centos5.5
+</span><span class='line'>yum -y install vsftpd-* --enablerepo=centos5.5
+</span><span class='line'>cp /usr/share/doc/dhcp-3.0.5/dhcpd.conf.sample /etc/dhcpd.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>配置dhcp</h2>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/23/linux-kickstart/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1188,142 +1250,9 @@ useradd -g zabbix -M -s /sbin/ &hellip;">
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/02/11/secure_solution/">安全漏洞整改解决方案</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-02-11T00:00:00+08:00" pubdate data-updated="true">Feb 11<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>注意：以下所有操作須确认后再实施：</p>
-
-<ul>
-<li>OpenSSH 相关漏洞  </li>
-</ul>
-
-
-<p>解决方案</p>
-
-<p>升级OpenSSH为最新版本,目前为5.9,首先到官网下载:<a href="http://www.openssh.com/portable.html#http">openssh-5.9p1.tar.gz</a></p>
-
-<p>把OpenSSH 上传到服务器，检查升级前版本(以下所有操作均在root下完成)：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; ssh -V # 此命令会显示OpenSSL、OpenSSH的詳細版本号</span></code></pre></td></tr></table></div></figure>
-
-
-<p>首先安装OpenSSH:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; tar xvf openssh-5.9p1.tar.gz
-</span><span class='line'>shell&gt; cd openssh-5.9p1
-</span><span class='line'>shell&gt; sed -i -e &#8216;s/_5.9//&#8217; version.h</span></code></pre></td></tr></table></div></figure>
-
-
-<p>查询信赖包是否安装：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; rpm -qa | grep zlib #如果能看到zlib、zlib-devel，请继续，否则安装后再继续。
-</span><span class='line'>shell&gt; ./configure &#8211;sysconfdir=/etc/ssh
-</span><span class='line'>shell&gt; make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>开始配置：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; /bin/cp /usr/local/sbin/sshd /etc/init.d/sshd
-</span><span class='line'>shell&gt; mkdir /root/ssh_bak  #创建备份目录
-</span><span class='line'>shell&gt; mv /etc/ssh/* /root/ssh_bak/  #移动到备份目录
-</span><span class='line'>shell&gt; /bin/cp /usr/local/etc/* /etc/ssh/
-</span><span class='line'>shell&gt; sed -e &#8216;s@/usr/bin/ssh-keygen.*@#@&#8217; /etc/init.d/sshd
-</span><span class='line'>shell&gt; /etc/init.d/sshd restart
-</span><span class='line'>shell&gt; ssh -V 检查是否是 OpenSSHp1 开头，如果是，则OpenSSH升级成功。</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>远端WEB服务器上存在/robots.txt文件</li>
-</ul>
-
-
-<p>解决方案： 可直接删除（可参考：<a href="http://zh.wikipedia.org/wiki/Robots.txt" title="robots.txt">http://zh.wikipedia.org/wiki/Robots.txt</a></p>
-
-<ul>
-<li>ICMP timestamp请求响应漏洞</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; echo 0 &gt; /proc/sys/net/ipv4/icmp_echo_ignore_all
-</span><span class='line'>shell&gt; echo 0  &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Windows Server 2008 参考: <a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html">http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html</a>
-Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">http://zhidao.baidu.com/question/41992099</a></p>
-
-<ul>
-<li>Apache Tomcat 相关漏洞</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>根据安全厂商给的解决方案链接：<a href="http://www.ocert.org/advisories/ocert-2011-003.html">http://www.ocert.org/advisories/ocert-2011-003.html</a> 从此页面可得知，有问题的Tomcat版本如下：&lt;= 5.5.34, &lt;= 6.0.34, &lt;= 7.0.22，而无安全漏洞的 Tomcat版本如下： 5.5.35, >= 6.0.35, >= 7.0.23</p>
-
-<p>访问：<a href="http://tomcat.apache.org/index.html" title="Apache Tomcat">Tomcat</a>, 下载对应的Tomcat版本，例如经分在使用 Tomcat 5.5.34，下载对应的Tomcat 5.5.35,如在使用Tomcat 6.0.34，下载对应的 Tomcat 6.0.35，依此类推。</p>
-
-<ul>
-<li>Apache Tomcat sendfile请求安全限制绕过和拒绝服务漏洞：此漏洞也是通过上面的版本升级方式解决。具体请参考官方解释：</li>
-</ul>
-
-
-<p><a href="http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35">http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35</a> 和 <a href="http://secunia.com/advisories/45232/">http://secunia.com/advisories/45232/</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/02/11/secure_solution/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/3/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -1336,6 +1265,10 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
     <section>
   <h1>最新文章</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
@@ -1351,10 +1284,6 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
     
       <li class="post">
         <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a>
       </li>
     
   </ul>

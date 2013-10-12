@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>安全漏洞整改解决方案 - TaurusHome</title>
+  <title>TaurusHome</title>
   <meta name="author" content="agenge">
 
   
@@ -19,7 +19,7 @@ shell&gt; ssh -V &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://agenge.github.io/blog/2012/02/11/secure_solution">
+  <link rel="canonical" href="http://agenge.github.io/blog/page/3">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
@@ -78,12 +78,15 @@ shell&gt; ssh -V &hellip;">
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article class="hentry" role="article">
+      <div class="blog-index">
   
+  
+  
+    <article>
+      
   <header>
     
-      <h1 class="entry-title">安全漏洞整改解决方案</h1>
+      <h1 class="entry-title"><a href="/blog/2012/02/11/secure_solution/">安全漏洞整改解决方案</a></h1>
     
     
       <p class="meta">
@@ -106,7 +109,7 @@ shell&gt; ssh -V &hellip;">
   </header>
 
 
-<div class="entry-content"><p>注意：以下所有操作須确认后再实施：</p>
+  <div class="entry-content"><p>注意：以下所有操作須确认后再实施：</p>
 
 <ul>
 <li>OpenSSH 相关漏洞  </li>
@@ -202,185 +205,25 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
 
 <p><a href="http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35">http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35</a> 和 <a href="http://secunia.com/advisories/45232/">http://secunia.com/advisories/45232/</a></p>
 
-<!-- more -->
-
-
-<ul>
-<li>SNMP服务存在可读口令</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>可按照漏洞扫描結果中的过程操作，如问困难，可向系统组同事请教。</p>
-
-<ul>
-<li>rpc相关漏洞</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>(和项目组确认没有使用NFS后再操作)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; /etc/init.d/portmap stop && chkconfig portmap off
-</span><span class='line'>shell&gt; /etc/init.d/rpcidmapd stop  &&  chkconfig rpcidmapd off
-</span><span class='line'>shell&gt; /etc/init.d/nfslock stop && chkconfig nfslock off</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><p>利用SMTP/EXPN命令可猜测目标主机上的用户名 <span style="color: #ff0000;">解决方案（待确认）：</p></li>
-<li><p>Oracle数据库服务器CREATE ANY DIRECTORY权限提升漏洞  <span style="color: #ff0000;">暂时没有解决方案。</p></li>
-<li><p>SNMP服务可以通过SNMPV1访问  <span style="color: #ff0000;"> 解决方案（待确认）</p></li>
-<li><p>Apache HTTP Server相关漏洞</p></li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>通过下载使用Apache HTTP Server 2.2.22或以上可解决，详情参考：<a href="http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser">http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser</a></p>
-
-<p>此页面显示了2.2.22或以上这个版本修复了哪些安全漏洞。官方下载地址：<a href="http://www.apache.org/dyn/closer.cgi">http://www.apache.org/dyn/closer.cgi</a></p>
-
-<p>10.1 Apache Apache::Status和Apache2::Status模块跨站脚本漏洞</p>
-
-<p><a href="http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E">http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E</a></p>
-
-<p>10.2  Apache服务器不完整HTTP请求拒绝服务漏洞[精确扫描]:
-更改httpd.conf中 TimeOut 的值为30秒</p>
-
-<p>11.远端WWW服务支持TRACE请求 解决方案 请参考第10点。</p>
-
-<p>12.Oracle tnslsnr没有设置口令  解决方案：
-扫描报告已经明确写出详细步骤，或DBA自己完成。</p>
-
-<p>13. 猜测出远程FTP服务存在可登录的用户名口令  解决方案：
-确认账号的密码复杂性，例如检查是否存在123456 类似这样的密码，如有简单密码，确认后再修改。</p>
-
-<p>14.目标主机showmount -e信息泄露 解决方案：
-确认是否有NFS服务在运行，如在运行确认是否关闭，如因有业务影响请在整改报告中明确写出原因（但绝不能外网访问NFS）。</p>
-
-<p>15.检测到远端rlogin服务正在运行中  解决方案：
-如果是AIX系统，请在整改报告中明确写出原因（但绝不能外网登录）。</p>
-
-<p>16.远端运行着IDENT服务  解决方案：
-漏洞扫描报告中已经有详细的操作步骤。</p>
-
-<p>17.检测到远端rsh服务正在运行中   解决方案：
-如果是AIX系统，请在整改报告中明确写出原因（但绝不能外网登录）。</p>
-
-<p>18.检测到远端rexec服务正在运行中  解决方案：
-漏洞扫描报告中已经有详细的操作步骤。</p>
-
-<p>19.存在一个可用的远程代理服务器  <span style="color: #ff0000;">解决方案待确认。</p>
-
-<p>20.远程web主机存在目录遍历漏洞  <span style="color: #ff0000;"> 解决方案待确认。</p>
-
-<p>21. 远程主机允许匿名FTP登录  解决方案：
-修改配置文件，不许出现匿名登录，由于FTP的类型较多，具体的操作步骤可咨询系统组同事。</p>
-
-<p>22.FTP服务器版本信息可被获取  <span style="color: #00ff00;">无需整改（因要修改源码重新编译）。</p>
-
-<p>23.远端SSH Server允许使用低版本SSH协议  解决方案：
-参考漏洞扫描报告中的操作步骤，或参考第1点直接升级OpenSSH版本（强烈建议）。</p>
-
-<p>24.检测到远端XDMCP服务正在运行中  解决方案：
-关闭XDMCP服务</p>
-
-<ol>
-<li><p>PHP相关漏洞  解决方案：
-根据<a href="http://www.venustech.com.cn/NewsInfo/124/6459.Html">http://www.venustech.com.cn/NewsInfo/124/6459.Html</a> 可得知，受影响版本是：</p></li>
-<li><p>PHP 5.2 &lt;= 5.2.13</p></li>
-<li>PHP 5.3 &lt;= 5.3.2</li>
-</ol>
-
-
-<p>目前最好的办法是升级PHP版本。官方最新稳定是：PHP 5.3.10。 而5.2.X 最高版本是：PHP 5.2.17</p>
 </div>
-
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
-
-      
-
-
-
-
-
-
-
-
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/02/11/secure_solution/">阅读全文 &rarr;</a>
+    </footer>
   
 
 
-<time datetime="2012-02-11T00:00:00+08:00" pubdate data-updated="true">Feb 11<span>th</span>, 2012</time>
-      
-
-<span class="categories">
+    </article>
   
-    <a class='category' href='/blog/categories/xin-xi-an-quan/'>信息安全</a>
-  
-</span>
-
-
-	  
-
-<DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right>
-<DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"></DIV>
-<DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000">
-作者： <A href="http://agenge.com">agenge</A> <BR>
-出处： <A href="http://agenge.com">http://agenge.com</A> 
-<BR>本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
-<a href=mailto:huanggeng.8552@gmail.com> agenge </a>。 </DIV></DIV>
-
-
-    </p>
+  <div class="pagination">
     
-      <div class="sharing">
-  
-  
-  
-  
-     <!-- JiaThis Button BEGIN -->
-<div class="jiathis_style_24x24">
-	<a class="jiathis_button_qzone"></a>
-	<a class="jiathis_button_tsina"></a>
-	<a class="jiathis_button_tqq"></a>
-	<a class="jiathis_button_weixin"></a>
-	<a class="jiathis_button_renren"></a>
-	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
-	<a class="jiathis_counter_style"></a>
-</div>
-<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
-<!-- JiaThis Button END -->
-
-<!-- UY BEGIN -->
-<div id="uyan_frame"></div>
-<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
-<!-- UY END -->
- 
-</div>
-
+    <a href="/blog/archives">Blog Archives</a>
     
-    <p class="meta">
-      
-      
-        <a class="basic-alignment right" href="/blog/2012/12/21/puppet_install_conf/" title="Next Post: Puppet用户手册--安装与配置">Puppet用户手册--安装与配置 &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
+    <a class="next" href="/blog/page/2/">Newer &rarr;</a>
+    
+  </div>
 </div>
-
 <aside class="sidebar">
   
     <section>
@@ -421,7 +264,6 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
 
   
 </aside>
-
 
     </div>
   </div>

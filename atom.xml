@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-11T11:08:19+08:00</updated>
+  <updated>2013-10-12T14:37:48+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,365 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[LVS+Keepalived做Red5高可用和负载均衡]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/"/>
+    <updated>2013-10-12T14:33:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>此篇文章纯实践篇，只有部分关键配置会作解决，理论知识偶会专门写一篇来介绍。</p>
+
+<ol>
+<li>准备环境</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.30.136     lvs-dr_01 # LVS Director Master
+</span><span class='line'>192.168.30.167     lvs-dr_02  # LVS Director Backup
+</span><span class='line'>192.168.30.172     lvs-vip        # VIP  虚拟IP
+</span><span class='line'>192.168.30.171     realserver-01  # 后端Red5 服务器
+</span><span class='line'>192.168.30.150     realserver-02  # 后端Red5 服务器</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li><p>安装依赖包</p></li>
+<li><p>检查是否支持IPVS</p></li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>modprobe -l | grep ipvs </span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果支持的话，会就输出以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>kernel/net/netfilter/ipvs/ip_vs.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_rr.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_wrr.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_lc.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_wlc.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_lblc.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_lblcr.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_dh.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_sh.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_sed.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_nq.ko
+</span><span class='line'>kernel/net/netfilter/ipvs/ip_vs_ftp.ko</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>安装ipvsadm
+SSH到主节点 lvs-dr_01 和 lvs-dr_02</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install ipvsadm</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>安装 Keepalived
+以下分别是安装依赖包、下载keepalived-1.2.8、以配置文件：</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum install -y gcc kernel-devel openssl-devel popt-devel  make # 安装依赖包
+</span><span class='line'>wget http://www.keepalived.org/software/keepalived-1.2.8.tar.gz
+</span><span class='line'>tar zxvf keepalived-1.2.8.tar.gz 
+</span><span class='line'>cd keepalived-1.2.8
+</span><span class='line'>./configure --with-kernel-dir=/usr/src/kernels/2.6.32-358.18.1.el6.x86_64/
+</span><span class='line'>make
+</span><span class='line'>make install DIR=/usr/local/
+</span><span class='line'>cp /usr/local/etc/rc.d/init.d/keepalived /etc/rc.d/init.d/
+</span><span class='line'>cp /usr/local/etc/sysconfig/keepalived /etc/sysconfig/
+</span><span class='line'>mkdir -p /etc/keepalived
+</span><span class='line'>cp /usr/local/sbin/keepalived /usr/sbin/</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 /usr/local/etc/keepalived/keepalived.conf 中加入以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>! Configuration File for keepalived
+</span><span class='line'>
+</span><span class='line'>global_defs {
+</span><span class='line'>   notification_email {
+</span><span class='line'>     acassen@firewall.loc
+</span><span class='line'>     failover@firewall.loc
+</span><span class='line'>     sysadmin@firewall.loc   # 全局联系人
+</span><span class='line'>   }
+</span><span class='line'>   notification_email_from Alexandre.Cassen@firewall.loc
+</span><span class='line'>   smtp_server 127.0.0.1
+</span><span class='line'>   smtp_connect_timeout 30
+</span><span class='line'>   router_id LVS_DEVEL
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>vrrp_instance VI_1 {
+</span><span class='line'>    state MASTER      # keepalived MASTER，另外一台 lvs-dr_02 修改为：BACKUP
+</span><span class='line'>    interface eth0        # 使用哪个网络接口来通信
+</span><span class='line'>    virtual_router_id 52  # 默认为51，两个DR都修改成非51，这里修改成 52
+</span><span class='line'>    priority 100      # 优先级，数字越大表示 优先级越高，MASTER一定要比BACKUP高
+</span><span class='line'>    advert_int 1
+</span><span class='line'>    authentication {
+</span><span class='line'>        auth_type PASS        # 密码验证类型
+</span><span class='line'>        auth_pass 1111        # MASTER与BACKUP之间的验证密码，两端必须保持一致。
+</span><span class='line'>    }
+</span><span class='line'>    virtual_ipaddress {
+</span><span class='line'>        192.168.30.172   # 虚拟IP，即 VIP
+</span><span class='line'>    }
+</span><span class='line'>}
+</span><span class='line'># 虚拟服务器  需要填写自己 IP 和 端口
+</span><span class='line'>virtual_server 192.168.30.172 1935 {
+</span><span class='line'>    delay_loop 6          # 每隔 6 秒去检查 RealServer 的健康状态
+</span><span class='line'>    lb_algo rr                #  LVS 的 rr(轮循)算法，LVS共 10种算法，如果需要修改就在此处。
+</span><span class='line'>    lb_kind DR                # LVS DR模式(直接路由)，LVS共三种工作模式：VS/NAT、VS/TUN、VS/DR
+</span><span class='line'>    persistence_timeout 50        # 同一IP的连接在60秒内分配到同一台 RealServer
+</span><span class='line'>    protocol TCP          # 使用TCP协议来检查后台服务器(realserver)状态
+</span><span class='line'>
+</span><span class='line'>    real_server 192.168.30.171 1935 {     # 后端red5 IP地址与端口
+</span><span class='line'>        weight 1                      # 权重
+</span><span class='line'>        TCP_CHECK {
+</span><span class='line'>            connect_timeout 3         # 3秒内无响应超时
+</span><span class='line'>            nb_get_retry 3
+</span><span class='line'>            delay_before_retry 3
+</span><span class='line'>            connect_port 1935
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    real_server 192.168.30.150 1935 {     # 后端red5 IP地址与端口
+</span><span class='line'>        weight 1
+</span><span class='line'>        TCP_CHECK {
+</span><span class='line'>            connect_timeout 3
+</span><span class='line'>            nb_get_retry 3
+</span><span class='line'>            delay_before_retry 3
+</span><span class='line'>            connect_port 1935
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同样，在两台 Director 都需要安装与配置，注意的是两台keepalived.conf的配置所有不同。</p>
+
+<ol>
+<li>设置Real Server
+以下操作如果没有特别说明，将针对 <strong>所有Real Server</strong>
+将以下内容添加到 /root/realserver.sh</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/bash
+</span><span class='line'>
+</span><span class='line'>SNS_VIP=192.168.30.172
+</span><span class='line'>/etc/rc.d/init.d/functions
+</span><span class='line'>case "$1" in
+</span><span class='line'>start)
+</span><span class='line'>       /sbin/ifconfig lo:0 $SNS_VIP netmask 255.255.255.255 broadcast $SNS_VIP
+</span><span class='line'>       /sbin/route add -host $SNS_VIP dev lo:0
+</span><span class='line'>       echo "1" &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore
+</span><span class='line'>       echo "2" &gt;/proc/sys/net/ipv4/conf/lo/arp_announce
+</span><span class='line'>       echo "1" &gt;/proc/sys/net/ipv4/conf/all/arp_ignore
+</span><span class='line'>       echo "2" &gt;/proc/sys/net/ipv4/conf/all/arp_announce
+</span><span class='line'>       sysctl -p &gt;/dev/null 2&gt;&1
+</span><span class='line'>       echo "RealServer Start OK"
+</span><span class='line'>       ;;
+</span><span class='line'>stop)
+</span><span class='line'>       /sbin/ifconfig lo:0 down
+</span><span class='line'>       /sbin/route del $SNS_VIP &gt;/dev/null 2&gt;&1
+</span><span class='line'>       echo "0" &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore
+</span><span class='line'>       echo "0" &gt;/proc/sys/net/ipv4/conf/lo/arp_announce
+</span><span class='line'>       echo "0" &gt;/proc/sys/net/ipv4/conf/all/arp_ignore
+</span><span class='line'>       echo "0" &gt;/proc/sys/net/ipv4/conf/all/arp_announce
+</span><span class='line'>       echo "RealServer Stoped"
+</span><span class='line'>       ;;
+</span><span class='line'>*)
+</span><span class='line'>       echo "Usage: $0 {start|stop}"
+</span><span class='line'>       exit 1
+</span><span class='line'>esac
+</span><span class='line'>exit 0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加执行权限
+chmod +x /root/realserver.sh</p>
+
+<p>启动及添加到开机自启动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/root/realserver.sh start
+</span><span class='line'>echo "/root/realserver.sh start" &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>测试
+首先依次启动 lvs-dr_01 和 lvs-dr_02 的keepalived服务：</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/keepalived restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>检查LVS路由和连接</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipvsadm -Ln
+</span><span class='line'>
+</span><span class='line'>IP Virtual Server version 1.2.1 (size=4096)
+</span><span class='line'>Prot LocalAddress:Port Scheduler Flags
+</span><span class='line'>  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn
+</span><span class='line'>TCP  192.168.30.172:1935 rr persistent 50
+</span><span class='line'>  -&gt; 192.168.30.150:1935          Route   1      2          0         
+</span><span class='line'>  -&gt; 192.168.30.171:1935          Route   1      0          0         </span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到 realserver-01:1935 和 realserver-02:1935 已经加入到LVS。</p>
+
+<p>通过RTMP客户端不断访问，可以看到2台 RealServer 都有活动的链接：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>IP Virtual Server version 1.2.1 (size=4096)
+</span><span class='line'>Prot LocalAddress:Port Scheduler Flags
+</span><span class='line'>  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn
+</span><span class='line'>TCP  192.168.30.172:1935 rr persistent 50
+</span><span class='line'>  -&gt; 192.168.30.150:1935          Route   1      1          0         
+</span><span class='line'>  -&gt; 192.168.30.171:1935          Route   1      1          0         </span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>常见错误
+ip address associated with VRID not present in received packet
+这个错误主要原因是 在同一网段内virtual_router_id 值不能相同，如果相同会在messages中收到VRRP错误包，所以需要更改 virual_router_id，但如果只改一个，就等于是2个相对独立的集群，所以virual_router_id改成非51的相同值即可，例如都改成 52.</li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[octopress个性化定制]]></title>
@@ -4437,7 +4796,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#x3a;&#x74;&#101;&#x73;&#x74;&#95;&#x7a;&#x61;&#98;&#98;&#105;&#x78;&#64;&#x67;&#x6d;&#97;&#x69;&#x6c;&#x2e;&#99;&#x6f;&#109;">&#x74;&#x65;&#x73;&#x74;&#95;&#122;&#x61;&#98;&#x62;&#105;&#x78;&#64;&#x67;&#109;&#x61;&#x69;&#x6c;&#x2e;&#99;&#111;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#97;&#x69;&#108;&#116;&#x6f;&#58;&#x74;&#101;&#115;&#x74;&#x5f;&#122;&#97;&#x62;&#98;&#x69;&#120;&#64;&#x67;&#x6d;&#97;&#105;&#x6c;&#46;&#99;&#x6f;&#x6d;">&#x74;&#x65;&#x73;&#x74;&#x5f;&#122;&#97;&#98;&#98;&#105;&#x78;&#64;&#103;&#109;&#97;&#x69;&#108;&#x2e;&#x63;&#x6f;&#109;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -4796,6 +5155,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <span class='line-number'>53</span>
 <span class='line-number'>54</span>
 <span class='line-number'>55</span>
+<span class='line-number'>56</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>#platform=x86, AMD64, or Intel EM64T
 </span><span class='line'># System authorization information
 </span><span class='line'>auth --useshadow --enablemd5
@@ -4851,7 +5211,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 </span><span class='line'>#@admin-tools
 </span><span class='line'>#@editors
 </span><span class='line'>#key --skip
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'></span></code></pre></td></tr></table></div></figure>
 
 
 <p>所有以井号(#)开头的为注释行.</p>
@@ -5542,6 +5902,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
+<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'># mysql -uroot -p
 </span><span class='line'>Enter password:
 </span><span class='line'>
@@ -5551,7 +5912,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 </span><span class='line'>Query OK, 0 rows affected (0.00 sec)
 </span><span class='line'>mysql&gt; flush privileges;
 </span><span class='line'>Query OK, 0 rows affected (0.00 sec)
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'></span></code></pre></td></tr></table></div></figure>
 
 
 <h2>安装Puppet Dashboard</h2>
@@ -5719,10 +6080,11 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
+<span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production db:raw:dump
 </span><span class='line'>mysqldump --add-locks --create-options --disable-keys --extended-insert --quick --set-charset --user=dashboard --password=dashboard dashboard &gt; production.sql.tmp
 </span><span class='line'>mv production.sql.tmp production.sql
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'></span></code></pre></td></tr></table></div></figure>
 
 
 <p><strong>恢复数据库 </strong></p>
@@ -5780,6 +6142,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <span class='line-number'>45</span>
 <span class='line-number'>46</span>
 <span class='line-number'>47</span>
+<span class='line-number'>48</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/bash
 </span><span class='line'># Description: Puppet Dashboard init.d script
 </span><span class='line'>
@@ -5827,7 +6190,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 </span><span class='line'>esac
 </span><span class='line'>
 </span><span class='line'>exit 0
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'></span></code></pre></td></tr></table></div></figure>
 
 
 <h2>使用Passenger运行Puppet Dashboard</h2>
@@ -7765,207 +8128,6 @@ PassengerRuby /usr/bin/ruby
 <li>Linux 客户端: /var/lib/puppet/ssl</li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[安全漏洞整改解决方案]]></title>
-    <link href="http://agenge.github.io/blog/2012/02/11/secure_solution/"/>
-    <updated>2012-02-11T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2012/02/11/secure_solution</id>
-    <content type="html"><![CDATA[<p>注意：以下所有操作須确认后再实施：</p>
-
-<ul>
-<li>OpenSSH 相关漏洞  </li>
-</ul>
-
-
-<p>解决方案</p>
-
-<p>升级OpenSSH为最新版本,目前为5.9,首先到官网下载:<a href="http://www.openssh.com/portable.html#http">openssh-5.9p1.tar.gz</a></p>
-
-<p>把OpenSSH 上传到服务器，检查升级前版本(以下所有操作均在root下完成)：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; ssh -V # 此命令会显示OpenSSL、OpenSSH的詳細版本号</span></code></pre></td></tr></table></div></figure>
-
-
-<p>首先安装OpenSSH:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; tar xvf openssh-5.9p1.tar.gz
-</span><span class='line'>shell&gt; cd openssh-5.9p1
-</span><span class='line'>shell&gt; sed -i -e &#8216;s/_5.9//&#8217; version.h</span></code></pre></td></tr></table></div></figure>
-
-
-<p>查询信赖包是否安装：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; rpm -qa | grep zlib #如果能看到zlib、zlib-devel，请继续，否则安装后再继续。
-</span><span class='line'>shell&gt; ./configure &#8211;sysconfdir=/etc/ssh
-</span><span class='line'>shell&gt; make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>开始配置：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; /bin/cp /usr/local/sbin/sshd /etc/init.d/sshd
-</span><span class='line'>shell&gt; mkdir /root/ssh_bak  #创建备份目录
-</span><span class='line'>shell&gt; mv /etc/ssh/* /root/ssh_bak/  #移动到备份目录
-</span><span class='line'>shell&gt; /bin/cp /usr/local/etc/* /etc/ssh/
-</span><span class='line'>shell&gt; sed -e &#8216;s@/usr/bin/ssh-keygen.*@#@&#8217; /etc/init.d/sshd
-</span><span class='line'>shell&gt; /etc/init.d/sshd restart
-</span><span class='line'>shell&gt; ssh -V 检查是否是 OpenSSHp1 开头，如果是，则OpenSSH升级成功。</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>远端WEB服务器上存在/robots.txt文件</li>
-</ul>
-
-
-<p>解决方案： 可直接删除（可参考：<a href="http://zh.wikipedia.org/wiki/Robots.txt" title="robots.txt">http://zh.wikipedia.org/wiki/Robots.txt</a></p>
-
-<ul>
-<li>ICMP timestamp请求响应漏洞</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; echo 0 &gt; /proc/sys/net/ipv4/icmp_echo_ignore_all
-</span><span class='line'>shell&gt; echo 0  &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Windows Server 2008 参考: <a href="http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html">http://hi.baidu.com/%BA%D3%C4%CF%CD%F8%C2%B7/blog/item/91076a62831cdb4aebf8f807.html</a>
-Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">http://zhidao.baidu.com/question/41992099</a></p>
-
-<ul>
-<li>Apache Tomcat 相关漏洞</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>根据安全厂商给的解决方案链接：<a href="http://www.ocert.org/advisories/ocert-2011-003.html">http://www.ocert.org/advisories/ocert-2011-003.html</a> 从此页面可得知，有问题的Tomcat版本如下：&lt;= 5.5.34, &lt;= 6.0.34, &lt;= 7.0.22，而无安全漏洞的 Tomcat版本如下： 5.5.35, >= 6.0.35, >= 7.0.23</p>
-
-<p>访问：<a href="http://tomcat.apache.org/index.html" title="Apache Tomcat">Tomcat</a>, 下载对应的Tomcat版本，例如经分在使用 Tomcat 5.5.34，下载对应的Tomcat 5.5.35,如在使用Tomcat 6.0.34，下载对应的 Tomcat 6.0.35，依此类推。</p>
-
-<ul>
-<li>Apache Tomcat sendfile请求安全限制绕过和拒绝服务漏洞：此漏洞也是通过上面的版本升级方式解决。具体请参考官方解释：</li>
-</ul>
-
-
-<p><a href="http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35">http://tomcat.apache.org/security-5.html#Fixed_in_Apache_Tomcat_5.5.35</a> 和 <a href="http://secunia.com/advisories/45232/">http://secunia.com/advisories/45232/</a></p>
-
-<!-- more -->
-
-
-<ul>
-<li>SNMP服务存在可读口令</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>可按照漏洞扫描結果中的过程操作，如问困难，可向系统组同事请教。</p>
-
-<ul>
-<li>rpc相关漏洞</li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>(和项目组确认没有使用NFS后再操作)</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>shell&gt; /etc/init.d/portmap stop && chkconfig portmap off
-</span><span class='line'>shell&gt; /etc/init.d/rpcidmapd stop  &&  chkconfig rpcidmapd off
-</span><span class='line'>shell&gt; /etc/init.d/nfslock stop && chkconfig nfslock off</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><p>利用SMTP/EXPN命令可猜测目标主机上的用户名 <span style="color: #ff0000;">解决方案（待确认）：</p></li>
-<li><p>Oracle数据库服务器CREATE ANY DIRECTORY权限提升漏洞  <span style="color: #ff0000;">暂时没有解决方案。</p></li>
-<li><p>SNMP服务可以通过SNMPV1访问  <span style="color: #ff0000;"> 解决方案（待确认）</p></li>
-<li><p>Apache HTTP Server相关漏洞</p></li>
-</ul>
-
-
-<p>解决方案：</p>
-
-<p>通过下载使用Apache HTTP Server 2.2.22或以上可解决，详情参考：<a href="http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser">http://mail-archives.apache.org/mod_mbox/httpd-announce/201201.mbox/browser</a></p>
-
-<p>此页面显示了2.2.22或以上这个版本修复了哪些安全漏洞。官方下载地址：<a href="http://www.apache.org/dyn/closer.cgi">http://www.apache.org/dyn/closer.cgi</a></p>
-
-<p>10.1 Apache Apache::Status和Apache2::Status模块跨站脚本漏洞</p>
-
-<p><a href="http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E">http://mail-archives.apache.org/mod_mbox/perl-advocacy/200904.mbox/%3Cad28918e0904011458h273a71d4x408f1ed286c9dfbc@mail.gmail.com%3E</a></p>
-
-<p>10.2  Apache服务器不完整HTTP请求拒绝服务漏洞[精确扫描]:
-更改httpd.conf中 TimeOut 的值为30秒</p>
-
-<p>11.远端WWW服务支持TRACE请求 解决方案 请参考第10点。</p>
-
-<p>12.Oracle tnslsnr没有设置口令  解决方案：
-扫描报告已经明确写出详细步骤，或DBA自己完成。</p>
-
-<p>13. 猜测出远程FTP服务存在可登录的用户名口令  解决方案：
-确认账号的密码复杂性，例如检查是否存在123456 类似这样的密码，如有简单密码，确认后再修改。</p>
-
-<p>14.目标主机showmount -e信息泄露 解决方案：
-确认是否有NFS服务在运行，如在运行确认是否关闭，如因有业务影响请在整改报告中明确写出原因（但绝不能外网访问NFS）。</p>
-
-<p>15.检测到远端rlogin服务正在运行中  解决方案：
-如果是AIX系统，请在整改报告中明确写出原因（但绝不能外网登录）。</p>
-
-<p>16.远端运行着IDENT服务  解决方案：
-漏洞扫描报告中已经有详细的操作步骤。</p>
-
-<p>17.检测到远端rsh服务正在运行中   解决方案：
-如果是AIX系统，请在整改报告中明确写出原因（但绝不能外网登录）。</p>
-
-<p>18.检测到远端rexec服务正在运行中  解决方案：
-漏洞扫描报告中已经有详细的操作步骤。</p>
-
-<p>19.存在一个可用的远程代理服务器  <span style="color: #ff0000;">解决方案待确认。</p>
-
-<p>20.远程web主机存在目录遍历漏洞  <span style="color: #ff0000;"> 解决方案待确认。</p>
-
-<p>21. 远程主机允许匿名FTP登录  解决方案：
-修改配置文件，不许出现匿名登录，由于FTP的类型较多，具体的操作步骤可咨询系统组同事。</p>
-
-<p>22.FTP服务器版本信息可被获取  <span style="color: #00ff00;">无需整改（因要修改源码重新编译）。</p>
-
-<p>23.远端SSH Server允许使用低版本SSH协议  解决方案：
-参考漏洞扫描报告中的操作步骤，或参考第1点直接升级OpenSSH版本（强烈建议）。</p>
-
-<p>24.检测到远端XDMCP服务正在运行中  解决方案：
-关闭XDMCP服务</p>
-
-<ol>
-<li><p>PHP相关漏洞  解决方案：
-根据<a href="http://www.venustech.com.cn/NewsInfo/124/6459.Html">http://www.venustech.com.cn/NewsInfo/124/6459.Html</a> 可得知，受影响版本是：</p></li>
-<li><p>PHP 5.2 &lt;= 5.2.13</p></li>
-<li>PHP 5.3 &lt;= 5.3.2</li>
-</ol>
-
-
-<p>目前最好的办法是升级PHP版本。官方最新稳定是：PHP 5.3.10。 而5.2.X 最高版本是：PHP 5.2.17</p>
 ]]></content>
   </entry>
   
