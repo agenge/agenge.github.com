@@ -9,13 +9,22 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 此篇文章纯实践篇，只有部分关键配置会作解决，理论知识偶会专门写一篇来介绍 准备环境 1
+  <meta name="description" content="准备环境 1
+2
+3
+192.168.30.150 proxy server
+192.168.30.151 storage server 192.168.30.152 storage server 网络配置 Proxy 代理节点网络(单网卡) 1
 2
 3
 4
 5
-192.168.30.136 lvs-dr_01 # LVS Director Master
-192.168.30.167 lvs-dr_02 # LVS Director Backup &hellip;">
+6
+7
+8
+9
+10
+11
+12 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +94,172 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-15T14:00:00+08:00" pubdate data-updated="true">Oct 15<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>准备环境</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.30.150   proxy server
+</span><span class='line'>192.168.30.151    storage server 
+</span><span class='line'>192.168.30.152    storage server</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>网络配置</h2>
+
+<p><strong> Proxy 代理节点网络(单网卡)  </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto lo
+</span><span class='line'>iface lo inet loopback
+</span><span class='line'>
+</span><span class='line'># The primary network interface
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 192.168.30.150
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>network 192.168.30.0
+</span><span class='line'>broadcast 192.168.30.255
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 存储节点网络(单网卡)  </strong>
+存储节点1：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto lo
+</span><span class='line'>iface lo inet loopback
+</span><span class='line'>
+</span><span class='line'># The primary network interface
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 192.168.30.151
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>network 192.168.30.0
+</span><span class='line'>broadcast 192.168.30.255
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p>存储节点2：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto lo
+</span><span class='line'>iface lo inet loopback
+</span><span class='line'>
+</span><span class='line'># The primary network interface
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 192.168.30.152
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>network 192.168.30.0
+</span><span class='line'>broadcast 192.168.30.255
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>安装公共组件</h2>
+
+<p>以下操作在所有节点全部安装：</p>
+
+<h3>添加源</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt; /etc/apt/sources.list.d/grizzly.list &lt;&lt; _END_
+</span><span class='line'>deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
+</span><span class='line'>deb  http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+</span><span class='line'>_END_</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更新源</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 5EDB1B62EC4926EA
+</span><span class='line'>apt-get update
+</span><span class='line'>apt-get upgrade
+</span><span class='line'>apt-get install ubuntu-cloud-keyring</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/15/openstack-swift-install/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1483,84 +1658,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/29/zabbix-config-emailalert/">Zabbix配置与报警设置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-29T00:00:00+08:00" pubdate data-updated="true">May 29<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>上次偶写了一篇<a href="http://agenge.com/blog/2013/05/02/zabbix-source-install-conf">Zabbix 源码安装与配置</a> ，安装之后默认是无法监控客户端主机滴，所以偶今天专门写篇文章来介绍Zabbix配置，主要涉及到：添加主机、邮件报警及一些常见的操作流程，希望对初学者有所帮助。</p>
-
-<h2>监控机</h2>
-
-<p>通在安装Zabbix之后，还需要在Web管理控制台添加需要监控的主机，下列是以添加一台监控主机为例进行演示。</p>
-
-<ol>
-<li>“Configuration” &ndash;> “Hosts”，点击添加一台主机“Host”:</li>
-</ol>
-
-
-<p> <img src="/images/2013/05/01.jpg" title="" ></p>
-
-<ol>
-<li>需要填写的内容主要为：“主机(Host)”、“模板(Templates)”，详细操作请见下列图中所示：主机的设置如下：</li>
-</ol>
-
-
-<p> <img src="/images/2013/05/02.jpg" title="" >
- 模板的设置如下：</p>
-
-<p> <img src="/images/2013/05/03.jpg" title="" ></p>
-
-<p> 点击“添加(Add)”之后，从弹出的子页面选择需要的模板，Zabbix默认已自带非常多的模板，</p>
-
-<p> 例如Mysql、Zabbix Server、Zabbix Agentd、OS Linux等。</p>
-
-<p>  <img src="/images/2013/05/04.jpg" title="" ></p>
-
-<p> 勾选所需要的监控模板后，点击最下边的“选择(Select)”，回到之前的模板标签页，最后一定要记得保存(Save)。</p>
-
-<p>  <img src="/images/2013/05/05.jpg" title="" ></p>
-
-<ol>
-<li>如果一切正常，默认在1分钟之后就会变成可用状态：
-<img src="/images/2013/05/06.jpg" title="" ></li>
-</ol>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/05/29/zabbix-config-emailalert/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1576,6 +1673,10 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
       </li>
     
@@ -1589,10 +1690,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
     
       <li class="post">
         <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
       </li>
     
   </ul>

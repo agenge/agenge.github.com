@@ -9,8 +9,7 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前段时间总是忙于安装系统，对于偶这种懒人来说，一天安装两遍都无法承受，别说更多，基本上有两个原因造出： 时间很宝贵。
-偶比较懒惰。 一直习惯于 RedHat 家族产品，从最开始接触的RHEL，到后来同时使用的Fedora，及目前使用最多的CentOS，这无疑是偶最为熟悉的Linux， &hellip;">
+  <meta name="description" content="上次偶写了一篇Zabbix 源码安装与配置 ，安装之后默认是无法监控客户端主机滴，所以偶今天专门写篇文章来介绍Zabbix配置，主要涉及到：添加主机、邮件报警及一些常见的操作流程，希望对初学者有所帮助。 监控机 通在安装Zabbix之后，还需要在Web管理控制台添加需要监控的主机， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +79,84 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/29/zabbix-config-emailalert/">Zabbix配置与报警设置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-29T00:00:00+08:00" pubdate data-updated="true">May 29<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>上次偶写了一篇<a href="http://agenge.com/blog/2013/05/02/zabbix-source-install-conf">Zabbix 源码安装与配置</a> ，安装之后默认是无法监控客户端主机滴，所以偶今天专门写篇文章来介绍Zabbix配置，主要涉及到：添加主机、邮件报警及一些常见的操作流程，希望对初学者有所帮助。</p>
+
+<h2>监控机</h2>
+
+<p>通在安装Zabbix之后，还需要在Web管理控制台添加需要监控的主机，下列是以添加一台监控主机为例进行演示。</p>
+
+<ol>
+<li>“Configuration” &ndash;> “Hosts”，点击添加一台主机“Host”:</li>
+</ol>
+
+
+<p> <img src="/images/2013/05/01.jpg" title="" ></p>
+
+<ol>
+<li>需要填写的内容主要为：“主机(Host)”、“模板(Templates)”，详细操作请见下列图中所示：主机的设置如下：</li>
+</ol>
+
+
+<p> <img src="/images/2013/05/02.jpg" title="" >
+ 模板的设置如下：</p>
+
+<p> <img src="/images/2013/05/03.jpg" title="" ></p>
+
+<p> 点击“添加(Add)”之后，从弹出的子页面选择需要的模板，Zabbix默认已自带非常多的模板，</p>
+
+<p> 例如Mysql、Zabbix Server、Zabbix Agentd、OS Linux等。</p>
+
+<p>  <img src="/images/2013/05/04.jpg" title="" ></p>
+
+<p> 勾选所需要的监控模板后，点击最下边的“选择(Select)”，回到之前的模板标签页，最后一定要记得保存(Save)。</p>
+
+<p>  <img src="/images/2013/05/05.jpg" title="" ></p>
+
+<ol>
+<li>如果一切正常，默认在1分钟之后就会变成可用状态：
+<img src="/images/2013/05/06.jpg" title="" ></li>
+</ol>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/29/zabbix-config-emailalert/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1149,107 +1226,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/21/puppet_install_conf/">Puppet用户手册&#8211;安装与配置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-21T00:00:00+08:00" pubdate data-updated="true">Dec 21<span>st</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1. 安装Puppet依赖环境</h2>
-
-<p>在安装Puppet之前需要保证服务器已经安装以下软件：</p>
-
-<ol>
-<li>Ruby: 挂载ISO后，切换到/mnt/Server, 输入： yum  -y install ruby-*</li>
-<li>Facter</li>
-<li>Ruby所依赖的OpenSSL 库，运行以下命令来测试是否已经安装所依赖的库文件：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> ruby -ropenssl -e "puts :yep"</span></code></pre></td></tr></table></div></figure>
-
-
-<p>
- 如果输出“yep”表示无问题。</p>
-
-<p><strong><em>注意：在安装Puppet之前，如果需要，必须将服务器主机名修改好，否则将会出现很多问题哟！</em></strong></p>
-
-<h2>2. 安装Puppet服务器端</h2>
-
-<p>由于本文基于源码安装，使用二进制包的安装方式本文不打算介绍，如有需要请自行到网上搜索。好了，首先将facter-2.0.0rc4.tar.gz、puppet-2.7.19.tar.gz上传到 Puppet服务端(192.168.56.2)，具体步骤如下</p>
-
-<ul>
-<li>安装facter：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz
-</span><span class='line'># tar zxvf facter-2.0.0rc4.tar.gz
-</span><span class='line'># cd facter-2.0.0rc4
-</span><span class='line'># ruby install.rb</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 安装后会提示是否有无问题，如下图所示，无任何错误：
- <img src="/images/2012/12/1.png"></p>
-
-<ul>
-<li>安装Puppet:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz
-</span><span class='line'># tar zxvf puppet-2.7.19.tar.gz
-</span><span class='line'># cd puppet-2.7.19
-</span><span class='line'># ruby install.rb</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 安装后会提示是否有无问题，如下图所示，无任何错误：
- <img src="/images/2012/12/2.png"></p>
-
-<p> 到此，Puppet服务端安装已经结束。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/12/21/puppet_install_conf/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1267,6 +1243,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
       </li>
     
@@ -1280,10 +1260,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
     
       <li class="post">
         <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a>
       </li>
     
   </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-12T14:45:55+08:00</updated>
+  <updated>2013-10-15T14:33:08+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,804 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[OpenStack Swift安装与配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/15/openstack-swift-install/"/>
+    <updated>2013-10-15T14:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/15/openstack-swift-install</id>
+    <content type="html"><![CDATA[<h2>准备环境</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.30.150   proxy server
+</span><span class='line'>192.168.30.151    storage server 
+</span><span class='line'>192.168.30.152    storage server</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>网络配置</h2>
+
+<p><strong> Proxy 代理节点网络(单网卡)  </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto lo
+</span><span class='line'>iface lo inet loopback
+</span><span class='line'>
+</span><span class='line'># The primary network interface
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 192.168.30.150
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>network 192.168.30.0
+</span><span class='line'>broadcast 192.168.30.255
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 存储节点网络(单网卡)  </strong>
+存储节点1：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto lo
+</span><span class='line'>iface lo inet loopback
+</span><span class='line'>
+</span><span class='line'># The primary network interface
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 192.168.30.151
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>network 192.168.30.0
+</span><span class='line'>broadcast 192.168.30.255
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p>存储节点2：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>auto lo
+</span><span class='line'>iface lo inet loopback
+</span><span class='line'>
+</span><span class='line'># The primary network interface
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 192.168.30.152
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>network 192.168.30.0
+</span><span class='line'>broadcast 192.168.30.255
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>安装公共组件</h2>
+
+<p>以下操作在所有节点全部安装：</p>
+
+<h3>添加源</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt; /etc/apt/sources.list.d/grizzly.list &lt;&lt; _END_
+</span><span class='line'>deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
+</span><span class='line'>deb  http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+</span><span class='line'>_END_</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更新源</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 5EDB1B62EC4926EA
+</span><span class='line'>apt-get update
+</span><span class='line'>apt-get upgrade
+</span><span class='line'>apt-get install ubuntu-cloud-keyring</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<!-- more -->
+
+
+<h2>安装 Swift</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>os_swift="python-swift swift swift-proxy swift-account swift-container swift-object python-memcache xfsprogs"
+</span><span class='line'>os_keystone="python-keystone python-keystoneclient"
+</span><span class='line'>apt-get install -y $os_swift $os_keystone</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装之后需要手工创建 swift相关配置文件:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir /etc/swift
+</span><span class='line'>touch /etc/swift/swift.conf
+</span><span class='line'>touch /etc/swift/proxy-server.conf
+</span><span class='line'>chown -R swift:swift /etc/swift</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加 swift.conf内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt; /etc/swift/swift.conf &lt;&lt; _END_
+</span><span class='line'>[swift-hash]
+</span><span class='line'># od -t x8 -N 8 -A n &lt; /dev/random
+</span><span class='line'># The above command can be used to generate random a string.
+</span><span class='line'>swift_hash_path_suffix = 50ea1ddb6e88b991
+</span><span class='line'>_END_</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将以下内容添加到 /etc/swift/proxy-server.conf内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>bind_port = 8080
+</span><span class='line'>bind_ip = 0.0.0.0
+</span><span class='line'>user = swift
+</span><span class='line'>swift_dir = /etc/swift
+</span><span class='line'>
+</span><span class='line'>log_facility = LOG_LOCAL0
+</span><span class='line'>log_level = DEBUG
+</span><span class='line'>
+</span><span class='line'>[pipeline:main]
+</span><span class='line'>pipeline = catch_errors healthcheck cache authtoken keystoneauth container-quotas account-quotas proxy-server
+</span><span class='line'>
+</span><span class='line'>[app:proxy-server]
+</span><span class='line'>use = egg:swift#proxy
+</span><span class='line'>allow_account_management = true
+</span><span class='line'>account_autocreate = true
+</span><span class='line'>
+</span><span class='line'>[filter:keystoneauth]
+</span><span class='line'>use = egg:swift#keystoneauth
+</span><span class='line'>operator_roles = Member,admin
+</span><span class='line'>
+</span><span class='line'>[filter:authtoken]
+</span><span class='line'>paste.filter_factory = keystone.middleware.auth_token:filter_factory
+</span><span class='line'>service_protocol = http
+</span><span class='line'>service_port = 5000
+</span><span class='line'>service_host = 192.168.30.150
+</span><span class='line'>auth_port = 35357
+</span><span class='line'>auth_host = 192.168.30.150
+</span><span class='line'>auth_protocol = http
+</span><span class='line'>admin_tenant_name = service
+</span><span class='line'>admin_user = swift
+</span><span class='line'>admin_password = password
+</span><span class='line'>signing_dir = /etc/swift
+</span><span class='line'>
+</span><span class='line'>[filter:cache]
+</span><span class='line'>use = egg:swift#memcache
+</span><span class='line'>set log_name = cache
+</span><span class='line'>memcache_servers = 192.168.30.150:11211
+</span><span class='line'>
+</span><span class='line'>[filter:catch_errors]
+</span><span class='line'>use = egg:swift#catch_errors
+</span><span class='line'>
+</span><span class='line'>[filter:healthcheck]
+</span><span class='line'>use = egg:swift#healthcheck
+</span><span class='line'>
+</span><span class='line'>[filter:proxy-logging]
+</span><span class='line'>use = egg:swift#proxy_logging
+</span><span class='line'>
+</span><span class='line'>[filter:ratelimit]
+</span><span class='line'>use = egg:swift#ratelimit
+</span><span class='line'>[filter:container-quotas]
+</span><span class='line'>use = egg:swift#container_quotas
+</span><span class='line'>
+</span><span class='line'>[filter:account-quotas]
+</span><span class='line'>use = egg:swift#account_quotas</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果不使用 Keystone 认证，请使用以下的配置文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>bind_port = 8080
+</span><span class='line'>bind_ip = 192.168.30.150
+</span><span class='line'>user = swift
+</span><span class='line'>
+</span><span class='line'>[pipeline:main]
+</span><span class='line'>pipeline = healthcheck cache tempauth proxy-server
+</span><span class='line'>
+</span><span class='line'>[app:proxy-server]
+</span><span class='line'>use = egg:swift#proxy
+</span><span class='line'>allow_account_management = true
+</span><span class='line'>account_autocreate = true
+</span><span class='line'>
+</span><span class='line'>[filter:tempauth]
+</span><span class='line'>use = egg:swift#tempauth
+</span><span class='line'>user_admin_admin = admin .admin .reseller_admin
+</span><span class='line'>user_test_tester = testing .admin
+</span><span class='line'>user_test2_tester2 = testing2 .admin
+</span><span class='line'>user_test_tester3 = testing3
+</span><span class='line'>
+</span><span class='line'>[filter:healthcheck]
+</span><span class='line'>use = egg:swift#healthcheck
+</span><span class='line'>
+</span><span class='line'>[filter:cache]
+</span><span class='line'>use = egg:swift#memcache
+</span><span class='line'>memcache_servers = 192.168.30.150:11211</span></code></pre></td></tr></table></div></figure>
+
+
+<p>格式： user<em><login1></em><login2> = <password> <privileges>
+登录的时候就是：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>login = admin:admin
+</span><span class='line'>password = admin
+</span><span class='line'>privileges = .admin .reseller_admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置rsyslog</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "local0.*    /var/log/swift/proxy-server.log" &gt;&gt; /etc/rsyslog.conf
+</span><span class='line'>mkdir /var/log/swift</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置 环 Ring</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /etc/swift
+</span><span class='line'>sudo swift-ring-builder account.builder create 6 2 1
+</span><span class='line'>sudo swift-ring-builder container.builder create 6 2 1
+</span><span class='line'>sudo swift-ring-builder object.builder create 6 2 1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>说明：</p>
+
+<ul>
+<li>第一个数字：6表示分区(环)将被处理为2<sup>6th</sup>，即使用2的6次方个分区，创建完之后应有 64个分区;</li>
+<li>第二个数字：每个存储对象保存2份，即创建2个副本；由于偶只有两台storage，故只写2;</li>
+<li>第三个数字：1表示限制分区数据转移的时间，此处表示1小时，即分区被连续移动两次之间的最小时间间隔;</li>
+</ul>
+
+
+<p>添加设备
+添加新设备到Ring上，但add操作不会分配partitions到新的设备上，只有运行“rebalance”命令后才会进行分区的分配，所以这种方式可以有这种优势： 允许一次添加多个设备，只执行一次rebalance就可以了，以下操作步骤：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo swift-ring-builder account.builder add z1-192.168.30.151:6002/sdb1 100
+</span><span class='line'>sudo swift-ring-builder account.builder add z2-192.168.30.152:6002/sdb1 100
+</span><span class='line'>
+</span><span class='line'>sudo swift-ring-builder container.builder add z1-192.168.30.151:6001/sdb1 100
+</span><span class='line'>sudo swift-ring-builder container.builder add z2-192.168.30.152:6001/sdb1 100
+</span><span class='line'>
+</span><span class='line'>sudo swift-ring-builder object.builder add z1-192.168.30.151:6000/sdb1 100
+</span><span class='line'>sudo swift-ring-builder object.builder add z2-192.168.30.152:6000/sdb1 100</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看 Ring信息
+可通过以下命令查到到Ring和Ring中的设备信息：
+* 查询account信息：</p>
+
+<pre><code>    swift-ring-builder account.builder
+</code></pre>
+
+<ul>
+<li><p>查询container信息：</p>
+
+<pre><code>  swift-ring-builder container.builder
+</code></pre></li>
+<li><p>查询object信息</p>
+
+<pre><code>  swift-ring-builder object.builder
+</code></pre></li>
+<li><p>生成 Ring
+如果确认一切之后，最终还要生成Ring，来进行分区的分配，即之前提到的rebalance：</p></li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo swift-ring-builder account.builder rebalance
+</span><span class='line'>sudo swift-ring-builder container.builder rebalance
+</span><span class='line'>sudo swift-ring-builder object.builder rebalance</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置权限</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chown -R swift:swift /etc/swift
+</span><span class='line'>chown -R swift:swift /var/cache/swift</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<h2>存储节点安装与配置</h2>
+
+<p>添加设备：
+先创建分区，另外一定要是 XFS文件系统</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /srv/node/sdb1
+</span><span class='line'>chown -R swift:swift /srv/node/
+</span><span class='line'>mkfs.xfs -i size=1024 /dev/sdb1 -f 
+</span><span class='line'>echo "/dev/sdb1 /srv/node/sdb1 xfs noatime,nodiratime,nobarrier,logbufs=8 0 0" &gt;&gt; /etc/fstab 
+</span><span class='line'>mount /srv/node/sdb1  </span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置 rsyncd.conf</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>uid = swift
+</span><span class='line'>gid = swift
+</span><span class='line'>
+</span><span class='line'>log file = /var/log/rsyncd.log
+</span><span class='line'>pid file = /var/run/rsyncd.pid
+</span><span class='line'>address = 192.168.30.151
+</span><span class='line'>
+</span><span class='line'>[account]
+</span><span class='line'>max_connections = 2
+</span><span class='line'>path = /srv/node/
+</span><span class='line'>read only = false
+</span><span class='line'>lock file = /var/lock/account.lock
+</span><span class='line'>
+</span><span class='line'>[container]
+</span><span class='line'>max_connections = 2
+</span><span class='line'>path = /srv/node/
+</span><span class='line'>read only = false
+</span><span class='line'>lock file = /var/lock/container.lock
+</span><span class='line'>
+</span><span class='line'>[object]
+</span><span class='line'>max_connections = 2
+</span><span class='line'>path = /srv/node/
+</span><span class='line'>read only = false
+</span><span class='line'>lock file = /var/lock/object.lock</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置 rsync开机自启动</p>
+
+<pre><code>sudo sed -i 's/RSYNC_ENABLE=false/RSYNC_ENABLE=true/g' /etc/default/rsync
+</code></pre>
+
+<p>启动 rsync服务</p>
+
+<pre><code>sudo service rsync start
+</code></pre>
+
+<p>创建/etc/account-server.conf：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>bind_ip = 0.0.0.0
+</span><span class='line'>bind_port = 6002
+</span><span class='line'>workers = 1
+</span><span class='line'>user = swift
+</span><span class='line'>swift_dir = /etc/swift
+</span><span class='line'>devices = /srv/node
+</span><span class='line'>
+</span><span class='line'>[pipeline:main]
+</span><span class='line'>pipeline = account-server
+</span><span class='line'>
+</span><span class='line'>[app:account-server]
+</span><span class='line'>use = egg:swift#account
+</span><span class='line'>
+</span><span class='line'>[account-replicator]
+</span><span class='line'>
+</span><span class='line'>[account-auditor]
+</span><span class='line'>
+</span><span class='line'>[account-reaper]
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建/etc/container-server.conf</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>bind_ip = 0.0.0.0
+</span><span class='line'>bind_port = 6001
+</span><span class='line'>workers = 1
+</span><span class='line'>user = swift
+</span><span class='line'>swift_dir = /etc/swift
+</span><span class='line'>devices = /srv/node
+</span><span class='line'>
+</span><span class='line'>[pipeline:main]
+</span><span class='line'>pipeline = container-server
+</span><span class='line'>
+</span><span class='line'>[app:container-server]
+</span><span class='line'>use = egg:swift#container
+</span><span class='line'>
+</span><span class='line'>[container-replicator]
+</span><span class='line'>
+</span><span class='line'>[container-updater]
+</span><span class='line'>
+</span><span class='line'>[container-auditor]
+</span><span class='line'>
+</span><span class='line'>[container-sync]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建/etc/object-server.conf</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>bind_ip = 0.0.0.0
+</span><span class='line'>bind_port = 6000
+</span><span class='line'>workers = 1
+</span><span class='line'>user = swift
+</span><span class='line'>swift_dir = /etc/swift
+</span><span class='line'>devices = /srv/node
+</span><span class='line'>
+</span><span class='line'>[pipeline:main]
+</span><span class='line'>pipeline = recon object-server
+</span><span class='line'>
+</span><span class='line'>[app:object-server]
+</span><span class='line'>use = egg:swift#object
+</span><span class='line'>
+</span><span class='line'>[filter:recon]
+</span><span class='line'>use = egg:swift#recon
+</span><span class='line'>recon_cache_path = /var/cache/swift
+</span><span class='line'>
+</span><span class='line'>[object-replicator]
+</span><span class='line'>
+</span><span class='line'>[object-updater]
+</span><span class='line'>
+</span><span class='line'>[object-auditor]</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>重启服务</h3>
+
+<p>在所有存储节点重启以下服务：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo swift-init object-server start
+</span><span class='line'>sudo swift-init object-replicator start
+</span><span class='line'>sudo swift-init object-updater start
+</span><span class='line'>sudo swift-init object-auditor start
+</span><span class='line'>sudo swift-init container-server start
+</span><span class='line'>sudo swift-init container-replicator start
+</span><span class='line'>sudo swift-init container-updater start
+</span><span class='line'>sudo swift-init container-auditor start
+</span><span class='line'>sudo swift-init account-server start
+</span><span class='line'>sudo swift-init account-replicator start
+</span><span class='line'>sudo swift-init account-auditor start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在代理节点启动以下服务：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo swift-init all restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Swift操作</h2>
+
+<p>获得 X-Storage-Url 和 X-Auth-Token:</p>
+
+<pre><code>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0
+</code></pre>
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>* About to connect() to 192.168.30.150 port 8080 (#0)
+</span><span class='line'>*   Trying 192.168.30.150... connected
+</span><span class='line'>&gt; GET /auth/v1.0 HTTP/1.1
+</span><span class='line'>&gt; User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
+</span><span class='line'>&gt; Host: 192.168.30.150:8080
+</span><span class='line'>&gt; Accept: */*
+</span><span class='line'>&gt; X-Storage-User: admin:admin
+</span><span class='line'>&gt; X-Storage-Pass: admin
+</span><span class='line'>&gt; 
+</span><span class='line'>&lt; HTTP/1.1 200 OK
+</span><span class='line'>&lt; X-Storage-Url: http://192.168.30.150:8080/v1/AUTH_admin
+</span><span class='line'>&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&lt; Content-Type: text/html; charset=UTF-8
+</span><span class='line'>&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&lt; Content-Length: 0
+</span><span class='line'>&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
+</span><span class='line'>&lt; 
+</span><span class='line'>* Connection #0 to host 192.168.30.150 left intact
+</span><span class='line'>* Closing connection #0</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>检查账号</p>
+
+<pre><code>    curl -k -v -H 'X-Auth-Token: &lt;token-from-x-auth-token-above&gt;' &lt;url-from-xstorage-url-above&gt;  
+</code></pre>
+
+<p>这里的token-from-x-auth-token-above 就是上面输出的 AUTH_tk8a85916d63b14c568a4633b7920623c5，url-from-xstorage-url-above对应：<a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a></p>
+
+<p>检测 swift 命令是否工作正常</p>
+
+<pre><code>    swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin stat
+</code></pre>
+
+<p>正常输出类似以下信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>   Account: AUTH_admin
+</span><span class='line'>Containers: 0
+</span><span class='line'>   Objects: 0
+</span><span class='line'>     Bytes: 0
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806617.24083
+</span><span class='line'>Content-Type: text/plain; charset=utf-8</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上传</p>
+
+<pre><code>swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin upload test apache-tomcat-6.0.36.tar.gz
+</code></pre>
+
+<p>删除</p>
+
+<pre><code>swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin delete test apache-tomcat-6.0.36.tar.gz
+</code></pre>
+
+<h2>排错思路</h2>
+
+<ol>
+<li>直接看控制台打印的日志</li>
+<li>检查配置文件是否正确</li>
+<li>通过观察日志，例如/var/log/syslog</li>
+<li>修改配置文件之后，需要重启对应的服务</li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[LVS+Keepalived做Red5高可用和负载均衡]]></title>
@@ -4781,7 +5579,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#x3a;&#x74;&#101;&#x73;&#116;&#x5f;&#x7a;&#97;&#x62;&#x62;&#x69;&#120;&#64;&#103;&#x6d;&#x61;&#105;&#x6c;&#46;&#x63;&#x6f;&#x6d;">&#x74;&#101;&#x73;&#x74;&#95;&#122;&#x61;&#x62;&#x62;&#105;&#120;&#x40;&#x67;&#109;&#97;&#105;&#108;&#46;&#x63;&#x6f;&#109;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#111;&#58;&#116;&#101;&#x73;&#116;&#x5f;&#122;&#x61;&#98;&#98;&#x69;&#120;&#64;&#x67;&#109;&#97;&#105;&#108;&#46;&#99;&#x6f;&#109;">&#x74;&#x65;&#115;&#x74;&#95;&#x7a;&#x61;&#x62;&#x62;&#x69;&#x78;&#x40;&#103;&#x6d;&#97;&#105;&#108;&#46;&#x63;&#111;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -7231,888 +8029,6 @@ PassengerRuby /usr/bin/ruby
 
 
 <p>最后启动PLSQL，如果您所有步骤顺利通过，就可连接到数据库。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Puppet用户手册--安装与配置]]></title>
-    <link href="http://agenge.github.io/blog/2012/12/21/puppet_install_conf/"/>
-    <updated>2012-12-21T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2012/12/21/puppet_install_conf</id>
-    <content type="html"><![CDATA[<h2>1. 安装Puppet依赖环境</h2>
-
-<p>在安装Puppet之前需要保证服务器已经安装以下软件：</p>
-
-<ol>
-<li>Ruby: 挂载ISO后，切换到/mnt/Server, 输入： yum  -y install ruby-*</li>
-<li>Facter</li>
-<li>Ruby所依赖的OpenSSL 库，运行以下命令来测试是否已经安装所依赖的库文件：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> ruby -ropenssl -e "puts :yep"</span></code></pre></td></tr></table></div></figure>
-
-
-<p>
- 如果输出“yep”表示无问题。</p>
-
-<p><strong><em>注意：在安装Puppet之前，如果需要，必须将服务器主机名修改好，否则将会出现很多问题哟！</em></strong></p>
-
-<h2>2. 安装Puppet服务器端</h2>
-
-<p>由于本文基于源码安装，使用二进制包的安装方式本文不打算介绍，如有需要请自行到网上搜索。好了，首先将facter-2.0.0rc4.tar.gz、puppet-2.7.19.tar.gz上传到 Puppet服务端(192.168.56.2)，具体步骤如下</p>
-
-<ul>
-<li>安装facter：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://downloads.puppetlabs.com/facter/facter-2.0.0rc4.tar.gz
-</span><span class='line'># tar zxvf facter-2.0.0rc4.tar.gz
-</span><span class='line'># cd facter-2.0.0rc4
-</span><span class='line'># ruby install.rb</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 安装后会提示是否有无问题，如下图所示，无任何错误：
- <img src="http://agenge.github.io/images/2012/12/1.png"></p>
-
-<ul>
-<li>安装Puppet:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://puppetlabs.com/downloads/puppet/puppet-2.7.20.tar.gz
-</span><span class='line'># tar zxvf puppet-2.7.19.tar.gz
-</span><span class='line'># cd puppet-2.7.19
-</span><span class='line'># ruby install.rb</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 安装后会提示是否有无问题，如下图所示，无任何错误：
- <img src="http://agenge.github.io/images/2012/12/2.png"></p>
-
-<p> 到此，Puppet服务端安装已经结束。</p>
-
-<!-- more -->
-
-
-<h2>3. 安装Puppet客户端 For Linux</h2>
-
-<p>Puppet客户端的安装方式与服务端一样，故不再详细介绍，详细请见第二章。</p>
-
-<h2>4. 安装Puppet客户端 For Windows</h2>
-
-<p>暂时不打算写！</p>
-
-<h2>5. 配置Puppet服务端和客户端</h2>
-
-<p>在配置之前，要确保Puppet服务端和所有Puppet客户端的本地时间一致，关于时间同步，推荐使用NTP(请参考网上的NTP详细介绍或MAN)。</p>
-
-<h3>5.1 配置Puppet服务端：</h3>
-
-<p>创建puppet组和用户：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># groupadd puppet
-</span><span class='line'># useradd -g puppet -s /sbin/nologin puppet</span></code></pre></td></tr></table></div></figure>
-
-
-<p>设置/etc/hosts：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># echo "192.168.56.2 puppetmaster.test.com puppetmaster" &gt;&gt; /etc/hosts
-</span><span class='line'># echo "192.168.56.10 client1.test.com client1" &gt;&gt; /etc/hosts
-</span><span class='line'># cp conf/namespaceauth.conf /etc/puppet/
-</span><span class='line'># cp conf/redhat/puppet.conf /etc/puppet/
-</span><span class='line'># cp conf/redhat/server.init /etc/init.d/puppetmaster
-</span><span class='line'># chmod +x /etc/init.d/puppetmaster</span></code></pre></td></tr></table></div></figure>
-
-
-<p>启动puppetmaster ，若无问题，显示如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppetmaster start
-</span><span class='line'>Starting puppetmaster:                    [ OK ]
-</span><span class='line'># chkconfig puppetmaster on</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>5.2  配置Puppet客户端：</h3>
-
-<p>除了以下命令不一样，其他全部和服务端一样的配置：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cp conf/redhat/client.init /etc/init.d/puppet
-</span><span class='line'># chmod +x /etc/init.d/puppet</span></code></pre></td></tr></table></div></figure>
-
-
-<p>服务端对应命令如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cp conf/redhat/server.init /etc/init.d/puppetmaster</span></code></pre></td></tr></table></div></figure>
-
-
-<p>启动puppet，若无问题，显示如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppet start
-</span><span class='line'>Starting puppet:               [ OK ]
-</span><span class='line'># chkconfig puppet on</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>5.3 Puppet服务端和客户端测试：</h3>
-
-<p>Puppet客户端与服务器端是通过SSL隧道通信的，客户端安装完成后，需要向服务器端申请证书：</p>
-
-<ul>
-<li>首次连接服务器端会发起证书申请，在客户端执行命令如下</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> puppetd --server puppetmaster --test</span></code></pre></td></tr></table></div></figure>
-
-
-<p> <img src="http://agenge.github.io/images/2012/12/3.png"></p>
-
-<p> 执行以上命令代表客户端已经成功生成证书，并把证书签名请求发送到Puppet服务端.</p>
-
-<ul>
-<li>登录到Puppet服务端，查看所有客户端的证书签名请求：</li>
-</ul>
-
-
-<p> <img src="http://agenge.github.io/images/2012/12/4.png"></p>
-
-<p> 从结果可看出，已经看到client1.test.com客户端的证书签名请求，最后对所有的证书请求进行签名：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppetca -s -a</span></code></pre></td></tr></table></div></figure>
-
-
-<p> <img src="http://agenge.github.io/images/2012/12/5.png"></p>
-
-<h3>5.4 示例：同步hosts文件(modules实现)</h3>
-
-<ul>
-<li>同步之前，先看下未使用module实现的简单示例：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># 默认的节点配置
-</span><span class='line'>node default {
-</span><span class='line'>     file {
-</span><span class='line'>             "/tmp/temp1.txt":
-</span><span class='line'>             content =&gt; "Hello,Puppet!"; }
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'># 同步/root/temp01.txt文件
-</span><span class='line'>node "client1.test.com" {
-</span><span class='line'>     host { "host1":
-</span><span class='line'>     ip =&gt; "192.168.1.1",
-</span><span class='line'>     target =&gt; "/root/temp01.txt",
-</span><span class='line'>     ensure =&gt; present; }
-</span><span class='line'>}
-</span><span class='line'>node "feinno-hgg" {
-</span><span class='line'>     host { "host2":
-</span><span class='line'>     ip =&gt; "192.168.1.1",
-</span><span class='line'>     target =&gt; "/root/temp01.txt",
-</span><span class='line'>     ensure =&gt; present; }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以上示例表示配置两个客户端，分别是“client1.test.com”和“feinno-hgg”，同时还有一个默认的node节点，后期如果有新客户端加入，在文件末尾加入一个新的node即可。但请再深入的思考一下，从后期的维护或管理角度来看，必须考虑下面两个重点的问题：</p>
-
-<ul>
-<li>问题1：假设您管理的不是10台，而是100台或者1000台，甚至更多，此种配置方式是否最优？</li>
-<li>问题2：假设您管理的客户端是多架构平台的，例如Debian、CentOS、Solaris、AIX或</li>
-</ul>
-
-
-<p> Windows，如何解决跨平台的文件同步？</p>
-
-<p> 使用示例1的配置方式，显示无法解决上面这两个问题，所以这就是我们下面要介绍的模块化实现。</p>
-
-<ul>
-<li>创建所须目录：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#/bin/mkdir -p /etc/puppet/modules/hosts/{files,lib,manifests,templates}
-</span><span class='line'>#/bin/mkdir -p /etc/puppet/modules/hosts/files/hosts/etc</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>创建所须文件：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># ll /etc/puppet/manifests/
-</span><span class='line'>total 8
-</span><span class='line'>-rw-r--r-- 1 root root 103 Oct 15 17:08 nodes.pp
-</span><span class='line'>-rw-r--r-- 1 root root 52 Oct 15 17:04 site.pp</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cat site.pp
-</span><span class='line'># 导入nodes.pp
-</span><span class='line'>import 'nodes.pp'
-</span><span class='line'>$puppetserver="master.test.com"</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cat nodes.pp
-</span><span class='line'># 匹配所有以字母开头、.test.com结尾的客户端，并包含一个 hosts 的类文件
-</span><span class='line'>node /^\w+\.test\.com$/  {    
-</span><span class='line'>     include hosts
-</span><span class='line'>}
-</span><span class='line'>node 'feinno-hgg'  {
-</span><span class='line'>     include hosts
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>nodes.pp中使用了正则表达式，这使得一个非常 简单的node可以匹配多个客户端，而对于特殊主机来讲，可单独在文件结尾添加node即可，从而解决我们刚才提到的第一个问题。再来看看modules下的2类文件：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># ls -l /etc/puppet/modules/hosts/manifests
-</span><span class='line'>-rw-r--r-- 1 root root 654 Oct 15 17:16 config.pp
-</span><span class='line'>-rw-r--r-- 1 root root 47 Oct 12 11:20 init.pp</span></code></pre></td></tr></table></div></figure>
-
-
-<p>查看init.pp</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> #cat init.pp
-</span><span class='line'> # 定义一个hosts的类，并包括它的一个子类：hosts::config
-</span><span class='line'> class hosts {
-</span><span class='line'>     include hosts::config
-</span><span class='line'> }</span></code></pre></td></tr></table></div></figure>
-
-
-<p>查看config.pp</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cat config.pp
-</span><span class='line'># 定义一个hosts::config的子类，父类为 hosts
-</span><span class='line'>class hosts::config inherits hosts {
-</span><span class='line'>    if $operatingsystem in [ "RedHat","CentOS","Ubuntu","Fedora" ] {
-</span><span class='line'>
-</span><span class='line'>            file { "/etc/hosts":
-</span><span class='line'>                owner =&gt; "root",
-</span><span class='line'>                group =&gt; "root",
-</span><span class='line'>                mode =&gt; 644,
-</span><span class='line'>                source =&gt; "puppet://$puppetserver/hosts/etc/hosts",
-</span><span class='line'>            }
-</span><span class='line'>    }  elsif $operatingsystem == "Windows" {
-</span><span class='line'>            file { "C:/Windows/System32/drivers/etc/hosts":
-</span><span class='line'>                owner =&gt; "xm_Administrator",
-</span><span class='line'>                group =&gt; "Administrators",
-</span><span class='line'>                source =&gt; "puppet://$puppetserver/hosts/etc/win_hosts";
-</span><span class='line'>            }
-</span><span class='line'>    } else {
-</span><span class='line'>        fail("Doesn't support this OS: $operatingsystem")
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>从config.pp中可看出，通过一个if/elsif决断语句，结合Puppet内置变量$operatingsystem可同步任何跨平台的操作系统的hosts文件，从而解决我们刚才提到的第二个问题。</p>
-
-<ul>
-<li>配置modules</li>
-</ul>
-
-
-<p> 细心的读者可能会问：Puppet如何识别的module？ 问的相当好，Puppet默认是无法识别自定义modules的，需要我们在puppet.conf的 [main]中配置一个参数：modulepath，例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cat puppet.conf | grep module
-</span><span class='line'>modulepath = /etc/puppet/modules</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 通过简单的参加配置，Puppet就可识别自定义模块。</p>
-
-<ul>
-<li>配置 Fileserver：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/puppet/fileserver.conf
-</span><span class='line'>[hosts]
-</span><span class='line'>        path /etc/puppet/modules/hosts/files
-</span><span class='line'>        allow *</span></code></pre></td></tr></table></div></figure>
-
-
-<p>此处配置一个hosts的文件服务，及指定文件存放位置，同时允许所有客户端同步，生产环境不建议直接对所有客户端开放。而我们之前在config.pp中的source后面的路径格式为：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>puppet://$puppetserver/mount_point/path</span></code></pre></td></tr></table></div></figure>
-
-
-<p>例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>puppet://$puppetserver/hosts/etc/hosts</span></code></pre></td></tr></table></div></figure>
-
-
-<p>对应的绝对路径为：/etc/puppet/modules/hosts/files/etc/hosts</p>
-
-<ol>
-<li>Puppet客户端 for Windows 8客户端测试：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>D:\Program Files (x86)\Puppet Labs\Puppet\bin&gt;puppet.bat agent --test --server master.test.com
-</span><span class='line'>info: Retrieving plugin
-</span><span class='line'>info: Caching catalog for feinno-hgg
-</span><span class='line'>info: Applying configuration version '1350292129'
-</span><span class='line'>notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/content:
-</span><span class='line'> 
-</span><span class='line'>info: FileBucket got a duplicate file {md5}2c0dd3682bc4dbab317365a88af6177a
-</span><span class='line'>info: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]: Filebucketed C:/Windows/System32/drivers/etc/hosts to puppet with sum 2c0dd3682bc4dbab317365a88af6177a
-</span><span class='line'>notice: /Stage[main]/Hosts::Config/File[C:/Windows/System32/drivers/etc/hosts]/content: content changed '{md5}2c0dd3682bc4dbab317365a88af6177a' to '{md5}09636a06eea3999e8b02ca831923f3d6'
-</span><span class='line'>notice: this OS: windows.  Sync complete.
-</span><span class='line'>notice: /Stage[main]/Hosts::Config/Notify[this OS: windows.  Sync complete.]/message: defined 'message' as 'this OS: windows.  Sync complete.'
-</span><span class='line'>notice: Finished catalog run in 0.85 seconds</span></code></pre></td></tr></table></div></figure>
-
-
-<p>通过日志可看出，已经成功同步win_host到C:/Windows/System32/drivers/etc/hosts 。</p>
-
-<p><strong><em>提示：在MS 2008或Win 7、Win 8客户端同步时，注意C:/Windows/System32/drivers/etc的目录需要有写权限。</em></strong></p>
-
-<h2>6. 管理Puppet服务</h2>
-
-<h3>6.1 Puppet服务端启动、停止、重启过程如下：</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppetmaster start # 启动
-</span><span class='line'># /etc/init.d/puppetmaster stop # 停止
-</span><span class='line'># /etc/init.d/puppetmaster restart # 重启</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>6.2 Puppet客户端启动、停止、重启过程如下：</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppet start
-</span><span class='line'># /etc/init.d/puppet stop
-</span><span class='line'># /etc/init.d/puppet restart</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>6.3 Puppet For Windows客户端设置：</h3>
-
-<p>在Windows下安装Puppet客户端后，会自动在系统服务中添加一个Puppet Agent服务，并已经设置为开机自启动，如果不是，请自行修改。</p>
-
-<h3>6.4 设置Puppet服务端开机自启动：</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># chkconfig puppetmaster on
-</span><span class='line'># chkconfig --list puppetmaster</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>7. 常见错误</h2>
-
-<h3>7.1 语法错误 puppetd -s puppetmaster.test.com –t</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/usr/lib/ruby/site_ruby/1.8/puppet/application/agent.rb:54:in `handle_serve': uninitialized constant Puppet::Network::Handler (NameError)
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `send'
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:363:in `parse_options'
-</span><span class='line'>    from /usr/lib/ruby/1.8/optparse.rb:1247:in `call'
-</span><span class='line'>    from /usr/lib/ruby/1.8/optparse.rb:1247:in `order!'
-</span><span class='line'>    from /usr/lib/ruby/1.8/optparse.rb:1205:in `catch'
-</span><span class='line'>    from /usr/lib/ruby/1.8/optparse.rb:1205:in `order!'
-</span><span class='line'>    from /usr/lib/ruby/1.8/optparse.rb:1279:in `permute!'
-</span><span class='line'>    from /usr/lib/ruby/1.8/optparse.rb:1300:in `parse!'
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:370:in `parse_options'
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:416:in `hook'
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:407:in `exit_on_fail'
-</span><span class='line'>    from /usr/lib/ruby/site_ruby/1.8/puppet/application.rb:305:in `run'
-</span><span class='line'>    from /usr/sbin/puppetd:4</span></code></pre></td></tr></table></div></figure>
-
-
-<p>答：此问题由于版本太低导致，或修改参数形式，例如将-t  -s 修改成 &mdash;test &mdash;server。</p>
-
-<h3>7.2  Could not load openssl Ruby library; cannot install</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># tar xvf openssl-0.9.8p.tar.gz
-</span><span class='line'># cd openssl-0.9.8p
-</span><span class='line'># cp ssl/ssl.h /root/ruby-1.8.7/ext/openssl/
-</span><span class='line'># ./config -fPIC --prefix=/usr/local --openssldir=/usr/local/openssl enable-shared
-</span><span class='line'># make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>进入到ruby源码目录下的ext/openssl/：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cd /root/ruby-1.8.7/ext/openssl/
-</span><span class='line'># ruby extconf.rb --with-openssl-include=/usr/local/openssl/include --with-openssl-lib=/usr/local/openssl/lib 
-</span><span class='line'># make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.3   Error 400 on SERVER: Cannot find file: Invalid mount</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@client1 puppet]# puppetd --test
-</span><span class='line'>info: Caching catalog for client1.test.com
-</span><span class='line'>info: Applying configuration version '1349933729'
-</span><span class='line'>err: /Stage[main]//Node[client1.test.com]/File[/etc/puppet/files/temp01.txt]: Could not evaluate: Error 400 on SERVER: Cannot find file: Invalid mount 'temp01.txt' Could not retrieve file metadata for puppet:///temp01.txt: Error 400 on SERVER: Cannot find file: Invalid mount 'temp01.txt' at /etc/puppet/manifests/site.pp:20
-</span><span class='line'>notice: Finished catalog run in 0.45 seconds</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.4 err: Could not retrieve catalog from remote server: Connection refused</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@client1 puppet]# puppetd --test --server master.test.com
-</span><span class='line'>err: Could not retrieve catalog from remote server: Connection refused - connect(2)
-</span><span class='line'>warning: Not using cache on failed catalog
-</span><span class='line'>err: Could not retrieve catalog; skipping run
-</span><span class='line'>err: Could not send report: Connection refused - connect(2)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>该错误表示无法连接到Master，即Puppet服务端，由以下两个原因造成：</p>
-
-<ol>
-<li><p>Puppet服务端拒绝连接，通常是由于防火墙或selinux造成；</p></li>
-<li><p>Puppet客户端本地防火墙导致</p></li>
-</ol>
-
-
-<p>本人在测试时遇到此问题，但经检查上述原因后，仍然报拒绝连接错误，经过约2小时的仔细排查，终于找到问题，原因却让我差点吐血， 以下是排查过程：</p>
-
-<ul>
-<li>第一步：查看Puppet服务端防火墙，发现是开启的，但无任何规则，关闭防火墙后，到客户端尝试，无果! 再查看Linux，问题仍在。</li>
-<li>第二步：查看Puppet客户端防火墙，已是关闭状态，SELinux同样关闭状态。</li>
-<li>第三步：尝试修改Puppet服务端的auth.conf文件，并重启puppetmaster后，问题仍在。</li>
-<li>第四步：查看Puppet客户端所连接的服务端是否正确：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppet agent --configprint server</span></code></pre></td></tr></table></div></figure>
-
-
-<p>打印的域名和hosts文件一致。</p>
-
-<ul>
-<li>第五步：查看Puppet服务端和Puppet客户端的hosts文件是否正确</li>
-</ul>
-
-
-<p> 在第一次查看这两个文件的时候，发现没问题，后来再从其他地方折腾回来看hosts文件的时候，</p>
-
-<p> 发现Puppet客户端的hosts文件存在一个让本人都不好意思写出来的错误：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> # Do not remove the following line, or various programs
-</span><span class='line'> # that require network functionality will fail.
-</span><span class='line'> 127.0.0.1 master.test.com master localhost.localdomain localhost
-</span><span class='line'> #::1 localhost6.localdomain6 localhost6
-</span><span class='line'>  
-</span><span class='line'> 192.168.56.2 master.test.com
-</span><span class='line'> 192.168.56.10 client1.test.com
-</span><span class='line'> 192.168.10.188 feinno-hgg</span></code></pre></td></tr></table></div></figure>
-
-
-<p>终于发现问题所在，客户端的hosts写成这样，也确实不易，保存退出后，经测试问题已解决。这种低级错误都是平常不够严谨才造成的，且还花大量时间，所以当出现问题后，一定要非常仔细检查每个操作或步骤，只有这样，才能更高效的找到根源并解决。</p>
-
-<h3>7.5 Could not evaluate: Error 400 on SERVER: Not authorized to call find</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>info: Caching catalog for client1.test.com
-</span><span class='line'>info: Applying configuration version '1350282880'
-</span><span class='line'>notice: this OS: RedHat.  Sync complete.
-</span><span class='line'>notice: /Stage[main]/Hosts::Config/Notify[this OS: RedHat.  Sync complete.]/message: defined 'message' as 'this OS: RedHat.  Sync complete.'
-</span><span class='line'>err: /Stage[main]/Hosts::Config/File[/etc/hosts]: Could not evaluate: Error 400 on SERVER: Not authorized to call find on /file_metadata/hosts/etc/hosts Could not retrieve file metadata for puppet://master.test.com/hosts/etc/hosts: Error 400 on SERVER: Not authorized to call find on /file_metadata/hosts/etc/hosts at /etc/puppet/modules/hosts/manifests/config.pp:10</span></code></pre></td></tr></table></div></figure>
-
-
-<p>该问题由于没有通过Puppet服务端fileserver的认证造成，由于要同步文件资源，故需要在Puppet服务端Fileserver对应的mount point加上认证，例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cat /etc/puppet/fileserver.conf
-</span><span class='line'>[hosts]
-</span><span class='line'>        path /etc/puppet/modules/hosts/files
-</span><span class='line'>        allow client1.test.com</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.6 Failed to generate additional resources using &lsquo;eval_generate: SSL_connect</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>D:\Program Files (x86)\Puppet Labs\Puppet\bin&gt;puppet.bat agent --test --server master.test.com
-</span><span class='line'>info: Retrieving plugin
-</span><span class='line'>err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Failed to generate additional resources using 'eval_generate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]
-</span><span class='line'>err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Could not evaluate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com] Could not retrieve file metadata for puppet://master.test.com/plugins: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]
-</span><span class='line'>
-</span><span class='line'>err: Could not retrieve catalog from remote server: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]
-</span><span class='line'>warning: Not using cache on failed catalog
-</span><span class='line'>err: Could not retrieve catalog; skipping run
-</span><span class='line'>err: Could not send report: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=master.test.com]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>此问题由于Puppet服务端和Puppet客户端的时间不一致导致，将服务端和客户端的时间修改成一致即可解决，如果确保时间一致，问题仍在，请重新生成证书，重新生成证书过程如下：</p>
-
-<ol>
-<li>在Puppet服务端清除证书：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppetca -c feinno-hgg</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>在Puppet客户端删除证书：</li>
-</ol>
-
-
-<p> Linux客户端证书路径：</p>
-
-<ul>
-<li><p>MS2003：%ALLUSERSPROFILE%\Application Data\PuppetLabs\puppet\etc\ssl</p></li>
-<li><p>MS2008：%PROGRAMDATA%\PuppetLabs\puppet\etc\ssl\</p></li>
-</ul>
-
-
-<p> 例如删除Linux客户端下的证书：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># rm -fr /var/lib/puppet/ssl/*</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>在Puppet客户端执行：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppetca --test --server master.test.com</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>在Puppet客户端执行：</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppetca –l</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果有显示客户端的认证请求签名，则输入：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppetca -s feinno-hgg    #意思为客户端feinno-hgg的证书请求进行签名</span></code></pre></td></tr></table></div></figure>
-
-
-<p>或：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppetca -s -a # 对所有的客户端进行证书签名</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.7 Could not retrieve information from environment production source(s)</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>D:\Program Files (x8 6)\Puppet Labs\Puppet\bin&gt;puppet.bat agent --test --server master.test.com
-</span><span class='line'>info: Caching certificate for feinno-hgg
-</span><span class='line'>info: Retrieving plugin
-</span><span class='line'>info: Caching certificate_revocation_list for ca
-</span><span class='line'>err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Could not evaluate: Could
-</span><span class='line'>not retrieve information from environment production source(s) puppet://master.t
-</span><span class='line'>est.com/plugins
-</span><span class='line'>info: Caching catalog for feinno-hgg
-</span><span class='line'>info: Applying configuration version '1350284808'
-</span><span class='line'>info: Creating state file C:/ProgramData/PuppetLabs/puppet/var/state/state.yaml
-</span><span class='line'>notice: Finished catalog run in 0.18 seconds</span></code></pre></td></tr></table></div></figure>
-
-
-<p>此问题是属于2.7.x 的一个Bug导致，即在Windows平台下Puppet客户端向Puppet服务端同步文件时，默认情况下会同步Puppet服务端的plug，那要怎么解决呢？操作如下：</p>
-
-<p>在modules_name的目录下创建一个 lib的空目录即可。例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># mkdir /etc/puppet/modules/mymodule/lib</span></code></pre></td></tr></table></div></figure>
-
-
-<p>也可参考以下官方地址：<a href="https://projects.puppetlabs.com/issues/2244">https://projects.puppetlabs.com/issues/2244</a></p>
-
-<h3>7.8 notice: Run of Puppet configuration client already in progress; skipping</h3>
-
-<p>解决方法： 部分情况下puppet服务会无法启动，且会提示puppet已经启动，这个时候需要删除一个文件puppetdlock：</p>
-
-<ul>
-<li>Linux客户端绝对路径： /var/lib/puppet/state/puppetdlock</li>
-<li>Windows 2003客户端绝对路径：C:\Documents and Settings\All Users\Application Data\PuppetLabs\puppet\var\state\ puppetdlock</li>
-<li>Windows 2008客户端绝对路径：C:\ ProgramData\PuppetLabs\puppet\var\state\ puppetdlock</li>
-</ul>
-
-
-<h3>7.9 certificate verify failed: [CRL is not yet valid for /CN</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Failed to generate additional resources using 'eval_generate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]
-</span><span class='line'>err: /File[C:/ProgramData/PuppetLabs/puppet/var/lib]: Could not evaluate: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com] Could not retrieve file metadata for puppet://pmaster.i.12582.com/plugins: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]
-</span><span class='line'>err: Could not retrieve catalog from remote server: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]
-</span><span class='line'>warning: Not using cache on failed catalog
-</span><span class='line'>err: Could not retrieve catalog; skipping run
-</span><span class='line'>err: Could not send report: SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed: [CRL is not yet valid for /CN=pmaster.i.12582.com]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>原因：</p>
-
-<p>在配置证书时可能由于CA证书不匹配或被删除导致。</p>
-
-<p>解决办法：</p>
-
-<p>Master执行：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># puppet cert clean c02.i.12582.com</span></code></pre></td></tr></table></div></figure>
-
-
-<p>客户端执行：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># rm -f C:/ProgramData/PuppetLabs/puppet/etc/ssl/certs/c02.i.12582.com.pem
-</span><span class='line'># puppetca –test</span></code></pre></td></tr></table></div></figure>
-
-
-<p>此处需要注意一定别删除整个SSL目录，只需要删除指定的pem文件即可，另上面请根据实际情况修改。</p>
-
-<h3>7.10 charset: utf8, collation: utf8_unicode_ci</h3>
-
-<p>详细错误信息：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Couldn't create database for {"encoding"=&gt;"utf8", "adapter"=&gt;"mysql", "username"=&gt;"dashboard", "database"=&gt;"dashboard", "password"=&gt;"dashboard"}, charset: utf8, collation: utf8_unicode_ci (if you set the charset manually, make sure you have a matching collation)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>解决方法：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@pmaster puppet-dashboard-1.2.20]# ln -s /var/lib/mysql/mysql.sock /tmp/mysql.sock</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.11 undefined method `more_results&#8217; for #<Mysql></h3>
-
-<p>解决方法：注释mysql_adapter.rb中的318和       642</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@connection.more_results && @connection.next_result    # invoking stored procedures with CLIENT_MULTI_RESULTS requires this
-</span><span class='line'> to tidy up else connection will be dropped</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>7.12 undefined method `requirement&#8217; for #&lt;Rails:</h3>
-
-<p>解决方法：修改gem_dependency.rb
-注释掉81行</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#gem self.name, self.requirement # &lt;  1.8 unhappy way </span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改为：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>gem self.name, :version =&gt; (self.respond_to?(:requirement) ? self.requirement : self.version_requirements)</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>8. 排错思路</h2>
-
-<ul>
-<li><p>服务器端、客户端之间和本身的防火墙确认无问题；</p></li>
-<li><p>服务器端的SELinux确认禁用；</p></li>
-<li><p>证书确认是否正确配置正确，重新配置的过程如下：</p></li>
-</ul>
-
-
-<p> Puppet服务端：
- <code>
- # puppetd -r -c client01.domain.com
-</code></p>
-
-<p>Puppet客户端：</p>
-
-<ul>
-<li>Windows 2003：C:\Documents and Settings\All Users\Application Data\PuppetLabs\puppet\etc\ssl</li>
-<li>Windows 2008：C:\ProgramData\PuppetLabs\puppet\etc\ssl</li>
-<li>Linux 客户端: /var/lib/puppet/ssl</li>
-</ul>
-
 ]]></content>
   </entry>
   
