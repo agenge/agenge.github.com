@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-15T14:33:08+08:00</updated>
+  <updated>2013-10-17T11:57:24+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,429 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[使用Curl操作OpenStack Swift]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift/"/>
+    <updated>2013-10-17T09:51:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift</id>
+    <content type="html"><![CDATA[<p>提示：以下操作均是使用的 swift tempauth认证机制。</p>
+
+<ul>
+<li>获取 Token</li>
+</ul>
+
+
+<p>```</p>
+
+<pre><code>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0
+</code></pre>
+
+<p>```</p>
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<p>```
+* About to connect() to 192.168.30.150 port 8080 (#0)
+*   Trying 192.168.30.150&hellip; connected</p>
+
+<blockquote><p>GET /auth/v1.0 HTTP/1.1
+User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
+Host: 192.168.30.150:8080
+Accept: <em>/</em>
+X-Storage-User: admin:admin
+X-Storage-Pass: admin</p>
+
+<p>&lt; HTTP/1.1 200 OK
+&lt; X-Storage-Url: <a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a>
+&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+&lt; Content-Type: text/html; charset=UTF-8
+&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+&lt; Content-Length: 0
+&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
+&lt;
+* Connection #0 to host 192.168.30.150 left intact
+* Closing connection #0
+```</p></blockquote>
+
+<ul>
+<li>Account操作</li>
+</ul>
+
+
+<p>```</p>
+
+<pre><code>curl -k -v -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
+</code></pre>
+
+<p>```</p>
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<p>```
+* About to connect() to 192.168.30.150 port 8080 (#0)
+*   Trying 192.168.30.150&hellip; connected</p>
+
+<blockquote><p>HEAD /v1/AUTH_admin HTTP/1.1
+User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
+Host: 192.168.30.150:8080
+Accept: <em>/</em>
+X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5</p>
+
+<p>&lt; HTTP/1.1 204 No Content
+&lt; Content-Length: 0
+&lt; Accept-Ranges: bytes
+&lt; X-Timestamp: 1381806617.24083
+&lt; X-Account-Bytes-Used: 0
+&lt; X-Account-Container-Count: 1
+&lt; Content-Type: text/plain; charset=utf-8
+&lt; X-Account-Object-Count: 0
+&lt; Date: Tue, 15 Oct 2013 05:17:23 GMT
+&lt;
+* Connection #0 to host 192.168.30.150 left intact
+* Closing connection #0
+```</p></blockquote>
+
+<ul>
+<li><p>Container操作</p>
+
+<ul>
+<li>列出 Contailner</li>
+</ul>
+</li>
+</ul>
+
+
+<p><code>
+curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
+</code>
+ 如果正确，将会返回以下类似信息：</p>
+
+<p>```
+HTTP/1.1 200 OK
+Content-Length: 5
+Accept-Ranges: bytes
+X-Timestamp: 1381806617.24083
+X-Account-Bytes-Used: 0
+X-Account-Container-Count: 1
+Content-Type: text/plain; charset=utf-8
+X-Account-Object-Count: 0
+Date: Tue, 15 Oct 2013 05:20:11 GMT</p>
+
+<p>test
+```
+ 最后一行的test就是查询出来的内容。</p>
+
+<ul>
+<li>创建 Container</li>
+</ul>
+
+
+<p><code>
+curl -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile
+</code></p>
+
+<p>   如果正确，将会返回以下类似信息：</p>
+
+<p><code>
+HTTP/1.1 201 Created
+Content-Length: 0
+Content-Type: text/html; charset=UTF-8
+Date: Tue, 15 Oct 2013 05:22:01 GMT
+</code></p>
+
+<p>  我们再来查询一次看是否成功：</p>
+
+<p>  <!-- more --></p>
+
+<p><code>
+curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
+</code></p>
+
+<p>  如果正确，将会返回以下类似信息：</p>
+
+<p>```
+HTTP/1.1 200 OK
+Content-Length: 12
+Accept-Ranges: bytes
+X-Timestamp: 1381806617.24083
+X-Account-Bytes-Used: 0
+X-Account-Container-Count: 2
+Content-Type: text/plain; charset=utf-8
+X-Account-Object-Count: 0
+Date: Tue, 15 Oct 2013 05:23:18 GMT</p>
+
+<p>myfile
+test
+```</p>
+
+<ul>
+<li> 只列出部分 Container</li>
+</ul>
+
+
+<p>  很多时候 Container 会有很多个，Swift 默认会列出前10000个，但如果我们只看最前面几个，该怎么办？ 以下示例只显示最前面一个 Container</p>
+
+<p><code>
+curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?limit=1
+</code></p>
+
+<p> 结果：</p>
+
+<p>```
+HTTP/1.1 200 OK
+Content-Length: 7
+Accept-Ranges: bytes
+X-Timestamp: 1381806617.24083
+X-Account-Bytes-Used: 0
+X-Account-Container-Count: 2
+Content-Type: text/plain; charset=utf-8
+X-Account-Object-Count: 0
+Date: Tue, 15 Oct 2013 05:24:36 GMT</p>
+
+<p>myfile
+```</p>
+
+<p>  那如果要列出最后几个 Container 又怎么办呢？ 加一个 marker即可，以下示例列出 myfile之后的一个Container</p>
+
+<p><code>
+curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?marker=myfile\&amp;limit=1
+</code></p>
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<p>```
+HTTP/1.1 200 OK
+Content-Length: 5
+Accept-Ranges: bytes
+X-Timestamp: 1381806617.24083
+X-Account-Bytes-Used: 0
+X-Account-Container-Count: 2
+Content-Type: text/plain; charset=utf-8
+X-Account-Object-Count: 0
+Date: Tue, 15 Oct 2013 05:28:53 GMT</p>
+
+<p>test
+```</p>
+
+<ul>
+<li>格式化输出 Container</li>
+</ul>
+
+
+<p><code>
+curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?format=json
+</code></p>
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<p>```
+HTTP/1.1 200 OK
+Content-Length: 86
+Accept-Ranges: bytes
+X-Timestamp: 1381806617.24083
+X-Account-Bytes-Used: 0
+X-Account-Container-Count: 2
+Content-Type: application/json; charset=utf-8
+X-Account-Object-Count: 0
+Date: Tue, 15 Oct 2013 05:29:58 GMT</p>
+
+<p>[{&ldquo;count&rdquo;: 0, &ldquo;bytes&rdquo;: 0, &ldquo;name&rdquo;: &ldquo;myfile&rdquo;}, {&ldquo;count&rdquo;: 0, &ldquo;bytes&rdquo;: 0, &ldquo;name&rdquo;: &ldquo;test&rdquo;}]
+```</p>
+
+<p>  除了JSON格式，还可以格式化XML，只需要将json改成xml 即可。</p>
+
+<ul>
+<li>查看 Container metadata</li>
+</ul>
+
+
+<p><code>
+curl -i -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test
+</code></p>
+
+<p>  如果正确，将会返回以下类似信息：</p>
+
+<p><code>
+HTTP/1.1 204 No Content
+Content-Length: 0
+X-Container-Object-Count: 0
+Accept-Ranges: bytes
+X-Timestamp: 1381806903.70007
+X-Container-Bytes-Used: 0
+Content-Type: text/plain; charset=utf-8
+Date: Tue, 15 Oct 2013 05:32:06 GMT
+</code></p>
+
+<ul>
+<li>删除 Container</li>
+</ul>
+
+
+<p><code>
+curl -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/mytest
+</code></p>
+
+<ul>
+<li><p>Object操作</p>
+
+<ul>
+<li>创建 Object</li>
+</ul>
+</li>
+</ul>
+
+
+<p><code>
+curl -k -i -X PUT -T "apache-tomcat-6.0.36.tgz" -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz
+</code></p>
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<p>```
+HTTP/1.1 100 Continue</p>
+
+<p>HTTP/1.1 201 Created
+Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
+Content-Length: 0
+Etag: 3dde098fd0b3a08d3f2867e4a95591ba
+Content-Type: text/html; charset=UTF-8
+Date: Tue, 15 Oct 2013 05:39:08 GMT
+```</p>
+
+<ul>
+<li>列出  Object</li>
+</ul>
+
+
+<p>```</p>
+
+<pre><code>curl -k -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile
+</code></pre>
+
+<p>```</p>
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<p>```
+HTTP/1.1 200 OK
+Content-Length: 25
+X-Container-Object-Count: 1
+Accept-Ranges: bytes
+X-Timestamp: 1381814521.71796
+X-Container-Bytes-Used: 6780936
+Content-Type: text/plain; charset=utf-8
+Date: Tue, 15 Oct 2013 05:40:43 GMT</p>
+
+<p>apache-tomcat-6.0.36.tgz
+```</p>
+
+<p>另外 Object和 Container一样可以通过加参数来限制查询，具体示例可参考 Container操作。</p>
+
+<ul>
+<li>下载 Object</li>
+</ul>
+
+
+<p>```</p>
+
+<pre><code>curl -k -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz &gt; apache-tomcat-6.0.36.tgz
+</code></pre>
+
+<p>```</p>
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<p>```
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</p>
+
+<pre><code>                             Dload  Upload   Total   Spent    Left  Speed
+</code></pre>
+
+<p>100 6622k  100 6622k    0     0  32.8M      0 &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; 33.1M
+```</p>
+
+<ul>
+<li>Copy Object</li>
+</ul>
+
+
+<p><code>
+curl -k -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
+ -H 'X-Copy-From: /myfile/apache-tomcat-6.0.36.tgz' \
+ -H 'Content-Length:0' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz
+</code></p>
+
+<p>将/myfile/apache-tomcat-6.0.36.tgz 拷贝到 /test/apache-tomcat-6.0.36.tgz,如果正确，将会返回以下类似信息：</p>
+
+<p><code>
+HTTP/1.1 201 Created
+Content-Length: 0
+X-Copied-From-Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
+X-Copied-From: myfile/apache-tomcat-6.0.36.tgz
+Last-Modified: Tue, 15 Oct 2013 05:47:52 GMT
+Etag: 3dde098fd0b3a08d3f2867e4a95591ba
+Content-Type: text/html; charset=UTF-8
+Date: Tue, 15 Oct 2013 05:47:52 GMT
+</code></p>
+
+<ul>
+<li>删除 Object</li>
+</ul>
+
+
+<p>```</p>
+
+<pre><code>curl -k -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz
+</code></pre>
+
+<p>```</p>
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<p><code>
+HTTP/1.1 204 No Content
+Content-Length: 0
+Content-Type: text/html; charset=UTF-8
+Date: Tue, 15 Oct 2013 05:50:49 GMT
+</code>
+ 通过之前的GET就能验证是否成功删除，此处略过。</p>
+
+<ul>
+<li>设置 Object Metadata</li>
+</ul>
+
+
+<p><code>
+curl -k -i -X POST -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
+-H 'X-Object-Meta-Breed: apache tomcat 6.0.36' \
+ http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz
+</code></p>
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<p><code>
+HTTP/1.1 202 Accepted
+Content-Length: 76
+Content-Type: text/html; charset=UTF-8
+Date: Tue, 15 Oct 2013 05:54:09 GMT
+</code></p>
+
+<p>通过之前的HEAD，就能查看到刚才添加的元数据</p>
+
+<p><code>
+HTTP/1.1 200 OK
+Content-Length: 6780936
+X-Object-Meta-Breed: apache tomcat 6.0.36
+Accept-Ranges: bytes
+Last-Modified: Tue, 15 Oct 2013 05:54:08 GMT
+Etag: 3dde098fd0b3a08d3f2867e4a95591ba
+X-Timestamp: 1381816448.74507
+Content-Type: application/x-tar
+Date: Tue, 15 Oct 2013 05:55:53 GMT
+</code></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[OpenStack Swift安装与配置]]></title>
@@ -253,14 +676,13 @@ cd /etc/swift
 sudo swift-ring-builder account.builder create 6 2 1
 sudo swift-ring-builder container.builder create 6 2 1
 sudo swift-ring-builder object.builder create 6 2 1
-</code></p>
-
-<p>说明：</p>
+</code>
+说明</p>
 
 <ul>
-<li>第一个数字：6表示分区(环)将被处理为2<sup>6th</sup>，即使用2的6次方个分区，创建完之后应有 64个分区;</li>
-<li>第二个数字：每个存储对象保存2份，即创建2个副本；由于偶只有两台storage，故只写2;</li>
-<li>第三个数字：1表示限制分区数据转移的时间，此处表示1小时，即分区被连续移动两次之间的最小时间间隔;</li>
+<li>第一个数字：6表示分区(环)将被处理为2<sup>6th</sup>，即使用2的6次方个分区，创建完之后应有 64个分区</li>
+<li>第二个数字：每个存储对象保存2份，即创建2个副本；由于偶只有两台storage，故只写2</li>
+<li>第三个数字：1表示限制分区数据转移的时间，此处表示1小时，即分区被连续移动两次之间的最小时间间隔</li>
 </ul>
 
 
@@ -1922,285 +2344,6 @@ sudo /etc/init.d/memcached restart
 
 <p>关于安装与部署，偶暂时写到这里，这只是很简单的一个入门例子而已，下次偶会介绍
 如何制作CentOS5.5、CentOS 6.3及Windows Server 2008的镜像，很多同学因镜像而烦恼。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hyper-V使用手册之部署与安装]]></title>
-    <link href="http://agenge.github.io/blog/2013/03/08/hyper-v-01/"/>
-    <updated>2013-03-08T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/03/08/hyper-v-01</id>
-    <content type="html"><![CDATA[<h2>安装Hyper-V前提条件</h2>
-
-<ul>
-<li>先决条件一：基于Windows Server 2008 64bit的标准版、企业版、数据中心版.</li>
-<li>先决条件二：硬件辅助虚拟化，即只有特定的CPU虚拟化选项，通常Intel 的技术叫：Intel-VT(Vanderpool Technology)，而AMD称为：AMD-V。 通常，绝大部分主板的BIOS在默认情况下未开启VT技术，需要自行进入BIOS修改。</li>
-<li>先决条件三：硬件数据执行保护（DEP. 需要开启，如果CPU支持Windwos Server 2008，默认即开启。</li>
-<li>快速检测系统是否支持虚拟化：</li>
-<li>使用工具securable可轻松检测，三个选项必须全部支持，即全部是绿色的。</li>
-<li>使用工具EVEREST（需要安装. 也可检测CPU是否支持VT，即Menu->Motherboard->CPUID->Virtual Machine Extensions(Vanderpool)，例如下图：</li>
-</ul>
-
-
-<p><img src="/images/2013/03/vtdisabled.png"></p>
-
-<p>表示此计算机不支持VT。</p>
-
-<h2>2、安装Hyper-V及虚拟机</h2>
-
-<h3>2.1 安装Hyper-V</h3>
-
-<p>默认情况下，Windows Server 2008 R2 没有安装Hyper-V相关包，需要手动安装才可使用，过程如下：</p>
-
-<p>点击系统任务栏的“服务器管理器”，在左侧的菜单栏点击角色，这里右侧会相应的显示角色相关信息，在角色摘要下的右边，点击”添加角色”，如：</p>
-
-<p><img src="/images/2013/03/c2-01.png"></p>
-
-<p>点击”添加角色”之后，将会进入“添加角色向导”，点击下一步，在”选择服务器角色”页，勾选Hyper-V，如下图所示：</p>
-
-<p><img src="/images/2013/03/c2-02.png"></p>
-
-<p>默认一直点“下一步”->“安装”，完成后需要重启服务器，如图所示：</p>
-
-<p><img src="/images/2013/03/c2-03.png"></p>
-
-<p>点击“关闭”再确定“重启服务器”就已经完成Hyper-V的安装。如果服务器不支持Hyper-V，则会提示无法安装，如下图所示：</p>
-
-<p><img src="/images/2013/03/c2-04.png"></p>
-
-<h3>2.2 安装虚拟机</h3>
-
-<h4>2.1.1 连接Hyper-V管理器</h4>
-
-<p>安装Hyper-V之后，必然要进行安装虚拟操作系统，即虚拟机，首先打开”服务器管器”(Windows7、8可直接打开Hyper-V管理器,依次展开：角色=>Hyper-V=>Hyper-V管理器，
-在最右边的“操作”面板点击“连接到服务器”，在随即出来的“选择计算机”对话框点击“确定”，如下图所示：</p>
-
-<p><img src="/images/2013/03/c2-05.png"></p>
-
-<ul>
-<li>第一步、新建虚拟机（以下为Win8英文环境. ：
-点击最右侧“Action”栏下面的“New”：</li>
-</ul>
-
-
-<p> <img src="/images/2013/03/c2-06.png"></p>
-
-<p> 点击后将会有3个选择：虚拟机(Virtual Machine)、磁盘(Hard Disk)、软盘(Floppy Disk)，选择“Virtual Machine”进入第二步。</p>
-
-<ul>
-<li>第二步、虚拟机命名：</li>
-</ul>
-
-
-<p> 在”New Virtual Machine Wizard”页的”Name”处键入虚拟机的名称，如MS2008：</p>
-
-<p> <img src="/images/2013/03/c2-07.png"></p>
-
-<p> 点击“Next”。</p>
-
-<ul>
-<li>第三步、内存分配：</li>
-</ul>
-
-
-<p> 在“分配内存”页键入需要的内存，例如输入“1024”：</p>
-
-<p> <img src="/images/2013/03/c2-08.png"></p>
-
-<p> 点击“Next”。</p>
-
-<ul>
-<li>第四步、网络配置：</li>
-</ul>
-
-
-<p> 在“网络配置”页暂时不选择,如下图：</p>
-
-<p> <img src="/images/2013/03/c2-09.png"></p>
-
-<p> 点击“Next”。</p>
-
-<ul>
-<li>第五步、创建虚拟磁盘：</li>
-</ul>
-
-
-<p> <img src="/images/2013/03/c2-10.png"></p>
-
-<p> 创建一个虚拟磁盘</li>
-  * Name:：虚拟磁盘的名字，一个虚拟机可配置多个硬盘，在同一个目录下，虚拟磁盘名字必须唯一；
-  * Location：虚拟磁盘存储位置，默认存放在C盘，点击右侧的“Browser”可自定义虚拟磁盘存储位置；</p>
-
-<p> <strong><em>建议：如果在有条件的环境下，建议将每个虚拟机对应的虚拟磁盘单独放在一个磁盘分区，甚至将每个虚拟磁盘单独存放在单独的磁盘分区。如果条件有限，建议将虚拟磁盘文件尽量放在空闲的系统分区。</em></strong></p>
-
-<ul>
-<li>Size：默认情况下是 127GB，单个虚拟磁盘最大值为64T；</li>
-</ul>
-
-
-<p> 注：此处127GB并不会马上扩展，而是动态扩展，也可自定义大小，最小值依所安装的操作系统而定。
- * 选择一个已存在的虚拟磁盘</li></p>
-
-<p>  <img src="/images/2013/03/c2-11.png"></p>
-
-<p>  <!-- more -->
-  选择已存在的虚拟磁盘，所下图：</p>
-
-<p>  <img src="/images/2013/03/c2-12.png"></p>
-
-<p>  点击“下一步”=>“完成”，开始创建虚拟机。</p>
-
-<ul>
-<li>稍后添加一个虚拟磁盘</li>
-</ul>
-
-
-<p>  选择此选项的原因可能有多方面：</p>
-
-<ul>
-<li> 第一，可能已经存在需要的虚拟磁盘；</li>
-<li><p> 第二，可能计划在此后通过”新建虚拟磁盘向导”自定义创建磁盘，例如创建固定大小的磁盘，而非创建动态虚拟磁盘。</p></li>
-<li><p>第六步、安装虚拟机选项：</p></li>
-</ul>
-
-
-<p> 此处共3个选项：</p>
-
-<ul>
-<li>稍后安装操作系统：在完成创建虚拟机后选择引导方式.</li>
-<li>从CD/DVD-ROM引导并安装操作系统，可分两种方式引导.</li>
-<li>Media：通过物理CD/DVD引导.</li>
-<li>Image file(.iso)：通过镜像文件引导操作系统，即.ISO文件.</li>
-</ul>
-
-
-<p> <img src="/images/2013/03/c2-131.png"></p>
-
-<ul>
-<li><p>从软盘引导并安装操作系统: 不过多介绍，现在几乎不用此方式，也不推荐使用.</p></li>
-<li><p>第七步、完成创建虚拟机向导，即摘要：</p></li>
-</ul>
-
-
-<p> <img src="/images/2013/03/c2-14.png"></p>
-
-<p> 点击“Finish”开始创建，此时可看到整个过程的执行进度，创建完成后可在Hyper-V管理器中看到刚才创建的虚拟机“MS2008”：</p>
-
-<p> <img src="/images/2013/03/c2-15.png"></p>
-
-<h4>2.1.2 连接并创建虚拟机</h4>
-
-<p>连接刚才所创建的虚拟机，并启动及引导安装操作系统，连接虚拟机方式：</p>
-
-<ul>
-<li><p>双击要启动的虚拟机；</p></li>
-<li><p>点击Hyper-V管理器右下方的Connect；</p></li>
-</ul>
-
-
-<p><img src="/images/2013/03/c2-16.png"></p>
-
-<p>点击
-<img src="/images/2013/03/c2-17.png">
-即可启动引导安装操作系统，之后的操作系统安装步骤本文不做介绍同，如有需要，请自行到网络上查找。</p>
-
-<h2>3. Hyper-V网络管理</h2>
-
-<p>在默认情况下，新建的虚拟机无法连接网络，那要如何配置才能上网？ 在介绍之前先说下Hyper-V的三种网络类型：</p>
-
-<p>在Hyper-V中，有3种不同的网络配置方式(本例主要介绍 External 类型，其他类型请读者自行测试)：</p>
-
-<ol>
-<li><p>External：让虚拟机与外部的网络连通，即使用单独的IP地址；</p></li>
-<li><p>Internal：让多台虚拟机之间内部连通，也可通过VLan将多个网络隔开；</p></li>
-<li><p>Private：独立的网络，不与任何外部网络连接；</p></li>
-</ol>
-
-
-<p><em><em>_注意：由于在创建虚拟网络过程中，会导致服务器的网络暂时中断不到1分钟，故在创建虚拟网络之前，一定要确保是在服务器本地操作，远程桌面连接的同学一定要注意。</em>)</em></p>
-
-<p>创建External 网络类型示例如下：</p>
-
-<ol>
-<li>在Hyper-V管理器主界面的右边的”Virtual Switch Manager”之后，出现如下图：</li>
-</ol>
-
-
-<p> <img src="/images/2013/03/c3-01.png"></p>
-
-<ol>
-<li>选中(默认)“External”后，点击“Create Virtual Switch”，如下所示：</li>
-</ol>
-
-
-<p> <img src="/images/2013/03/c3-02.png"></p>
-
-<p> 这里有两个地方需要注意：</p>
-
-<ul>
-<li><p>“Name”可以自定义，示例中叫：MyExternal。</p></li>
-<li><p>在外部网络(External network)选项下面点击图中第二个红色框的下拉菜单选择具体的网卡，</p></li>
-</ul>
-
-
-<p> 点击“Apply”，再点击“Yes”(点击Yes之前，请仔细阅读本章开始处的提醒)，开始创建虚拟网络，
-在创建完之后，点击“Ok”即完成创建虚拟网络的整个过程。</p>
-
-<h2>3、Hyper-V 存储设置</h2>
-
-<p>对于虚拟机来说，存储的设计及设置无疑成为了Hyper-V管理员最为头疼的问题，存储的设置好与坏直接决定着虚拟机的性能，甚至整个虚拟化项目的性能。本节主要从两方面介绍磁盘创建和管理相关设置。</p>
-
-<h3>3.1 磁盘管理</h3>
-
-<p>在Hyper-V管理器主界面点击“编辑磁盘”，在弹出的“编辑虚拟磁盘向导”点击浏览，并选择要进行</p>
-
-<p>编辑的虚拟磁盘，如下图所示：</p>
-
-<p><img src="/images/2013/03/c4-01.png"></p>
-
-<p>点击“下一步”后将会有3个选择：</p>
-
-<p><img src="/images/2013/03/c4-02.png"></p>
-
-<p>三个选项的详细介绍如下：</p>
-
-<ol>
-<li>压缩：该选项通过删除从磁盘中删除数据时留下的空白空间来减小虚拟硬盘文件的大小。</li>
-</ol>
-
-
-<p> 这里再通过一个例子来解释一下：假如原来的虚拟磁盘因为种种原因，已经从最开始的20G占用空间增加到60G占用空间，而现在为了节省虚拟机的磁盘空间，要删除约20G的垃圾数据以便留出空间（还有40G数据. ，但删除后，对应的虚拟磁盘文件在宿主机看来并不会因为虚拟机的数据删除而减少空间（还有60G. ，此时就需要通过压缩来减小虚拟磁盘的文件大小，压缩后的大小约为40G。直接点“下一步”=&gt;”完成”，就完成虚拟磁盘的压缩操作。</p>
-
-<ol>
-<li><p>转换：该选项主要是将动态扩展的虚拟磁盘文件转换为固定大小的磁盘文件，该操作是无损的，即转换时不会对虚拟磁盘文件造成任何损坏。点击“下一步”，选择要存储虚拟磁盘文件的名称和具体位置，再点击“完成”。</p></li>
-<li><p>扩展：该选项可扩展虚拟磁盘的容量。这个比较好理解，即在原有的基础上增加虚拟磁盘的大小，例如原来有50G的虚拟磁盘空间不够使用，通过扩展增加到80G或者更多，最大为2T。点击“下一步”，并输入虚拟磁盘空间的大小，最大值为2T。</p></li>
-</ol>
-
-
-<p> 另，为了数据的安全性及虚拟机的稳定性，建议选择在业务空闲时关闭虚拟机操作。如果只是测试，那可随意操作。</p>
-
-<h3>3.2 磁盘创建</h3>
-
-<p>Hyper-V支持两种磁盘类型：虚拟磁盘和物理磁盘，两种磁盘类型的性能不用多说，物理磁盘肯定强过虚拟磁盘N倍，但并不是说虚拟磁盘并无任何优势，虚拟磁盘的优势主要有以下几点：</p>
-
-<ul>
-<li><p>VHD文件类型较多: 固定虚拟磁盘、动态虚拟磁盘及差异虚拟磁盘，可灵活选择。固定和动态
-虚拟磁盘不过多介绍，而差异虚拟磁盘主要存储所关联的父盘修改后的数据。</p></li>
-<li><p>管理简单、维护成本低：随时备份VHD文件、随时迁移VHD文件、可很方便调整VHD文件的大小 ，从而也使得维护成本较低。</p></li>
-</ul>
-
-
-<p>创建虚拟磁盘可通过两种方式：</p>
-
-<ol>
-<li><p>在Hyper-V管理器左面板的服务器节点右击，“新建”=&gt;“硬盘”。</p></li>
-<li><p>点击右面板的“新建”=&gt;“硬盘”，连续单击“下一步”，选择虚拟磁盘类型，”下一步”再选择虚拟磁盘名称和文件存储位置，再次单击“下一步”转到“配置磁盘”，所下图所示：</p></li>
-</ol>
-
-
-<p><img src="/images/2013/03/c4-03.png"></p>
-
-<p>本次先讲到这里，下次将介绍Hyper-V的高级知识，例如动态内存管理、动态迁移等；</p>
 ]]></content>
   </entry>
   

@@ -9,22 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="准备环境 1
-2
-3
-192.168.30.150 proxy server
-192.168.30.151 storage server 192.168.30.152 storage server 网络配置 Proxy 代理节点网络(单网卡) 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12 &hellip;">
+  <meta name="description" content="提示：以下操作均是使用的 swift tempauth认证机制。 获取 Token 1
+curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -94,6 +80,218 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-17T09:51:00+08:00" pubdate data-updated="true">Oct 17<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>提示：以下操作均是使用的 swift tempauth认证机制。</p>
+
+<ul>
+<li>获取 Token</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>* About to connect() to 192.168.30.150 port 8080 (#0)
+</span><span class='line'>*   Trying 192.168.30.150... connected
+</span><span class='line'>&gt; GET /auth/v1.0 HTTP/1.1
+</span><span class='line'>&gt; User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
+</span><span class='line'>&gt; Host: 192.168.30.150:8080
+</span><span class='line'>&gt; Accept: */*
+</span><span class='line'>&gt; X-Storage-User: admin:admin
+</span><span class='line'>&gt; X-Storage-Pass: admin
+</span><span class='line'>&gt; 
+</span><span class='line'>&lt; HTTP/1.1 200 OK
+</span><span class='line'>&lt; X-Storage-Url: http://192.168.30.150:8080/v1/AUTH_admin
+</span><span class='line'>&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&lt; Content-Type: text/html; charset=UTF-8
+</span><span class='line'>&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&lt; Content-Length: 0
+</span><span class='line'>&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
+</span><span class='line'>&lt; 
+</span><span class='line'>* Connection #0 to host 192.168.30.150 left intact
+</span><span class='line'>* Closing connection #0</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<ul>
+<li>Account操作</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -v -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>* About to connect() to 192.168.30.150 port 8080 (#0)
+</span><span class='line'>*   Trying 192.168.30.150... connected
+</span><span class='line'>&gt; HEAD /v1/AUTH_admin HTTP/1.1
+</span><span class='line'>&gt; User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
+</span><span class='line'>&gt; Host: 192.168.30.150:8080
+</span><span class='line'>&gt; Accept: */*
+</span><span class='line'>&gt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&gt; 
+</span><span class='line'>&lt; HTTP/1.1 204 No Content
+</span><span class='line'>&lt; Content-Length: 0
+</span><span class='line'>&lt; Accept-Ranges: bytes
+</span><span class='line'>&lt; X-Timestamp: 1381806617.24083
+</span><span class='line'>&lt; X-Account-Bytes-Used: 0
+</span><span class='line'>&lt; X-Account-Container-Count: 1
+</span><span class='line'>&lt; Content-Type: text/plain; charset=utf-8
+</span><span class='line'>&lt; X-Account-Object-Count: 0
+</span><span class='line'>&lt; Date: Tue, 15 Oct 2013 05:17:23 GMT
+</span><span class='line'>&lt; 
+</span><span class='line'>* Connection #0 to host 192.168.30.150 left intact
+</span><span class='line'>* Closing connection #0</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>Container操作</p>
+
+<ul>
+<li>列出 Contailner</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 5
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806617.24083
+</span><span class='line'>X-Account-Bytes-Used: 0
+</span><span class='line'>X-Account-Container-Count: 1
+</span><span class='line'>Content-Type: text/plain; charset=utf-8
+</span><span class='line'>X-Account-Object-Count: 0
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:20:11 GMT
+</span><span class='line'>
+</span><span class='line'>test</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 最后一行的test就是查询出来的内容。</p>
+
+<ul>
+<li>创建 Container</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile</span></code></pre></td></tr></table></div></figure>
+
+
+<p>   如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Content-Length: 0
+</span><span class='line'>Content-Type: text/html; charset=UTF-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:22:01 GMT</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  我们再来查询一次看是否成功：</p>
+
+<p>  </div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/17/use-the-curl-operation-swift/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1442,222 +1640,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/06/12/openstack_install_with_deploy_for_folsom/">Openstack安装与部署(Folsom)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-12T00:00:00+08:00" pubdate data-updated="true">Jun 12<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>前言</h1>
-
-<p>近2、3年来，云计算是一个比较热门的话题，无论是国外还是国内，众多计算机厂商开始涉足云计算，未来IaaS、SaaS及PaaS都可能将IT行业又推上到一个新的台阶。云计算谈得最多的IaaS要数 OpenStack，本文主要记录偶试
-验的安装步骤，当然，参考了N多网友的博文，具有代表性的可能就是 <a href="http://www.stacklab.org/">stacklab</a> 的安装教程，以下就是具体安装步骤：</p>
-
-<h2>环境准备</h2>
-
-<p> ### 资源列表</p>
-
-<table width="582" border="0" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">IP
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">主机名
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">OS
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">CPU
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">内存
-</td>
-<td nowrap="nowrap" width="168">
-<p align="center">备注
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">192.168.30.73
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">control-01
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">Ubuntu 12.10
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">i5
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">16G
-</td>
-<td nowrap="nowrap" width="168">
-<p align="center">keystone、glance、cinder、nova-api、nova-scheduler
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">192.168.30.74
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">compute-01
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">Ubuntu 12.10
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">i5
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">16G
-</td>
-<td rowspan="3" nowrap="nowrap" width="168">
-<p align="center">nova-compute、nova-network、nova-api-metadata
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">192.168.30.75
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">compute-02
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">Ubuntu 12.10
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">i5
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">16G
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117"></td>
-<td nowrap="nowrap" width="88"></td>
-<td nowrap="nowrap" width="87"></td>
-<td nowrap="nowrap" width="70"></td>
-<td nowrap="nowrap" width="52"></td>
-</tr>
-</tbody>
-</table>
-
-
-<h3>网络配置</h3>
-
-<ol>
-<li><p>在配置之前需要注意，如果你的网卡名称有叫非ethX，例如p1p1，就得按以下步骤修改：</p>
-
-<pre><code> cd /etc/udev/rules.d/
- cp 70-persistent-net.rules 70-persistent-net.rules.bak
- ip a
-</code></pre>
-
-<p>可看到p1p1的MAC地址，如<strong>d4:3d:7e:57:a4:d4</strong>，将文件70-persistent-net.rules的：
-     ATTR{address}==&ldquo;ec:88:8f:ea:c4:eb&rdquo;
-修改为：
-     ATTR{address}==&ldquo;d4:3d:7e:57:a4:d4&rdquo;</p></li>
-</ol>
-
-
-<p> NAME=&ldquo;eth1&rdquo; 修改为:NAME=&ldquo;eth2&rdquo; 或 NAME=&ldquo;eth0&#8221;，只要不和已存在的冲突即可，例如此示例中，本身已经存在一块叫： eth1的网卡，那另外一块就改成eth2。修改之后需要重启服务器。
-所有节点配置如下（需要修改每个节点对应的IP）：</p>
-
-<pre><code>    cat /etc/network/interfaces
-    # This file describes the network interfaces available on your system
-    # and how to activate them. For more information, see interfaces(5).
-    # The loopback network interface
-    auto lo
-    iface lo inet loopback
-
-    # The primary network interface
-    auto eth1
-    iface eth1 inet static
-    address 192.168.30.75
-    netmask 255.255.255.0
-    network 192.168.30.0
-    broadcast 192.168.30.255
-    gateway 192.168.30.1
-    # dns-* options are implemented by the resolvconf package, if installed
-    dns-nameservers 218.201.4.3
-
-    auto eth2
-    iface eth2 inet static
-    address 10.10.0.75
-    netmask 255.255.0.0
-</code></pre>
-
-<p> 上面2个IP地址需要根据您的具体情况修改。
-2. 重启网络</p>
-
-<pre><code>     /etc/init.d/networking restart
-</code></pre>
-
-<ol>
-<li><p>IP转发</p>
-
-<pre><code> sudo su -
- sed -i -r 's/^s*#(net.ipv4.ip_forward=1.*)/1/' /etc/sysctl.conf
- echo 1 &gt; /proc/sys/net/ipv4/ip_forward
- sysctl -p
- net.ipv4.ip_forward = 1
-</code></pre></li>
-<li>更新源</li>
-</ol>
-
-
-<p> 在所有节点的/etc/apt/source.list 加入以下信息：</p>
-
-<pre><code>    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
-    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
-</code></pre>
-
-<p> 然后执行：</p>
-
-<pre><code>    gpg --keyserver keyserver.ubuntu.com --recv EC4926EA
-    gpg --export --armor EC4926EA | sudo apt-key add -
-    sudo apt-get update
-</code></pre>
-
-<p> 如果报错，请参考<a href="http://blog.csdn.net/wche1990/article/details/6759422">这里</a>.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/06/12/openstack_install_with_deploy_for_folsom/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1673,6 +1655,10 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
       </li>
     
@@ -1686,10 +1672,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
     
       <li class="post">
         <a href="/blog/2013/10/08/redis-install-and-config/">Redis安装与配置</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
       </li>
     
   </ul>

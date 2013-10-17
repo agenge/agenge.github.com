@@ -9,7 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="上次偶写了一篇Zabbix 源码安装与配置 ，安装之后默认是无法监控客户端主机滴，所以偶今天专门写篇文章来介绍Zabbix配置，主要涉及到：添加主机、邮件报警及一些常见的操作流程，希望对初学者有所帮助。 监控机 通在安装Zabbix之后，还需要在Web管理控制台添加需要监控的主机， &hellip;">
+  <meta name="description" content="前言 近2、3年来，云计算是一个比较热门的话题，无论是国外还是国内，众多计算机厂商开始涉足云计算，未来IaaS、SaaS及PaaS都可能将IT行业又推上到一个新的台阶。云计算谈得最多的IaaS要数 OpenStack，本文主要记录偶试
+验的安装步骤，当然，参考了N多网友的博文，具有代表性的可能就是 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +80,222 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/12/openstack_install_with_deploy_for_folsom/">Openstack安装与部署(Folsom)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-12T00:00:00+08:00" pubdate data-updated="true">Jun 12<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<p>近2、3年来，云计算是一个比较热门的话题，无论是国外还是国内，众多计算机厂商开始涉足云计算，未来IaaS、SaaS及PaaS都可能将IT行业又推上到一个新的台阶。云计算谈得最多的IaaS要数 OpenStack，本文主要记录偶试
+验的安装步骤，当然，参考了N多网友的博文，具有代表性的可能就是 <a href="http://www.stacklab.org/">stacklab</a> 的安装教程，以下就是具体安装步骤：</p>
+
+<h2>环境准备</h2>
+
+<p> ### 资源列表</p>
+
+<table width="582" border="0" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">IP
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">主机名
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">OS
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">CPU
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">内存
+</td>
+<td nowrap="nowrap" width="168">
+<p align="center">备注
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.73
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">control-01
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+<td nowrap="nowrap" width="168">
+<p align="center">keystone、glance、cinder、nova-api、nova-scheduler
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.74
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">compute-01
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+<td rowspan="3" nowrap="nowrap" width="168">
+<p align="center">nova-compute、nova-network、nova-api-metadata
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117">
+<p align="center">192.168.30.75
+</td>
+<td nowrap="nowrap" width="88">
+<p align="center">compute-02
+</td>
+<td nowrap="nowrap" width="87">
+<p align="center">Ubuntu 12.10
+</td>
+<td nowrap="nowrap" width="70">
+<p align="center">i5
+</td>
+<td nowrap="nowrap" width="52">
+<p align="center">16G
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="117"></td>
+<td nowrap="nowrap" width="88"></td>
+<td nowrap="nowrap" width="87"></td>
+<td nowrap="nowrap" width="70"></td>
+<td nowrap="nowrap" width="52"></td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>网络配置</h3>
+
+<ol>
+<li><p>在配置之前需要注意，如果你的网卡名称有叫非ethX，例如p1p1，就得按以下步骤修改：</p>
+
+<pre><code> cd /etc/udev/rules.d/
+ cp 70-persistent-net.rules 70-persistent-net.rules.bak
+ ip a
+</code></pre>
+
+<p>可看到p1p1的MAC地址，如<strong>d4:3d:7e:57:a4:d4</strong>，将文件70-persistent-net.rules的：
+     ATTR{address}==&ldquo;ec:88:8f:ea:c4:eb&rdquo;
+修改为：
+     ATTR{address}==&ldquo;d4:3d:7e:57:a4:d4&rdquo;</p></li>
+</ol>
+
+
+<p> NAME=&ldquo;eth1&rdquo; 修改为:NAME=&ldquo;eth2&rdquo; 或 NAME=&ldquo;eth0&#8221;，只要不和已存在的冲突即可，例如此示例中，本身已经存在一块叫： eth1的网卡，那另外一块就改成eth2。修改之后需要重启服务器。
+所有节点配置如下（需要修改每个节点对应的IP）：</p>
+
+<pre><code>    cat /etc/network/interfaces
+    # This file describes the network interfaces available on your system
+    # and how to activate them. For more information, see interfaces(5).
+    # The loopback network interface
+    auto lo
+    iface lo inet loopback
+
+    # The primary network interface
+    auto eth1
+    iface eth1 inet static
+    address 192.168.30.75
+    netmask 255.255.255.0
+    network 192.168.30.0
+    broadcast 192.168.30.255
+    gateway 192.168.30.1
+    # dns-* options are implemented by the resolvconf package, if installed
+    dns-nameservers 218.201.4.3
+
+    auto eth2
+    iface eth2 inet static
+    address 10.10.0.75
+    netmask 255.255.0.0
+</code></pre>
+
+<p> 上面2个IP地址需要根据您的具体情况修改。
+2. 重启网络</p>
+
+<pre><code>     /etc/init.d/networking restart
+</code></pre>
+
+<ol>
+<li><p>IP转发</p>
+
+<pre><code> sudo su -
+ sed -i -r 's/^s*#(net.ipv4.ip_forward=1.*)/1/' /etc/sysctl.conf
+ echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+ sysctl -p
+ net.ipv4.ip_forward = 1
+</code></pre></li>
+<li>更新源</li>
+</ol>
+
+
+<p> 在所有节点的/etc/apt/source.list 加入以下信息：</p>
+
+<pre><code>    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+</code></pre>
+
+<p> 然后执行：</p>
+
+<pre><code>    gpg --keyserver keyserver.ubuntu.com --recv EC4926EA
+    gpg --export --armor EC4926EA | sudo apt-key add -
+    sudo apt-get update
+</code></pre>
+
+<p> 如果报错，请参考<a href="http://blog.csdn.net/wche1990/article/details/6759422">这里</a>.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/06/12/openstack_install_with_deploy_for_folsom/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1163,69 +1380,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/01/26/win8_plsql_conn_oracle/">Win8通过PLSQL连接Oracle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-26T00:00:00+08:00" pubdate data-updated="true">Jan 26<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>偶一直比较喜欢新产品并很愿意去尝试，虽说特喜欢Linux，但Win8正式版发布后，立即将公司的笔记本第一时间从Ubuntu 10.04迁移到Win8 64位企业版，本文不介绍Win8、不介绍安装Oracle11g，而是记录偶在Win8系统通过PL/SQL连接Oracle的经过，以便于各位看客少走弯路，此问题折腾偶整整一天，费话就此打住，开始：</p>
-
-<ol>
-<li><p>首先您得安装一个Oracle 11g 64位，建议只安装数据库软件，不创建数据库实例，偶安装后的路径：E:\app\agen\product\11.2.0\dbhome_1Oracle database 11g For Windows 共有2安装包，下载地址：<a href="http://download.oracle.com/otn/nt/oracle11g/112010/win64_11gR2_database_1of2.zip" title="iso1">iso1</a>  | <a href="http://download.oracle.com/otn/nt/oracle11g/112010/win64_11gR2_database_2of2.zip" title="iso2">iso2</a></p></li>
-<li><p>必须再安装一个Oracle 11g 32位的客户端，下载地址：<a href="http://download.oracle.com/otn/nt/instantclient/112010/instantclient-basic-win32-11.2.0.1.0.zip" title="instantclient-basic">instantclient-basic-win32-11.2.0.1.0</a>将 instantclient_11_2 解压到：E:\app\agen\product，并把 tnsnames.ora 复制到instantclient_11_2下；</p></li>
-<li><p>安装PL/SQL DEV，安装包、注册码及汉化包，请见：<a href="http://www.oracle.com.cn/viewthread.php?tid=158668" title="PLSQL DEV +注册机 + 汉">PL/SQL Dev + 注册机 + 官方简体中文</a>，安装后，在登录时选择取消，弹出PLSQL DEV的界面，选择：“工具”-&gt;“首选项”，分别设置如下：</p></li>
-<li><p>Oracle 主目录名：E:\app\agen\product\instantclient_11_2</p></li>
-<li><p>OCI库：E:\app\agen\product\instantclient_11_2\oci.dll</p></li>
-</ol>
-
-
-<p> 点击“应用”->“确定”，并关闭PL/SQL。</p>
-
-<ol>
-<li>设置环境变量：</li>
-<li>在系统环境变量，选择“Path”，点击“编辑”，在最前面加入以下路径：E:\app\agen\product\instantclient_11_2，并确认。</li>
-<li>新建变量名称：TNS_ADMIN， 变量值：E:\app\agen\product\instantclient_11_2(因为我们的tnsnames.ora在这里啦)。</li>
-<li>新建变量名称：NLS_LANG， 变量值：SIMPLIFIED CHINESE_CHINA.ZHS16GBK</li>
-</ol>
-
-
-<p> 请注意,此变量值通过以下SQL语句在数据库服务器得到：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>SELECT userenv(‘language’) nls_lang FROM dual;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后启动PLSQL，如果您所有步骤顺利通过，就可连接到数据库。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1243,6 +1397,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
       </li>
     
@@ -1256,10 +1414,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
     
       <li class="post">
         <a href="/blog/2013/10/08/redis-install-and-config/">Redis安装与配置</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a>
       </li>
     
   </ul>

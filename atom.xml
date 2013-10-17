@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-15T14:33:08+08:00</updated>
+  <updated>2013-10-17T11:57:24+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,559 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[使用Curl操作OpenStack Swift]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift/"/>
+    <updated>2013-10-17T09:51:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift</id>
+    <content type="html"><![CDATA[<p>提示：以下操作均是使用的 swift tempauth认证机制。</p>
+
+<ul>
+<li>获取 Token</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>* About to connect() to 192.168.30.150 port 8080 (#0)
+</span><span class='line'>*   Trying 192.168.30.150... connected
+</span><span class='line'>&gt; GET /auth/v1.0 HTTP/1.1
+</span><span class='line'>&gt; User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
+</span><span class='line'>&gt; Host: 192.168.30.150:8080
+</span><span class='line'>&gt; Accept: */*
+</span><span class='line'>&gt; X-Storage-User: admin:admin
+</span><span class='line'>&gt; X-Storage-Pass: admin
+</span><span class='line'>&gt; 
+</span><span class='line'>&lt; HTTP/1.1 200 OK
+</span><span class='line'>&lt; X-Storage-Url: http://192.168.30.150:8080/v1/AUTH_admin
+</span><span class='line'>&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&lt; Content-Type: text/html; charset=UTF-8
+</span><span class='line'>&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&lt; Content-Length: 0
+</span><span class='line'>&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
+</span><span class='line'>&lt; 
+</span><span class='line'>* Connection #0 to host 192.168.30.150 left intact
+</span><span class='line'>* Closing connection #0</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<ul>
+<li>Account操作</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -v -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>* About to connect() to 192.168.30.150 port 8080 (#0)
+</span><span class='line'>*   Trying 192.168.30.150... connected
+</span><span class='line'>&gt; HEAD /v1/AUTH_admin HTTP/1.1
+</span><span class='line'>&gt; User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
+</span><span class='line'>&gt; Host: 192.168.30.150:8080
+</span><span class='line'>&gt; Accept: */*
+</span><span class='line'>&gt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
+</span><span class='line'>&gt; 
+</span><span class='line'>&lt; HTTP/1.1 204 No Content
+</span><span class='line'>&lt; Content-Length: 0
+</span><span class='line'>&lt; Accept-Ranges: bytes
+</span><span class='line'>&lt; X-Timestamp: 1381806617.24083
+</span><span class='line'>&lt; X-Account-Bytes-Used: 0
+</span><span class='line'>&lt; X-Account-Container-Count: 1
+</span><span class='line'>&lt; Content-Type: text/plain; charset=utf-8
+</span><span class='line'>&lt; X-Account-Object-Count: 0
+</span><span class='line'>&lt; Date: Tue, 15 Oct 2013 05:17:23 GMT
+</span><span class='line'>&lt; 
+</span><span class='line'>* Connection #0 to host 192.168.30.150 left intact
+</span><span class='line'>* Closing connection #0</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>Container操作</p>
+
+<ul>
+<li>列出 Contailner</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 5
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806617.24083
+</span><span class='line'>X-Account-Bytes-Used: 0
+</span><span class='line'>X-Account-Container-Count: 1
+</span><span class='line'>Content-Type: text/plain; charset=utf-8
+</span><span class='line'>X-Account-Object-Count: 0
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:20:11 GMT
+</span><span class='line'>
+</span><span class='line'>test</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 最后一行的test就是查询出来的内容。</p>
+
+<ul>
+<li>创建 Container</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile</span></code></pre></td></tr></table></div></figure>
+
+
+<p>   如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Content-Length: 0
+</span><span class='line'>Content-Type: text/html; charset=UTF-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:22:01 GMT</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  我们再来查询一次看是否成功：</p>
+
+<p>  <!-- more --></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 12
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806617.24083
+</span><span class='line'>X-Account-Bytes-Used: 0
+</span><span class='line'>X-Account-Container-Count: 2
+</span><span class='line'>Content-Type: text/plain; charset=utf-8
+</span><span class='line'>X-Account-Object-Count: 0
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:23:18 GMT
+</span><span class='line'>
+</span><span class='line'>myfile
+</span><span class='line'>test</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li> 只列出部分 Container</li>
+</ul>
+
+
+<p>  很多时候 Container 会有很多个，Swift 默认会列出前10000个，但如果我们只看最前面几个，该怎么办？ 以下示例只显示最前面一个 Container</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?limit=1</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p> 结果：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 7
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806617.24083
+</span><span class='line'>X-Account-Bytes-Used: 0
+</span><span class='line'>X-Account-Container-Count: 2
+</span><span class='line'>Content-Type: text/plain; charset=utf-8
+</span><span class='line'>X-Account-Object-Count: 0
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:24:36 GMT
+</span><span class='line'>  
+</span><span class='line'>myfile</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  那如果要列出最后几个 Container 又怎么办呢？ 加一个 marker即可，以下示例列出 myfile之后的一个Container</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?marker=myfile\&limit=1</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 5
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806617.24083
+</span><span class='line'>X-Account-Bytes-Used: 0
+</span><span class='line'>X-Account-Container-Count: 2
+</span><span class='line'>Content-Type: text/plain; charset=utf-8
+</span><span class='line'>X-Account-Object-Count: 0
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:28:53 GMT
+</span><span class='line'>
+</span><span class='line'>test</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>格式化输出 Container</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?format=json</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 86
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806617.24083
+</span><span class='line'>X-Account-Bytes-Used: 0
+</span><span class='line'>X-Account-Container-Count: 2
+</span><span class='line'>Content-Type: application/json; charset=utf-8
+</span><span class='line'>X-Account-Object-Count: 0
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:29:58 GMT
+</span><span class='line'>
+</span><span class='line'>[{"count": 0, "bytes": 0, "name": "myfile"}, {"count": 0, "bytes": 0, "name": "test"}]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  除了JSON格式，还可以格式化XML，只需要将json改成xml 即可。</p>
+
+<ul>
+<li>查看 Container metadata</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 204 No Content
+</span><span class='line'>Content-Length: 0
+</span><span class='line'>X-Container-Object-Count: 0
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381806903.70007
+</span><span class='line'>X-Container-Bytes-Used: 0
+</span><span class='line'>Content-Type: text/plain; charset=utf-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:32:06 GMT</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>删除 Container</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/mytest</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>Object操作</p>
+
+<ul>
+<li>创建 Object</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -i -X PUT -T "apache-tomcat-6.0.36.tgz" -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 100 Continue
+</span><span class='line'>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
+</span><span class='line'>Content-Length: 0
+</span><span class='line'>Etag: 3dde098fd0b3a08d3f2867e4a95591ba
+</span><span class='line'>Content-Type: text/html; charset=UTF-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:39:08 GMT</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>列出  Object</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 25
+</span><span class='line'>X-Container-Object-Count: 1
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>X-Timestamp: 1381814521.71796
+</span><span class='line'>X-Container-Bytes-Used: 6780936
+</span><span class='line'>Content-Type: text/plain; charset=utf-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:40:43 GMT
+</span><span class='line'>
+</span><span class='line'>apache-tomcat-6.0.36.tgz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外 Object和 Container一样可以通过加参数来限制查询，具体示例可参考 Container操作。</p>
+
+<ul>
+<li>下载 Object</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz &gt; apache-tomcat-6.0.36.tgz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+</span><span class='line'>                                 Dload  Upload   Total   Spent    Left  Speed
+</span><span class='line'>100 6622k  100 6622k    0     0  32.8M      0 --:--:-- --:--:-- --:--:-- 33.1M</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Copy Object</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
+</span><span class='line'> -H 'X-Copy-From: /myfile/apache-tomcat-6.0.36.tgz' \
+</span><span class='line'> -H 'Content-Length:0' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz </span></code></pre></td></tr></table></div></figure>
+
+
+<p>将/myfile/apache-tomcat-6.0.36.tgz 拷贝到 /test/apache-tomcat-6.0.36.tgz,如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Content-Length: 0
+</span><span class='line'>X-Copied-From-Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
+</span><span class='line'>X-Copied-From: myfile/apache-tomcat-6.0.36.tgz
+</span><span class='line'>Last-Modified: Tue, 15 Oct 2013 05:47:52 GMT
+</span><span class='line'>Etag: 3dde098fd0b3a08d3f2867e4a95591ba
+</span><span class='line'>Content-Type: text/html; charset=UTF-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:47:52 GMT</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>删除 Object</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 204 No Content
+</span><span class='line'>Content-Length: 0
+</span><span class='line'>Content-Type: text/html; charset=UTF-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:50:49 GMT</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 通过之前的GET就能验证是否成功删除，此处略过。</p>
+
+<ul>
+<li>设置 Object Metadata</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -i -X POST -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
+</span><span class='line'>-H 'X-Object-Meta-Breed: apache tomcat 6.0.36' \
+</span><span class='line'> http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正确，将会返回以下类似信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 202 Accepted
+</span><span class='line'>Content-Length: 76
+</span><span class='line'>Content-Type: text/html; charset=UTF-8
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:54:09 GMT</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过之前的HEAD，就能查看到刚才添加的元数据</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Length: 6780936
+</span><span class='line'>X-Object-Meta-Breed: apache tomcat 6.0.36
+</span><span class='line'>Accept-Ranges: bytes
+</span><span class='line'>Last-Modified: Tue, 15 Oct 2013 05:54:08 GMT
+</span><span class='line'>Etag: 3dde098fd0b3a08d3f2867e4a95591ba
+</span><span class='line'>X-Timestamp: 1381816448.74507
+</span><span class='line'>Content-Type: application/x-tar
+</span><span class='line'>Date: Tue, 15 Oct 2013 05:55:53 GMT</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[OpenStack Swift安装与配置]]></title>
@@ -387,12 +940,12 @@
 </span><span class='line'>sudo swift-ring-builder object.builder create 6 2 1</span></code></pre></td></tr></table></div></figure>
 
 
-<p>说明：</p>
+<p>说明</p>
 
 <ul>
-<li>第一个数字：6表示分区(环)将被处理为2<sup>6th</sup>，即使用2的6次方个分区，创建完之后应有 64个分区;</li>
-<li>第二个数字：每个存储对象保存2份，即创建2个副本；由于偶只有两台storage，故只写2;</li>
-<li>第三个数字：1表示限制分区数据转移的时间，此处表示1小时，即分区被连续移动两次之间的最小时间间隔;</li>
+<li>第一个数字：6表示分区(环)将被处理为2<sup>6th</sup>，即使用2的6次方个分区，创建完之后应有 64个分区</li>
+<li>第二个数字：每个存储对象保存2份，即创建2个副本；由于偶只有两台storage，故只写2</li>
+<li>第三个数字：1表示限制分区数据转移的时间，此处表示1小时，即分区被连续移动两次之间的最小时间间隔</li>
 </ul>
 
 
@@ -5579,7 +6132,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#111;&#58;&#116;&#101;&#x73;&#116;&#x5f;&#122;&#x61;&#98;&#98;&#x69;&#120;&#64;&#x67;&#109;&#97;&#105;&#108;&#46;&#99;&#x6f;&#109;">&#x74;&#x65;&#115;&#x74;&#95;&#x7a;&#x61;&#x62;&#x62;&#x69;&#x78;&#x40;&#103;&#x6d;&#97;&#105;&#108;&#46;&#x63;&#111;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#116;&#x65;&#x73;&#116;&#95;&#x7a;&#x61;&#98;&#x62;&#105;&#x78;&#64;&#x67;&#x6d;&#x61;&#105;&#108;&#x2e;&#x63;&#111;&#109;">&#x74;&#101;&#115;&#x74;&#95;&#122;&#x61;&#x62;&#x62;&#x69;&#x78;&#x40;&#x67;&#x6d;&#x61;&#105;&#x6c;&#46;&#99;&#111;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -5938,7 +6491,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <span class='line-number'>53</span>
 <span class='line-number'>54</span>
 <span class='line-number'>55</span>
-<span class='line-number'>56</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>#platform=x86, AMD64, or Intel EM64T
 </span><span class='line'># System authorization information
 </span><span class='line'>auth --useshadow --enablemd5
@@ -5994,7 +6546,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 </span><span class='line'>#@admin-tools
 </span><span class='line'>#@editors
 </span><span class='line'>#key --skip
-</span><span class='line'></span></code></pre></td></tr></table></div></figure>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>所有以井号(#)开头的为注释行.</p>
@@ -6685,7 +7237,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
-<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'># mysql -uroot -p
 </span><span class='line'>Enter password:
 </span><span class='line'>
@@ -6695,7 +7246,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 </span><span class='line'>Query OK, 0 rows affected (0.00 sec)
 </span><span class='line'>mysql&gt; flush privileges;
 </span><span class='line'>Query OK, 0 rows affected (0.00 sec)
-</span><span class='line'></span></code></pre></td></tr></table></div></figure>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>安装Puppet Dashboard</h2>
@@ -6863,11 +7414,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-<span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production db:raw:dump
 </span><span class='line'>mysqldump --add-locks --create-options --disable-keys --extended-insert --quick --set-charset --user=dashboard --password=dashboard dashboard &gt; production.sql.tmp
 </span><span class='line'>mv production.sql.tmp production.sql
-</span><span class='line'></span></code></pre></td></tr></table></div></figure>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p><strong>恢复数据库 </strong></p>
@@ -6925,7 +7475,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <span class='line-number'>45</span>
 <span class='line-number'>46</span>
 <span class='line-number'>47</span>
-<span class='line-number'>48</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/bash
 </span><span class='line'># Description: Puppet Dashboard init.d script
 </span><span class='line'>
@@ -6973,7 +7522,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 </span><span class='line'>esac
 </span><span class='line'>
 </span><span class='line'>exit 0
-</span><span class='line'></span></code></pre></td></tr></table></div></figure>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>使用Passenger运行Puppet Dashboard</h2>
@@ -7993,42 +8542,6 @@ PassengerRuby /usr/bin/ruby
 <p>创建之后，您最好在DOS窗口单独测试下是否能正常运行，如无问题再添加计划任务。</p>
 
 <p>如何增加一个计划任务的具体步骤由于过于简单此不再写出，相信您肯定会添加计划任务，至于任务的调度时间要根据您的需求来定，5分钟也好、5小时也罢，适合您的需求就好，例如本人就是设置的5分钟。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Win8通过PLSQL连接Oracle]]></title>
-    <link href="http://agenge.github.io/blog/2013/01/26/win8_plsql_conn_oracle/"/>
-    <updated>2013-01-26T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/01/26/win8_plsql_conn_oracle</id>
-    <content type="html"><![CDATA[<p>偶一直比较喜欢新产品并很愿意去尝试，虽说特喜欢Linux，但Win8正式版发布后，立即将公司的笔记本第一时间从Ubuntu 10.04迁移到Win8 64位企业版，本文不介绍Win8、不介绍安装Oracle11g，而是记录偶在Win8系统通过PL/SQL连接Oracle的经过，以便于各位看客少走弯路，此问题折腾偶整整一天，费话就此打住，开始：</p>
-
-<ol>
-<li><p>首先您得安装一个Oracle 11g 64位，建议只安装数据库软件，不创建数据库实例，偶安装后的路径：E:\app\agen\product\11.2.0\dbhome_1Oracle database 11g For Windows 共有2安装包，下载地址：<a href="http://download.oracle.com/otn/nt/oracle11g/112010/win64_11gR2_database_1of2.zip" title="iso1">iso1</a>  | <a href="http://download.oracle.com/otn/nt/oracle11g/112010/win64_11gR2_database_2of2.zip" title="iso2">iso2</a></p></li>
-<li><p>必须再安装一个Oracle 11g 32位的客户端，下载地址：<a href="http://download.oracle.com/otn/nt/instantclient/112010/instantclient-basic-win32-11.2.0.1.0.zip" title="instantclient-basic">instantclient-basic-win32-11.2.0.1.0</a>将 instantclient_11_2 解压到：E:\app\agen\product，并把 tnsnames.ora 复制到instantclient_11_2下；</p></li>
-<li><p>安装PL/SQL DEV，安装包、注册码及汉化包，请见：<a href="http://www.oracle.com.cn/viewthread.php?tid=158668" title="PLSQL DEV +注册机 + 汉">PL/SQL Dev + 注册机 + 官方简体中文</a>，安装后，在登录时选择取消，弹出PLSQL DEV的界面，选择：“工具”-&gt;“首选项”，分别设置如下：</p></li>
-<li><p>Oracle 主目录名：E:\app\agen\product\instantclient_11_2</p></li>
-<li><p>OCI库：E:\app\agen\product\instantclient_11_2\oci.dll</p></li>
-</ol>
-
-
-<p> 点击“应用”->“确定”，并关闭PL/SQL。</p>
-
-<ol>
-<li>设置环境变量：</li>
-<li>在系统环境变量，选择“Path”，点击“编辑”，在最前面加入以下路径：E:\app\agen\product\instantclient_11_2，并确认。</li>
-<li>新建变量名称：TNS_ADMIN， 变量值：E:\app\agen\product\instantclient_11_2(因为我们的tnsnames.ora在这里啦)。</li>
-<li>新建变量名称：NLS_LANG， 变量值：SIMPLIFIED CHINESE_CHINA.ZHS16GBK</li>
-</ol>
-
-
-<p> 请注意,此变量值通过以下SQL语句在数据库服务器得到：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>SELECT userenv(‘language’) nls_lang FROM dual;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后启动PLSQL，如果您所有步骤顺利通过，就可连接到数据库。</p>
 ]]></content>
   </entry>
   
