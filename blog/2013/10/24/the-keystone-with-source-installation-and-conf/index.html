@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Keystone 源码安装与配置 - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="Keystone介绍 什么是Keystone？
+Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。 安装依赖包 1
+apt- &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/10/24/the-keystone-with-source-installation-and-conf">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-6520474-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Keystone 源码安装与配置</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-24T09:02:00+08:00" pubdate data-updated="true">Oct 24<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Keystone介绍</h2>
+
+<p>什么是Keystone？
+Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。</p>
+
+<h3>安装依赖包</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y git python-dev sqlite3 libxml2-dev libxslt1-dev libsasl2-dev libsqlite3-dev libssl-dev libldap2-dev</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 下载源码 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone https://github.com/openstack/keystone.git 
+</span><span class='line'>git clone https://github.com/openstack/python-keystoneclient.git keystone/client</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装keystone</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd keystone
+</span><span class='line'>git checkout origin/stable/grizzly
+</span><span class='line'>pip install -r tools/pip-requires
+</span><span class='line'>python setup.py install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装客户端</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd client
+</span><span class='line'>git checkout -b origin/feature/keystone-v3
+</span><span class='line'>pip install -r requirements.txt 
+</span><span class='line'>python setup.py install
+</span><span class='line'>
+</span><span class='line'>cd ../
+</span><span class='line'>mkdir -p /etc/keystone
+</span><span class='line'>cp etc/keystone.conf.sample /etc/keystone/keystone.conf
+</span><span class='line'>cp etc/logging.conf.sample /etc/keystone/logging.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 配置日志存放路径 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /var/log/keystone
+</span><span class='line'>touch /var/log/keystone/keystone.log </span></code></pre></td></tr></table></div></figure>
+
+
+<p>数据库同步，即创建keystone相关的数据库表</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone-manage db_sync</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone-all -d &</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<h2>配置Keytone</h2>
+
+<p>截止到现在，我们已经完成Keystone的安装，但现在还无法使用，因为没有租户、用户、密码、服务等。</p>
+
+<p>为使用方便，先设置两个环境变量</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export OS_SERVICE_TOKEN=ADMIN
+</span><span class='line'>export SERVICE_ENDPOINT=http://192.168.30.150:35357/v2.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果前面安装没问题的话，使用以下命令查看用户列表，默认是没有任何数据返回</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-list</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>创建租户</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone tenant-create --name adminTenant --description "Admin Tenant" --enabled true
+</span><span class='line'>+-------------+----------------------------------+
+</span><span class='line'>|   Property  |              Value               |
+</span><span class='line'>+-------------+----------------------------------+
+</span><span class='line'>| description |           Admin Tenant           |
+</span><span class='line'>|   enabled   |               True               |
+</span><span class='line'>|      id     | e36e42a5ed264317a7a5119b1f513e32 |
+</span><span class='line'>|     name    |           adminTenant            |
+</span><span class='line'>+-------------+----------------------------------+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要记录 tenant id，在创建用户时需要关联，即将用户关联到哪个租户。</p>
+
+<ol>
+<li>创建用户</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create --tenant_id e36e42a5ed264317a7a5119b1f513e32 --name admin --pass openstack --enabled true
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>| Property |              Value               |
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>|  email   |                                  |
+</span><span class='line'>| enabled  |               True               |
+</span><span class='line'>|    id    | 8cc6ddbeab504e2b9e8bf30eff3d92b7 |
+</span><span class='line'>|   name   |              admin               |
+</span><span class='line'>| tenantId | e36e42a5ed264317a7a5119b1f513e32 |
+</span><span class='line'>+----------+----------------------------------+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>创建角色</li>
+</ol>
+
+
+<p>创建一个角色名称为adminRole。请记住该命令生成的Role id，下面的关联用户及租户时需要用到</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone role-create --name adminRole
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>| Property |              Value               |
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>|    id    | a00bf7b7fe4e4746bac0fd69778f3dfa |
+</span><span class='line'>|   name   |            adminRole             |
+</span><span class='line'>+----------+----------------------------------+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>截止到目前，已经分别创建 Tenant、User、Role，分别是：</p>
+
+<p>Tenant ID:  e36e42a5ed264317a7a5119b1f513e32
+User ID:    8cc6ddbeab504e2b9e8bf30eff3d92b7
+Role ID:    a00bf7b7fe4e4746bac0fd69778f3dfa</p>
+
+<p>现在将它们三者关联到一起</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-role-add --user-id 8cc6ddbeab504e2b9e8bf30eff3d92b7 \
+</span><span class='line'> --tenant-id e36e42a5ed264317a7a5119b1f513e32 \
+</span><span class='line'> --role-id a00bf7b7fe4e4746bac0fd69778f3dfa</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Keytone测试</h2>
+
+<h3>通过 Keystone 获取 Token</h3>
+
+<p>访问Keystone 需要4个参数：TenantName Username Password 申请URL，其中URL可以是：</p>
+
+<pre><code>http://192.168.30.150:35357/v2.0/tokens 或 http://192.168.30.150:5000/v2.0/tokens
+</code></pre>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -d '{"auth": {"tenantName": "adminTenant", "passwordCredentials":{"username": "admin", "password": "openstack"}}}' -H "Content-type: application/json" http://192.168.30.150:35357/v2.0/tokens | python -mjson.tool</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将会返回以下类似信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+</span><span class='line'>                                 Dload  Upload   Total   Spent    Left  Speed
+</span><span class='line'>100   676  100   567  100   109   6290   1209 --:--:-- --:--:-- --:--:--  6517
+</span><span class='line'>{
+</span><span class='line'>    "access": {
+</span><span class='line'>        "metadata": {
+</span><span class='line'>            "is_admin": 0, 
+</span><span class='line'>            "roles": [
+</span><span class='line'>                "9fe2ff9ee4384b1894a90878d3e92bab", 
+</span><span class='line'>                "a00bf7b7fe4e4746bac0fd69778f3dfa"
+</span><span class='line'>            ]
+</span><span class='line'>        }, 
+</span><span class='line'>        "serviceCatalog": [], 
+</span><span class='line'>        "token": {
+</span><span class='line'>            "expires": "2013-10-16T09:03:21Z", 
+</span><span class='line'>            "id": "7c76f8315f6e42d6a05b0ed726bc3441", 
+</span><span class='line'>            "issued_at": "2013-10-15T09:03:21.809471", 
+</span><span class='line'>            "tenant": {
+</span><span class='line'>                "description": "Admin Tenant", 
+</span><span class='line'>                "enabled": true, 
+</span><span class='line'>                "id": "e36e42a5ed264317a7a5119b1f513e32", 
+</span><span class='line'>                "name": "adminTenant"
+</span><span class='line'>            }
+</span><span class='line'>        }, 
+</span><span class='line'>        "user": {
+</span><span class='line'>            "id": "8cc6ddbeab504e2b9e8bf30eff3d92b7", 
+</span><span class='line'>            "name": "admin", 
+</span><span class='line'>            "roles": [
+</span><span class='line'>                {
+</span><span class='line'>                    "name": "_member_"
+</span><span class='line'>                }, 
+</span><span class='line'>                {
+</span><span class='line'>                    "name": "adminRole"
+</span><span class='line'>                }
+</span><span class='line'>            ], 
+</span><span class='line'>            "roles_links": [], 
+</span><span class='line'>            "username": "admin"
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>从上述返回结果能看到正常返回 token。更详细的操作请参考<a href="http://agenge.com/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a></p>
+
+<h2>错误汇总</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Traceback (most recent call last):
+</span><span class='line'>   File "/usr/bin/easy_install", line 5, in &lt;module&gt;
+</span><span class='line'>     from pkg_resources import load_entry_point ImportError: No module named pkg_resources raid:/home/linyoujushi# easy_install genshi Traceback (most recent call last):</span></code></pre></td></tr></table></div></figure>
+
+
+<p>解决办法：</p>
+
+<p>这是由于我们没有安装setuptools或者没有装好，我们只需要安装这个软件就行了。安装方法：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://peak.telecommunity.com/dist/ez_setup.py
+</span><span class='line'>python ez_setup.py</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或者，我们装的setuptools工具太老，我们升级一下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo python ./ez_setup.py -U setuptools</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-24T09:02:00+08:00" pubdate data-updated="true">Oct 24<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/openstack/'>OpenStack</a>, <a class='category' href='/blog/categories/yun-ji-suan/'>云计算</a>
+  
+</span>
+
+
+	  
+
+<DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right>
+<DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"></DIV>
+<DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000">
+作者： <A href="http://agenge.com">agenge</A> <BR>
+出处： <A href="http://agenge.com">http://agenge.com</A> 
+<BR>本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
+<a href=mailto:huanggeng.8552@gmail.com> agenge </a>。 </DIV></DIV>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/10/17/use-the-curl-operation-swift/" title="Previous Post: 使用Curl操作OpenStack Swift">&laquo; 使用Curl操作OpenStack Swift</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

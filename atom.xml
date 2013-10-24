@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-17T11:57:24+08:00</updated>
+  <updated>2013-10-24T09:29:31+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,329 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Keystone 源码安装与配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/24/the-keystone-with-source-installation-and-conf/"/>
+    <updated>2013-10-24T09:02:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/24/the-keystone-with-source-installation-and-conf</id>
+    <content type="html"><![CDATA[<h2>Keystone介绍</h2>
+
+<p>什么是Keystone？
+Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。</p>
+
+<h3>安装依赖包</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y git python-dev sqlite3 libxml2-dev libxslt1-dev libsasl2-dev libsqlite3-dev libssl-dev libldap2-dev</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 下载源码 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone https://github.com/openstack/keystone.git 
+</span><span class='line'>git clone https://github.com/openstack/python-keystoneclient.git keystone/client</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装keystone</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd keystone
+</span><span class='line'>git checkout origin/stable/grizzly
+</span><span class='line'>pip install -r tools/pip-requires
+</span><span class='line'>python setup.py install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装客户端</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd client
+</span><span class='line'>git checkout -b origin/feature/keystone-v3
+</span><span class='line'>pip install -r requirements.txt 
+</span><span class='line'>python setup.py install
+</span><span class='line'>
+</span><span class='line'>cd ../
+</span><span class='line'>mkdir -p /etc/keystone
+</span><span class='line'>cp etc/keystone.conf.sample /etc/keystone/keystone.conf
+</span><span class='line'>cp etc/logging.conf.sample /etc/keystone/logging.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 配置日志存放路径 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /var/log/keystone
+</span><span class='line'>touch /var/log/keystone/keystone.log </span></code></pre></td></tr></table></div></figure>
+
+
+<p>数据库同步，即创建keystone相关的数据库表</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone-manage db_sync</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone-all -d &</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<h2>配置Keytone</h2>
+
+<p>截止到现在，我们已经完成Keystone的安装，但现在还无法使用，因为没有租户、用户、密码、服务等。</p>
+
+<p>为使用方便，先设置两个环境变量</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export OS_SERVICE_TOKEN=ADMIN
+</span><span class='line'>export SERVICE_ENDPOINT=http://192.168.30.150:35357/v2.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果前面安装没问题的话，使用以下命令查看用户列表，默认是没有任何数据返回</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-list</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>创建租户</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone tenant-create --name adminTenant --description "Admin Tenant" --enabled true
+</span><span class='line'>+-------------+----------------------------------+
+</span><span class='line'>|   Property  |              Value               |
+</span><span class='line'>+-------------+----------------------------------+
+</span><span class='line'>| description |           Admin Tenant           |
+</span><span class='line'>|   enabled   |               True               |
+</span><span class='line'>|      id     | e36e42a5ed264317a7a5119b1f513e32 |
+</span><span class='line'>|     name    |           adminTenant            |
+</span><span class='line'>+-------------+----------------------------------+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要记录 tenant id，在创建用户时需要关联，即将用户关联到哪个租户。</p>
+
+<ol>
+<li>创建用户</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create --tenant_id e36e42a5ed264317a7a5119b1f513e32 --name admin --pass openstack --enabled true
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>| Property |              Value               |
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>|  email   |                                  |
+</span><span class='line'>| enabled  |               True               |
+</span><span class='line'>|    id    | 8cc6ddbeab504e2b9e8bf30eff3d92b7 |
+</span><span class='line'>|   name   |              admin               |
+</span><span class='line'>| tenantId | e36e42a5ed264317a7a5119b1f513e32 |
+</span><span class='line'>+----------+----------------------------------+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>创建角色</li>
+</ol>
+
+
+<p>创建一个角色名称为adminRole。请记住该命令生成的Role id，下面的关联用户及租户时需要用到</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone role-create --name adminRole
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>| Property |              Value               |
+</span><span class='line'>+----------+----------------------------------+
+</span><span class='line'>|    id    | a00bf7b7fe4e4746bac0fd69778f3dfa |
+</span><span class='line'>|   name   |            adminRole             |
+</span><span class='line'>+----------+----------------------------------+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>截止到目前，已经分别创建 Tenant、User、Role，分别是：</p>
+
+<p>Tenant ID:  e36e42a5ed264317a7a5119b1f513e32
+User ID:    8cc6ddbeab504e2b9e8bf30eff3d92b7
+Role ID:    a00bf7b7fe4e4746bac0fd69778f3dfa</p>
+
+<p>现在将它们三者关联到一起</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-role-add --user-id 8cc6ddbeab504e2b9e8bf30eff3d92b7 \
+</span><span class='line'> --tenant-id e36e42a5ed264317a7a5119b1f513e32 \
+</span><span class='line'> --role-id a00bf7b7fe4e4746bac0fd69778f3dfa</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Keytone测试</h2>
+
+<h3>通过 Keystone 获取 Token</h3>
+
+<p>访问Keystone 需要4个参数：TenantName Username Password 申请URL，其中URL可以是：</p>
+
+<pre><code>http://192.168.30.150:35357/v2.0/tokens 或 http://192.168.30.150:5000/v2.0/tokens
+</code></pre>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -d '{"auth": {"tenantName": "adminTenant", "passwordCredentials":{"username": "admin", "password": "openstack"}}}' -H "Content-type: application/json" http://192.168.30.150:35357/v2.0/tokens | python -mjson.tool</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将会返回以下类似信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+</span><span class='line'>                                 Dload  Upload   Total   Spent    Left  Speed
+</span><span class='line'>100   676  100   567  100   109   6290   1209 --:--:-- --:--:-- --:--:--  6517
+</span><span class='line'>{
+</span><span class='line'>    "access": {
+</span><span class='line'>        "metadata": {
+</span><span class='line'>            "is_admin": 0, 
+</span><span class='line'>            "roles": [
+</span><span class='line'>                "9fe2ff9ee4384b1894a90878d3e92bab", 
+</span><span class='line'>                "a00bf7b7fe4e4746bac0fd69778f3dfa"
+</span><span class='line'>            ]
+</span><span class='line'>        }, 
+</span><span class='line'>        "serviceCatalog": [], 
+</span><span class='line'>        "token": {
+</span><span class='line'>            "expires": "2013-10-16T09:03:21Z", 
+</span><span class='line'>            "id": "7c76f8315f6e42d6a05b0ed726bc3441", 
+</span><span class='line'>            "issued_at": "2013-10-15T09:03:21.809471", 
+</span><span class='line'>            "tenant": {
+</span><span class='line'>                "description": "Admin Tenant", 
+</span><span class='line'>                "enabled": true, 
+</span><span class='line'>                "id": "e36e42a5ed264317a7a5119b1f513e32", 
+</span><span class='line'>                "name": "adminTenant"
+</span><span class='line'>            }
+</span><span class='line'>        }, 
+</span><span class='line'>        "user": {
+</span><span class='line'>            "id": "8cc6ddbeab504e2b9e8bf30eff3d92b7", 
+</span><span class='line'>            "name": "admin", 
+</span><span class='line'>            "roles": [
+</span><span class='line'>                {
+</span><span class='line'>                    "name": "_member_"
+</span><span class='line'>                }, 
+</span><span class='line'>                {
+</span><span class='line'>                    "name": "adminRole"
+</span><span class='line'>                }
+</span><span class='line'>            ], 
+</span><span class='line'>            "roles_links": [], 
+</span><span class='line'>            "username": "admin"
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>从上述返回结果能看到正常返回 token。更详细的操作请参考<a href="http://agenge.com/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a></p>
+
+<h2>错误汇总</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Traceback (most recent call last):
+</span><span class='line'>   File "/usr/bin/easy_install", line 5, in &lt;module&gt;
+</span><span class='line'>     from pkg_resources import load_entry_point ImportError: No module named pkg_resources raid:/home/linyoujushi# easy_install genshi Traceback (most recent call last):</span></code></pre></td></tr></table></div></figure>
+
+
+<p>解决办法：</p>
+
+<p>这是由于我们没有安装setuptools或者没有装好，我们只需要安装这个软件就行了。安装方法：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://peak.telecommunity.com/dist/ez_setup.py
+</span><span class='line'>python ez_setup.py</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或者，我们装的setuptools工具太老，我们升级一下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo python ./ez_setup.py -U setuptools</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用Curl操作OpenStack Swift]]></title>
@@ -6132,7 +6455,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#116;&#x65;&#x73;&#116;&#95;&#x7a;&#x61;&#98;&#x62;&#105;&#x78;&#64;&#x67;&#x6d;&#x61;&#105;&#108;&#x2e;&#x63;&#111;&#109;">&#x74;&#101;&#115;&#x74;&#95;&#122;&#x61;&#x62;&#x62;&#x69;&#x78;&#x40;&#x67;&#x6d;&#x61;&#105;&#x6c;&#46;&#99;&#111;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x74;&#101;&#115;&#116;&#95;&#122;&#x61;&#98;&#x62;&#105;&#120;&#x40;&#103;&#x6d;&#97;&#105;&#108;&#46;&#x63;&#x6f;&#x6d;">&#116;&#101;&#115;&#116;&#95;&#x7a;&#97;&#x62;&#x62;&#x69;&#120;&#x40;&#x67;&#109;&#97;&#x69;&#108;&#46;&#99;&#x6f;&#109;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -8193,355 +8516,6 @@ PassengerRuby /usr/bin/ruby
 <p><img src="http://agenge.github.io/images/2013/03/c4-03.png"></p>
 
 <p>本次先讲到这里，下次将介绍Hyper-V的高级知识，例如动态内存管理、动态迁移等；</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[awstats 安装与配置分析IIS日志]]></title>
-    <link href="http://agenge.github.io/blog/2013/02/04/awstats-install-conf/"/>
-    <updated>2013-02-04T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/02/04/awstats-install-conf</id>
-    <content type="html"><![CDATA[<h2>1、准备环境：</h2>
-
-<ul>
-<li>Windows Server 2003</li>
-<li>IIS 6</li>
-<li>ActivePerl-5.16</li>
-<li>awstats-7.0</li>
-</ul>
-
-
-<h2>2、安装ActivePerl</h2>
-
-<p>安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为：</p>
-
-<p>32位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x86-296513.msi">ActivePerl-5.16.2</a>                    64位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x64-296513.msi">ActivePerl-5.16.2</a></p>
-
-<p>ActivePerl 的具体安装步骤就不再写出，只管点击“下一步”，安装完之后确认是否已经安装Perl，例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>C:\Documents and Settings\Administrator&gt;perl -v
-</span><span class='line'>
-</span><span class='line'>This is perl 5, version 16, subversion 2 (v5.16.2) built for MSWin32-x86-multi-t
-</span><span class='line'>hread
-</span><span class='line'>(with 1 registered patch, see perl -V for more detail)
-</span><span class='line'>
-</span><span class='line'>Copyright 1987-2012, Larry Wall
-</span><span class='line'>
-</span><span class='line'>Binary build 1602 [296513] provided by ActiveState http://www.ActiveState.com
-</span><span class='line'>Built Dec 19 2012 12:35:59
-</span><span class='line'>
-</span><span class='line'>Perl may be copied only under the terms of either the Artistic License or the
-</span><span class='line'>GNU General Public License, which may be found in the Perl 5 source kit.
-</span><span class='line'>
-</span><span class='line'>Complete documentation for Perl, including FAQ lists, should be found on
-</span><span class='line'>this system using "man perl" or "perldoc perl". If you have access to the
-</span><span class='line'>Internet, point your browser at http://www.perl.org/, the Perl Home Page.</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如何没有以上类似信息输出，请确认环境变量是否正确。</p>
-
-<!-- more -->
-
-
-<h2>3、安装awstats</h2>
-
-<p>安装之后就会弹出一个DOS窗口，如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>----- AWStats awstats_configure 1.0 (build 1.9) (c) Laurent Destailleur -----
-</span><span class='line'>This tool will help you to configure AWStats to analyze statistics for
-</span><span class='line'>one web server. You can try to use it to let it do all that is possible
-</span><span class='line'>in AWStats setup, however following the step by step manual setup
-</span><span class='line'>documentation (docs/index.html) is often a better idea. Above all if:
-</span><span class='line'>- You are not an administrator user,
-</span><span class='line'>- You want to analyze downloaded log files without web server,
-</span><span class='line'>- You want to analyze mail or ftp log files instead of web log files,
-</span><span class='line'>- You need to analyze load balanced servers log files,
-</span><span class='line'>- You want to 'understand' all possible ways to use AWStats...
-</span><span class='line'>Read the AWStats documentation (docs/index.html).
-</span><span class='line'>
-</span><span class='line'>-----&gt; Running OS detected: Windows
-</span><span class='line'>
-</span><span class='line'>-----&gt; Check for web server install
-</span><span class='line'>awstats_configure did not find your Apache web main runtime.
-</span><span class='line'>
-</span><span class='line'>Please, enter full directory path of your Apache web server or
-</span><span class='line'>'none' to skip this step if you don't have local web server or
-</span><span class='line'>don't have permission to change its setup.
-</span><span class='line'>Example: c:\Program files\apache group\apache
-</span><span class='line'>Apache Web server path ('none' to skip):
-</span><span class='line'>&gt; none
-</span><span class='line'>
-</span><span class='line'>Your web server config file(s) could not be found.
-</span><span class='line'>You will need to setup your web server manually to declare AWStats
-</span><span class='line'>script as a CGI, if you want to build reports dynamically.
-</span><span class='line'>See AWStats setup documentation (file docs/index.html)
-</span><span class='line'>
-</span><span class='line'>-----&gt; Update model config file 'C:/Program Files/AWStats\wwwroot\cgi-bin\awstat
-</span><span class='line'>s.model.conf'
-</span><span class='line'>File awstats.model.conf updated.
-</span><span class='line'>
-</span><span class='line'>-----&gt; Need to create a new config file ?
-</span><span class='line'>Do you want me to build a new AWStats config/profile
-</span><span class='line'>file (required if first install) [y/N] ? y
-</span><span class='line'>
-</span><span class='line'>-----&gt; Define config file name to create
-</span><span class='line'>What is the name of your web site or profile analysis ?
-</span><span class='line'>Example: www.mysite.com
-</span><span class='line'>Example: demo
-</span><span class='line'>Your web site, virtual server or profile name:
-</span><span class='line'>&gt; yfb.10086.cn
-</span><span class='line'>
-</span><span class='line'>-----&gt; Create config file 'C:/Program Files/AWStats\wwwroot\cgi-bin\awstats.yfb.
-</span><span class='line'>10086.cn.conf'
-</span><span class='line'>Config file C:/Program Files/AWStats\wwwroot\cgi-bin\awstats.yfb.10086.cn.conf
-</span><span class='line'>created.
-</span><span class='line'>
-</span><span class='line'>-----&gt; Add update process inside a scheduler
-</span><span class='line'>Sorry, for Windows users, if you want to have statistics to be
-</span><span class='line'>updated on a regular basis, you have to add the update process
-</span><span class='line'>in a scheduler task manually (See AWStats docs/index.html).
-</span><span class='line'>Press ENTER to continue...      # 按回车
-</span><span class='line'>A SIMPLE config file has been created: C:/Program Files/AWStats\wwwroot\cgi-bin\
-</span><span class='line'>awstats.yfb.10086.cn.conf
-</span><span class='line'>You should have a look inside to check and change manually main parameters.
-</span><span class='line'>You can then manually update your statistics for 'yfb.10086.cn' with command:
-</span><span class='line'>&gt; perl awstats.pl -update -config=yfb.10086.cn
-</span><span class='line'>You can also build static report pages for 'yfb.10086.cn' with command:
-</span><span class='line'>&gt; perl awstats.pl -output=pagetype -config=yfb.10086.cn
-</span><span class='line'>
-</span><span class='line'>Press ENTER to finish...       # 按回车</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>4、awstats 配置</h2>
-
-<h3>4.1 配置日志格式</h3>
-
-<p>右击“yfb.10086.cn”->“属性”，在“网站”选项卡选择“W3C 扩展日志文件格式”，点击“属性”->“高级”，确保以下字段勾选，其他全部取消：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>date
-</span><span class='line'>time
-</span><span class='line'>c-ip
-</span><span class='line'>cs-username
-</span><span class='line'>cs-method
-</span><span class='line'>cs-uri-stem
-</span><span class='line'>cs-uri-query
-</span><span class='line'>sc-status
-</span><span class='line'>sc-bytes
-</span><span class='line'>cs-version
-</span><span class='line'>cs(User-Agent)
-</span><span class='line'>cs(Referer)</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>4.2 建立虚拟目录</h3>
-
-<ul>
-<li><p>建立虚拟目录cgi-bin,在网站节点下点击“yfb.10086.cn”->“新建”->“虚拟目录”，下一步，别名填写：cgi-bin，路径为C:\Program Files\AWStats\wwwroot\cgi-bin，权限设置为：读取、运行脚本、执行；</p></li>
-<li><p>建立虚拟目录icon,在网站节点下点击“yfb.10086.cn”->“新建”->“虚拟目录”，下一步，别名填写：icon，路径为C:\Program Files\AWStats\wwwroot\icon，权限设置为：读取、运行脚本、执行；</p></li>
-</ul>
-
-
-<h3>4.3 修改awstats.domain_name.conf</h3>
-
-<p>例如：awstats.yfb.10086.cn.conf，路径为网站根目录下的cgi-bin，打开awstats.yfb.10086.cn.conf并修改以下几个变量值：</p>
-
-<ul>
-<li>LogFile修改为：LogFile=&ldquo;C:/WINDOWS/system32/LogFiles/W3SVC1237985490/ex%YY-24%MM-24%DD-24.log&#8221;，修改之前确保C:/WINDOWS/system32/LogFiles/W3SVC1237985490 这个路径已经存在。</li>
-<li>LogType 默认值（W）即可，W表示 web log ，S 为流日志，M为邮件日志，F为FTP日志。</li>
-<li>LogFormat 修改为LogFormat=2，表示IIS日志，1表示Apache日志。</li>
-</ul>
-
-
-<p>更新：根据IIS在实际情况下来看，此处设置2仍然无法按照我们之前设置的日志格式打印日志，所以设置成：</span></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>LogFormat="date time cs-method cs-uri-stem cs-username c-ip cs-version cs(User-Agent) cs(Referer) sc-status sc-bytes"</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>AllowToUpdateStatsFromBrowser 设置为1，表示允许从浏览器手动更新，但需要修改日志目录的权限为&#8221;IUSR_XXX&#8221; 读写，设置为0表示只允许从命令行更新；</li>
-<li>将LoadPlugin=&ldquo;timezone +2&#8221;修改为LoadPlugin=&#8221;timezone +8&#8221;，并将最前面的“#”号删除。</li>
-</ul>
-
-
-<h3>4.4 重启IIS</h3>
-
-<p>重启IIS后，并删除C:/WINDOWS/system32/LogFiles/W3SVC1237985490目录下所有的日志。</p>
-
-<h2>5、生成awstats数据</h2>
-
-<h3>5.1 手动生成awstats 数据</h3>
-
-<p>打开一个DOS窗口，并切换到网站根目录/cgi-bin，执行：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&gt;perl awstats.pl -config=yfb.10086.cn -update
-</span><span class='line'>
-</span><span class='line'>Create/Update database for config "./awstats.yfb.10086.cn.conf" by AWStats versi
-</span><span class='line'>on 7.0 (build 1.971)
-</span><span class='line'>From data in log file "C:/WINDOWS/system32/LogFiles/W3SVC1237985490/ex130130.log
-</span><span class='line'>"...
-</span><span class='line'>Phase 1 : First bypass old records, searching new record...
-</span><span class='line'>Searching new records from beginning of log file...
-</span><span class='line'>Phase 2 : Now process new records (Flush history on disk after 20000 hosts)...
-</span><span class='line'>Jumped lines in file: 0
-</span><span class='line'>Parsed lines in file: 84
-</span><span class='line'>Found 0 dropped records,
-</span><span class='line'>Found 4 comments,
-</span><span class='line'>Found 0 blank records,
-</span><span class='line'>Found 0 corrupted records,
-</span><span class='line'>Found 0 old records,
-</span><span class='line'>Found 80 new qualified records.</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果报以下错误：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Create/Update database for config "./awstats.yfb.10086.cn.conf" by AWStats versi
-</span><span class='line'>on 7.0 (build 1.971)
-</span><span class='line'>From data in log file "C:/WINNT/system32/LogFiles/W3SVC1237985490/ex130130.log".
-</span><span class='line'>..
-</span><span class='line'>Error: Couldn't open server log file "C:/WINNT/system32/LogFiles/W3SVC1237985490
-</span><span class='line'>/ex130130.log" : No such file or directory
-</span><span class='line'>Setup ('./awstats.yfb.10086.cn.conf' file, web server or permissions) may be wrong.
-</span><span class='line'>Check config file, permissions and AWStats documentation (in 'docs' directory).</span></code></pre></td></tr></table></div></figure>
-
-
-<p>请确保你的日志文件路径是否写正确，日志目录是否有权限等；</p>
-
-<p>由于每次都需要手动生成数据，对于我们这种懒人来讲是不可接受的，那怎么自动生成数据呢？</p>
-
-<p>5.2 自动生成awstats数据</p>
-
-<p>首先，您得在C:\Program Files\AWStats\wwwroot\cgi-bin目录创建一个批处理：awstatsUpdate.bat，内容如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cd C:/
-</span><span class='line'>cd C:\Program Files \AWStats\wwwroot\cgi-bin
-</span><span class='line'>perl awstats.pl -config=yfb.10086.cn -update</span></code></pre></td></tr></table></div></figure>
-
-
-<p>注意：以上部分需要根据您的实际情况修改，yfb.10086.cn是需要偶自己的内网域名，千万不可盲目复制。</p>
-
-<p>创建之后，您最好在DOS窗口单独测试下是否能正常运行，如无问题再添加计划任务。</p>
-
-<p>如何增加一个计划任务的具体步骤由于过于简单此不再写出，相信您肯定会添加计划任务，至于任务的调度时间要根据您的需求来定，5分钟也好、5小时也罢，适合您的需求就好，例如本人就是设置的5分钟。</p>
 ]]></content>
   </entry>
   

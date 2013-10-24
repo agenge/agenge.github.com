@@ -9,8 +9,9 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="提示：以下操作均是使用的 swift tempauth认证机制。 获取 Token 1
-curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1 &hellip;">
+  <meta name="description" content="Keystone介绍 什么是Keystone？
+Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。 安装依赖包 1
+apt- &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +81,120 @@ curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://19
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-24T09:02:00+08:00" pubdate data-updated="true">Oct 24<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Keystone介绍</h2>
+
+<p>什么是Keystone？
+Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。</p>
+
+<h3>安装依赖包</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y git python-dev sqlite3 libxml2-dev libxslt1-dev libsasl2-dev libsqlite3-dev libssl-dev libldap2-dev</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 下载源码 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone https://github.com/openstack/keystone.git 
+</span><span class='line'>git clone https://github.com/openstack/python-keystoneclient.git keystone/client</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装keystone</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd keystone
+</span><span class='line'>git checkout origin/stable/grizzly
+</span><span class='line'>pip install -r tools/pip-requires
+</span><span class='line'>python setup.py install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装客户端</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd client
+</span><span class='line'>git checkout -b origin/feature/keystone-v3
+</span><span class='line'>pip install -r requirements.txt 
+</span><span class='line'>python setup.py install
+</span><span class='line'>
+</span><span class='line'>cd ../
+</span><span class='line'>mkdir -p /etc/keystone
+</span><span class='line'>cp etc/keystone.conf.sample /etc/keystone/keystone.conf
+</span><span class='line'>cp etc/logging.conf.sample /etc/keystone/logging.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong> 配置日志存放路径 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /var/log/keystone
+</span><span class='line'>touch /var/log/keystone/keystone.log </span></code></pre></td></tr></table></div></figure>
+
+
+<p>数据库同步，即创建keystone相关的数据库表</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone-manage db_sync</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone-all -d &</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1538,108 +1653,6 @@ chmod +x /root/realserver.sh</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-07-20T00:00:00+08:00" pubdate data-updated="true">Jul 20<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>前言</h1>
-
-<p>距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
-OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
-
-<ol>
-<li><p>准备一个镜像文件，即ISO文件，本示例所使用的为：</p>
-
-<pre><code> CentOS-6.3-i386-minimal.iso
-</code></pre></li>
-</ol>
-
-
-<p> <em>注：无论您是内部测试环境还是生产环境，偶都强烈推荐使用64位操作系统。</em></p>
-
-<ol>
-<li><p>引导并安装系统</p>
-
-<pre><code> virt-install -n CentOS63 -r 2048 --cpu host \
-   -c /data/iso/CentOS-6.3-i386-minimal.iso \
-   --disk path=/data/kvm_data/centos6.3-openstack.img,device=disk,bus=virtio,size=10,format=qcow2 \
-   --vnc --vncport=5908 --vnclisten=0.0.0.0 -v \
-   --network bridge=br0
-</code></pre></li>
-</ol>
-
-
-<p> 这些参数的就请您先自行查找手册，后期有时间偶会补上关于KVM的相关实践手册。</p>
-
-<ol>
-<li>镜像相关设置（此处根据你的需求进行个性化定制，尽量保持简洁）：</li>
-<li><p>分区全部给根分区，防火墙和SELinux禁止.</p>
-
-<pre><code>     chkconfig iptables off
-</code></pre></li>
-</ol>
-
-
-<p> 将/etc/selinux/config 中的 SELINUX=enforcing修改成 SELINUX=disabled
- * 修改分区表：</p>
-
-<pre><code>        vi /etc/fstab
-        # 将UUID=这一行注释，加入：
-        LABEL=cec-rootfs                           / ext4 defaults&lt;b&gt; 0 0&lt;/b&gt;
-</code></pre>
-
-<ul>
-<li><p>修改网络配置：</p>
-
-<pre><code>     vi /etc/sysconfig/network-scripts/ifcfg-eth0
-     #将HWADDR=这行删除或注释即可，并且设置成BOOTPROTO=dhcp
-</code></pre></li>
-<li><p>删除网络规则，因为Centos6之后70-persistent-net.rules这个文件会自动添加除eth0之外的其他网络接口，</p>
-
-<pre><code>     rm -rf /etc/udev/rules.d/70-persistent-net.rules
-</code></pre></li>
-<li>还要把另外一个文件删除，不然上面这个文件还会自动创建滴：
-         mv /lib/udev/write_net_rules{,.bak}</li>
-<li><p>上传镜像</p>
-
-<pre><code> glance image-create --name centos63Image --is-public true --container-format ovf --disk-format qcow2 &amp;lt; /home/agen/centos63.img
-</code></pre></li>
-</ul>
-
-
-<p> 至此，所有操作已经完成，如果一切正常，你所创建的实例访问正常。如网络还存在问题，可能
-和您的OpenStack网络设置有关，不过这已经超出本文的范畴。假如您对OpenStack的环境搭建不是很熟悉的话，建议您再多看看这篇文章：<a title="Openstack安装与部署(Folsom)" href="http://agenge.com/cloud-computing/openstack_install_with_deploy_for_folsom.html">Openstack安装与部署(Folsom)</a>。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1655,6 +1668,10 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
       </li>
     
@@ -1668,10 +1685,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
     
       <li class="post">
         <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/08/redis-install-and-config/">Redis安装与配置</a>
       </li>
     
   </ul>

@@ -9,7 +9,10 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="偶一直比较喜欢新产品并很愿意去尝试，虽说特喜欢Linux，但Win8正式版发布后，立即将公司的笔记本第一时间从Ubuntu 10.04迁移到Win8 64位企业版，本文不介绍Win8、不介绍安装Oracle11g，而是记录偶在Win8系统通过PL/SQL连接Oracle的经过， &hellip;">
+  <meta name="description" content="1、准备环境： Windows Server 2003
+IIS 6
+ActivePerl-5.16
+awstats-7.0 2、安装ActivePerl 安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为： 32位：ActivePerl-5.16.2 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +82,101 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/02/04/awstats-install-conf/">Awstats 安装与配置分析IIS日志</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-04T00:00:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1、准备环境：</h2>
+
+<ul>
+<li>Windows Server 2003</li>
+<li>IIS 6</li>
+<li>ActivePerl-5.16</li>
+<li>awstats-7.0</li>
+</ul>
+
+
+<h2>2、安装ActivePerl</h2>
+
+<p>安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为：</p>
+
+<p>32位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x86-296513.msi">ActivePerl-5.16.2</a>                    64位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x64-296513.msi">ActivePerl-5.16.2</a></p>
+
+<p>ActivePerl 的具体安装步骤就不再写出，只管点击“下一步”，安装完之后确认是否已经安装Perl，例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>C:\Documents and Settings\Administrator&gt;perl -v
+</span><span class='line'>
+</span><span class='line'>This is perl 5, version 16, subversion 2 (v5.16.2) built for MSWin32-x86-multi-t
+</span><span class='line'>hread
+</span><span class='line'>(with 1 registered patch, see perl -V for more detail)
+</span><span class='line'>
+</span><span class='line'>Copyright 1987-2012, Larry Wall
+</span><span class='line'>
+</span><span class='line'>Binary build 1602 [296513] provided by ActiveState http://www.ActiveState.com
+</span><span class='line'>Built Dec 19 2012 12:35:59
+</span><span class='line'>
+</span><span class='line'>Perl may be copied only under the terms of either the Artistic License or the
+</span><span class='line'>GNU General Public License, which may be found in the Perl 5 source kit.
+</span><span class='line'>
+</span><span class='line'>Complete documentation for Perl, including FAQ lists, should be found on
+</span><span class='line'>this system using "man perl" or "perldoc perl". If you have access to the
+</span><span class='line'>Internet, point your browser at http://www.perl.org/, the Perl Home Page.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如何没有以上类似信息输出，请确认环境变量是否正确。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/02/04/awstats-install-conf/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -186,8 +284,7 @@
 </pre></td><td class='code'><pre><code class=''><span class='line'> ruby -ropenssl -e "puts :yep"</span></code></pre></td></tr></table></div></figure>
 
 
-<p>
- 如果输出“yep”表示无问题。</p>
+<blockquote><p> 如果输出“yep”表示无问题。</p></blockquote>
 
 <p><strong><em>注意：在安装Puppet之前，如果需要，必须将服务器主机名修改好，否则将会出现很多问题哟！</em></strong></p>
 
@@ -394,6 +491,10 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
       </li>
     
@@ -407,10 +508,6 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
     
       <li class="post">
         <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/08/redis-install-and-config/">Redis安装与配置</a>
       </li>
     
   </ul>

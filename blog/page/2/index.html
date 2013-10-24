@@ -9,8 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 近2、3年来，云计算是一个比较热门的话题，无论是国外还是国内，众多计算机厂商开始涉足云计算，未来IaaS、SaaS及PaaS都可能将IT行业又推上到一个新的台阶。云计算谈得最多的IaaS要数 OpenStack，本文主要记录偶试
-验的安装步骤，当然，参考了N多网友的博文，具有代表性的可能就是 &hellip;">
+  <meta name="description" content="前言 距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
+OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。 准备一个镜像文件，即ISO文件，本示例所使用的为： CentOS-6.3-i386-minimal.iso 注： &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,108 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/20/make_openstack-centos-image/">制作OpenStack CentOS 6.3 镜像</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-20T00:00:00+08:00" pubdate data-updated="true">Jul 20<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<p>距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
+OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
+
+<ol>
+<li><p>准备一个镜像文件，即ISO文件，本示例所使用的为：</p>
+
+<pre><code> CentOS-6.3-i386-minimal.iso
+</code></pre></li>
+</ol>
+
+
+<p> <em>注：无论您是内部测试环境还是生产环境，偶都强烈推荐使用64位操作系统。</em></p>
+
+<ol>
+<li><p>引导并安装系统</p>
+
+<pre><code> virt-install -n CentOS63 -r 2048 --cpu host \
+   -c /data/iso/CentOS-6.3-i386-minimal.iso \
+   --disk path=/data/kvm_data/centos6.3-openstack.img,device=disk,bus=virtio,size=10,format=qcow2 \
+   --vnc --vncport=5908 --vnclisten=0.0.0.0 -v \
+   --network bridge=br0
+</code></pre></li>
+</ol>
+
+
+<p> 这些参数的就请您先自行查找手册，后期有时间偶会补上关于KVM的相关实践手册。</p>
+
+<ol>
+<li>镜像相关设置（此处根据你的需求进行个性化定制，尽量保持简洁）：</li>
+<li><p>分区全部给根分区，防火墙和SELinux禁止.</p>
+
+<pre><code>     chkconfig iptables off
+</code></pre></li>
+</ol>
+
+
+<p> 将/etc/selinux/config 中的 SELINUX=enforcing修改成 SELINUX=disabled
+ * 修改分区表：</p>
+
+<pre><code>        vi /etc/fstab
+        # 将UUID=这一行注释，加入：
+        LABEL=cec-rootfs                           / ext4 defaults&lt;b&gt; 0 0&lt;/b&gt;
+</code></pre>
+
+<ul>
+<li><p>修改网络配置：</p>
+
+<pre><code>     vi /etc/sysconfig/network-scripts/ifcfg-eth0
+     #将HWADDR=这行删除或注释即可，并且设置成BOOTPROTO=dhcp
+</code></pre></li>
+<li><p>删除网络规则，因为Centos6之后70-persistent-net.rules这个文件会自动添加除eth0之外的其他网络接口，</p>
+
+<pre><code>     rm -rf /etc/udev/rules.d/70-persistent-net.rules
+</code></pre></li>
+<li>还要把另外一个文件删除，不然上面这个文件还会自动创建滴：
+         mv /lib/udev/write_net_rules{,.bak}</li>
+<li><p>上传镜像</p>
+
+<pre><code> glance image-create --name centos63Image --is-public true --container-format ovf --disk-format qcow2 &amp;lt; /home/agen/centos63.img
+</code></pre></li>
+</ul>
+
+
+<p> 至此，所有操作已经完成，如果一切正常，你所创建的实例访问正常。如网络还存在问题，可能
+和您的OpenStack网络设置有关，不过这已经超出本文的范畴。假如您对OpenStack的环境搭建不是很熟悉的话，建议您再多看看这篇文章：<a title="Openstack安装与部署(Folsom)" href="http://agenge.com/cloud-computing/openstack_install_with_deploy_for_folsom.html">Openstack安装与部署(Folsom)</a>。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1285,101 +1387,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/02/04/awstats-install-conf/">Awstats 安装与配置分析IIS日志</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-04T00:00:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1、准备环境：</h2>
-
-<ul>
-<li>Windows Server 2003</li>
-<li>IIS 6</li>
-<li>ActivePerl-5.16</li>
-<li>awstats-7.0</li>
-</ul>
-
-
-<h2>2、安装ActivePerl</h2>
-
-<p>安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为：</p>
-
-<p>32位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x86-296513.msi">ActivePerl-5.16.2</a>                    64位：<a href="http://downloads.activestate.com/ActivePerl/releases/5.16.2.1602/ActivePerl-5.16.2.1602-MSWin32-x64-296513.msi">ActivePerl-5.16.2</a></p>
-
-<p>ActivePerl 的具体安装步骤就不再写出，只管点击“下一步”，安装完之后确认是否已经安装Perl，例如：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>C:\Documents and Settings\Administrator&gt;perl -v
-</span><span class='line'>
-</span><span class='line'>This is perl 5, version 16, subversion 2 (v5.16.2) built for MSWin32-x86-multi-t
-</span><span class='line'>hread
-</span><span class='line'>(with 1 registered patch, see perl -V for more detail)
-</span><span class='line'>
-</span><span class='line'>Copyright 1987-2012, Larry Wall
-</span><span class='line'>
-</span><span class='line'>Binary build 1602 [296513] provided by ActiveState http://www.ActiveState.com
-</span><span class='line'>Built Dec 19 2012 12:35:59
-</span><span class='line'>
-</span><span class='line'>Perl may be copied only under the terms of either the Artistic License or the
-</span><span class='line'>GNU General Public License, which may be found in the Perl 5 source kit.
-</span><span class='line'>
-</span><span class='line'>Complete documentation for Perl, including FAQ lists, should be found on
-</span><span class='line'>this system using "man perl" or "perldoc perl". If you have access to the
-</span><span class='line'>Internet, point your browser at http://www.perl.org/, the Perl Home Page.</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如何没有以上类似信息输出，请确认环境变量是否正确。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/02/04/awstats-install-conf/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1397,6 +1404,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
       </li>
     
@@ -1410,10 +1421,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
     
       <li class="post">
         <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/08/redis-install-and-config/">Redis安装与配置</a>
       </li>
     
   </ul>

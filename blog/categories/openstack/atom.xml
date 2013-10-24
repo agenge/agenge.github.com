@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: OpenStack | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/openstack/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-17T11:57:24+08:00</updated>
+  <updated>2013-10-24T09:29:31+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,251 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Keystone 源码安装与配置]]></title>
+    <link href="http://agenge.github.io/blog/2013/10/24/the-keystone-with-source-installation-and-conf/"/>
+    <updated>2013-10-24T09:02:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/10/24/the-keystone-with-source-installation-and-conf</id>
+    <content type="html"><![CDATA[<h2>Keystone介绍</h2>
+
+<p>什么是Keystone？
+Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。</p>
+
+<h3>安装依赖包</h3>
+
+<p><code>
+apt-get install -y git python-dev sqlite3 libxml2-dev libxslt1-dev libsasl2-dev libsqlite3-dev libssl-dev libldap2-dev
+</code></p>
+
+<p><strong> 下载源码 </strong></p>
+
+<p><code>
+git clone https://github.com/openstack/keystone.git
+git clone https://github.com/openstack/python-keystoneclient.git keystone/client
+</code></p>
+
+<p>安装keystone</p>
+
+<p><code>
+cd keystone
+git checkout origin/stable/grizzly
+pip install -r tools/pip-requires
+python setup.py install
+</code></p>
+
+<p>安装客户端</p>
+
+<p>```
+cd client
+git checkout -b origin/feature/keystone-v3
+pip install -r requirements.txt
+python setup.py install</p>
+
+<p>cd ../
+mkdir -p /etc/keystone
+cp etc/keystone.conf.sample /etc/keystone/keystone.conf
+cp etc/logging.conf.sample /etc/keystone/logging.conf
+```</p>
+
+<p><strong> 配置日志存放路径 </strong></p>
+
+<p><code>
+mkdir -p /var/log/keystone
+touch /var/log/keystone/keystone.log
+</code></p>
+
+<p>数据库同步，即创建keystone相关的数据库表</p>
+
+<p><code>
+keystone-manage db_sync
+</code></p>
+
+<p>启动服务</p>
+
+<p><code>
+keystone-all -d &amp;
+</code></p>
+
+<!-- more -->
+
+
+<h2>配置Keytone</h2>
+
+<p>截止到现在，我们已经完成Keystone的安装，但现在还无法使用，因为没有租户、用户、密码、服务等。</p>
+
+<p>为使用方便，先设置两个环境变量</p>
+
+<p><code>
+export OS_SERVICE_TOKEN=ADMIN
+export SERVICE_ENDPOINT=http://192.168.30.150:35357/v2.0
+</code></p>
+
+<p>如果前面安装没问题的话，使用以下命令查看用户列表，默认是没有任何数据返回</p>
+
+<p><code>
+keystone user-list
+</code></p>
+
+<ol>
+<li>创建租户</li>
+</ol>
+
+
+<p><code>
+keystone tenant-create --name adminTenant --description "Admin Tenant" --enabled true
++-------------+----------------------------------+
+|   Property  |              Value               |
++-------------+----------------------------------+
+| description |           Admin Tenant           |
+|   enabled   |               True               |
+|      id     | e36e42a5ed264317a7a5119b1f513e32 |
+|     name    |           adminTenant            |
++-------------+----------------------------------+
+</code>
+需要记录 tenant id，在创建用户时需要关联，即将用户关联到哪个租户。</p>
+
+<ol>
+<li>创建用户</li>
+</ol>
+
+
+<p><code>
+keystone user-create --tenant_id e36e42a5ed264317a7a5119b1f513e32 --name admin --pass openstack --enabled true
++----------+----------------------------------+
+| Property |              Value               |
++----------+----------------------------------+
+|  email   |                                  |
+| enabled  |               True               |
+|    id    | 8cc6ddbeab504e2b9e8bf30eff3d92b7 |
+|   name   |              admin               |
+| tenantId | e36e42a5ed264317a7a5119b1f513e32 |
++----------+----------------------------------+
+</code></p>
+
+<ol>
+<li>创建角色</li>
+</ol>
+
+
+<p>创建一个角色名称为adminRole。请记住该命令生成的Role id，下面的关联用户及租户时需要用到</p>
+
+<p><code>
+keystone role-create --name adminRole
++----------+----------------------------------+
+| Property |              Value               |
++----------+----------------------------------+
+|    id    | a00bf7b7fe4e4746bac0fd69778f3dfa |
+|   name   |            adminRole             |
++----------+----------------------------------+
+</code></p>
+
+<p>截止到目前，已经分别创建 Tenant、User、Role，分别是：</p>
+
+<p>Tenant ID:  e36e42a5ed264317a7a5119b1f513e32
+User ID:    8cc6ddbeab504e2b9e8bf30eff3d92b7
+Role ID:    a00bf7b7fe4e4746bac0fd69778f3dfa</p>
+
+<p>现在将它们三者关联到一起</p>
+
+<p><code>
+keystone user-role-add --user-id 8cc6ddbeab504e2b9e8bf30eff3d92b7 \
+ --tenant-id e36e42a5ed264317a7a5119b1f513e32 \
+ --role-id a00bf7b7fe4e4746bac0fd69778f3dfa
+</code></p>
+
+<h2>Keytone测试</h2>
+
+<h3>通过 Keystone 获取 Token</h3>
+
+<p>访问Keystone 需要4个参数：TenantName Username Password 申请URL，其中URL可以是：</p>
+
+<pre><code>http://192.168.30.150:35357/v2.0/tokens 或 http://192.168.30.150:5000/v2.0/tokens
+</code></pre>
+
+<p><code>
+curl -d '{"auth": {"tenantName": "adminTenant", "passwordCredentials":{"username": "admin", "password": "openstack"}}}' -H "Content-type: application/json" http://192.168.30.150:35357/v2.0/tokens | python -mjson.tool
+</code>
+将会返回以下类似信息</p>
+
+<p>```
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</p>
+
+<pre><code>                             Dload  Upload   Total   Spent    Left  Speed
+</code></pre>
+
+<p>100   676  100   567  100   109   6290   1209 &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash;  6517
+{</p>
+
+<pre><code>"access": {
+    "metadata": {
+        "is_admin": 0, 
+        "roles": [
+            "9fe2ff9ee4384b1894a90878d3e92bab", 
+            "a00bf7b7fe4e4746bac0fd69778f3dfa"
+        ]
+    }, 
+    "serviceCatalog": [], 
+    "token": {
+        "expires": "2013-10-16T09:03:21Z", 
+        "id": "7c76f8315f6e42d6a05b0ed726bc3441", 
+        "issued_at": "2013-10-15T09:03:21.809471", 
+        "tenant": {
+            "description": "Admin Tenant", 
+            "enabled": true, 
+            "id": "e36e42a5ed264317a7a5119b1f513e32", 
+            "name": "adminTenant"
+        }
+    }, 
+    "user": {
+        "id": "8cc6ddbeab504e2b9e8bf30eff3d92b7", 
+        "name": "admin", 
+        "roles": [
+            {
+                "name": "_member_"
+            }, 
+            {
+                "name": "adminRole"
+            }
+        ], 
+        "roles_links": [], 
+        "username": "admin"
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>从上述返回结果能看到正常返回 token。更详细的操作请参考<a href="http://agenge.com/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a></p>
+
+<h2>错误汇总</h2>
+
+<p>```
+Traceback (most recent call last):
+   File &ldquo;/usr/bin/easy_install&rdquo;, line 5, in <module></p>
+
+<pre><code> from pkg_resources import load_entry_point ImportError: No module named pkg_resources raid:/home/linyoujushi# easy_install genshi Traceback (most recent call last):
+</code></pre>
+
+<p>```</p>
+
+<p>解决办法：</p>
+
+<p>这是由于我们没有安装setuptools或者没有装好，我们只需要安装这个软件就行了。安装方法：</p>
+
+<p><code>
+wget http://peak.telecommunity.com/dist/ez_setup.py
+python ez_setup.py
+</code></p>
+
+<p>或者，我们装的setuptools工具太老，我们升级一下：</p>
+
+<p><code>
+sudo python ./ez_setup.py -U setuptools
+</code></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用Curl操作OpenStack Swift]]></title>
@@ -1138,1212 +1383,6 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
 
 <p> 至此，所有操作已经完成，如果一切正常，你所创建的实例访问正常。如网络还存在问题，可能
 和您的OpenStack网络设置有关，不过这已经超出本文的范畴。假如您对OpenStack的环境搭建不是很熟悉的话，建议您再多看看这篇文章：<a title="Openstack安装与部署(Folsom)" href="http://agenge.com/cloud-computing/openstack_install_with_deploy_for_folsom.html">Openstack安装与部署(Folsom)</a>。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Openstack安装与部署(Folsom)]]></title>
-    <link href="http://agenge.github.io/blog/2013/06/12/openstack_install_with_deploy_for_folsom/"/>
-    <updated>2013-06-12T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/06/12/openstack_install_with_deploy_for_folsom</id>
-    <content type="html"><![CDATA[<h1>前言</h1>
-
-<p>近2、3年来，云计算是一个比较热门的话题，无论是国外还是国内，众多计算机厂商开始涉足云计算，未来IaaS、SaaS及PaaS都可能将IT行业又推上到一个新的台阶。云计算谈得最多的IaaS要数 OpenStack，本文主要记录偶试
-验的安装步骤，当然，参考了N多网友的博文，具有代表性的可能就是 <a href="http://www.stacklab.org/">stacklab</a> 的安装教程，以下就是具体安装步骤：</p>
-
-<h2>环境准备</h2>
-
-<p> ### 资源列表</p>
-
-<table width="582" border="0" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">IP
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">主机名
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">OS
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">CPU
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">内存
-</td>
-<td nowrap="nowrap" width="168">
-<p align="center">备注
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">192.168.30.73
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">control-01
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">Ubuntu 12.10
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">i5
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">16G
-</td>
-<td nowrap="nowrap" width="168">
-<p align="center">keystone、glance、cinder、nova-api、nova-scheduler
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">192.168.30.74
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">compute-01
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">Ubuntu 12.10
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">i5
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">16G
-</td>
-<td rowspan="3" nowrap="nowrap" width="168">
-<p align="center">nova-compute、nova-network、nova-api-metadata
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117">
-<p align="center">192.168.30.75
-</td>
-<td nowrap="nowrap" width="88">
-<p align="center">compute-02
-</td>
-<td nowrap="nowrap" width="87">
-<p align="center">Ubuntu 12.10
-</td>
-<td nowrap="nowrap" width="70">
-<p align="center">i5
-</td>
-<td nowrap="nowrap" width="52">
-<p align="center">16G
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="117"></td>
-<td nowrap="nowrap" width="88"></td>
-<td nowrap="nowrap" width="87"></td>
-<td nowrap="nowrap" width="70"></td>
-<td nowrap="nowrap" width="52"></td>
-</tr>
-</tbody>
-</table>
-
-
-<h3>网络配置</h3>
-
-<ol>
-<li><p>在配置之前需要注意，如果你的网卡名称有叫非ethX，例如p1p1，就得按以下步骤修改：</p>
-
-<pre><code> cd /etc/udev/rules.d/
- cp 70-persistent-net.rules 70-persistent-net.rules.bak
- ip a
-</code></pre>
-
-<p>可看到p1p1的MAC地址，如<strong>d4:3d:7e:57:a4:d4</strong>，将文件70-persistent-net.rules的：
-     ATTR{address}==&ldquo;ec:88:8f:ea:c4:eb&rdquo;
-修改为：
-     ATTR{address}==&ldquo;d4:3d:7e:57:a4:d4&rdquo;</p></li>
-</ol>
-
-
-<p> NAME=&ldquo;eth1&rdquo; 修改为:NAME=&ldquo;eth2&rdquo; 或 NAME=&ldquo;eth0"，只要不和已存在的冲突即可，例如此示例中，本身已经存在一块叫： eth1的网卡，那另外一块就改成eth2。修改之后需要重启服务器。
-所有节点配置如下（需要修改每个节点对应的IP）：</p>
-
-<pre><code>    cat /etc/network/interfaces
-    # This file describes the network interfaces available on your system
-    # and how to activate them. For more information, see interfaces(5).
-    # The loopback network interface
-    auto lo
-    iface lo inet loopback
-
-    # The primary network interface
-    auto eth1
-    iface eth1 inet static
-    address 192.168.30.75
-    netmask 255.255.255.0
-    network 192.168.30.0
-    broadcast 192.168.30.255
-    gateway 192.168.30.1
-    # dns-* options are implemented by the resolvconf package, if installed
-    dns-nameservers 218.201.4.3
-
-    auto eth2
-    iface eth2 inet static
-    address 10.10.0.75
-    netmask 255.255.0.0
-</code></pre>
-
-<p> 上面2个IP地址需要根据您的具体情况修改。
-2. 重启网络</p>
-
-<pre><code>     /etc/init.d/networking restart
-</code></pre>
-
-<ol>
-<li><p>IP转发</p>
-
-<pre><code> sudo su -
- sed -i -r 's/^s*#(net.ipv4.ip_forward=1.*)/1/' /etc/sysctl.conf
- echo 1 &gt; /proc/sys/net/ipv4/ip_forward
- sysctl -p
- net.ipv4.ip_forward = 1
-</code></pre></li>
-<li>更新源</li>
-</ol>
-
-
-<p> 在所有节点的/etc/apt/source.list 加入以下信息：</p>
-
-<pre><code>    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
-    deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
-</code></pre>
-
-<p> 然后执行：</p>
-
-<pre><code>    gpg --keyserver keyserver.ubuntu.com --recv EC4926EA
-    gpg --export --armor EC4926EA | sudo apt-key add -
-    sudo apt-get update
-</code></pre>
-
-<p> 如果报错，请参考<a href="http://blog.csdn.net/wche1990/article/details/6759422">这里</a>.</p>
-
-<!-- more -->
-
-
-<h3>主机名设置</h3>
-
-<p>在所有节点的/etc/hosts加入以下信息（需要修改每个节点对应的IP）：</p>
-
-<pre><code>    192.168.30.73  control-01
-    192.168.30.74  compute-01
-    192.168.30.75  compute-02
-</code></pre>
-
-<h3>Mysql和rabbitmq安装</h3>
-
-<p>在所有节点执行，密码统一设置为”123456”(你也可以设置为其他较安全的密码)：</p>
-
-<pre><code>    sudo apt-get install -y mysql-server python-mysqldb
-    sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
-    sudo /etc/init.d/mysql restart
-    sudo apt-get install -y rabbitmq-server
-</code></pre>
-
-<h3>时间同步</h3>
-
-<p>在所有节点执行：</p>
-
-<pre><code>    sudo apt-get install -y ntp
-    sudo sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.comnserver 127.127.1.0nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
-    sudo /etc/init.d/ntp restart
-</code></pre>
-
-<hr />
-
-<h2>控制节点安装</h2>
-
-<h3>安装OpenStack组件</h3>
-
-<ol>
-<li><p>在控制节点执行：</p>
-
-<pre><code> os_keystone="keystone python-keystone python-keystoneclient"
- os_glance="glance glance-api python-glanceclient glance-common"
- os_nova="nova-api nova-cert nova-common  nova-scheduler python-nova python-novaclient nova-consoleauth novnc   nova-novncproxy "
- os_horizon="apache2 libapache2-mod-wsgi openstack-dashboard memcached python-memcache"
- os_cinder="cinder-api cinder-scheduler cinder-volume iscsitarget  open-iscsi iscsitarget-dkms python-cinderclient"
- os_swift="python-swift swift swift-proxy swift-account swift-container swift-object python-memcache"
- sudo apt-get install -y $os_keystone $os_glance $os_nova $os_horizon $os_cinder $os_swift
-
- 大概要下载241M的文件。
-</code></pre></li>
-</ol>
-
-
-<h3>初始化数据库</h3>
-
-<ol>
-<li><p>在控制节点执行，创建keystone, nova,cinder,glance数据库：</p>
-
-<pre><code> mysql -uroot –p
- mysql&gt; CREATE DATABASE keystone;
- mysql&gt; CREATE DATABASE nova;
- mysql&gt; CREATE DATABASE cinder;
- mysql&gt; CREATE DATABASE glance;
- mysql&gt; GRANT ALL ON keystone.* TO openstack@'%' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON nova.* TO openstack@'%' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON cinder.* TO openstack@'%' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON glance.* TO openstack@'%' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON keystone.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON nova.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON nova.* TO openstack@'192.168.30.74' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON nova.* TO openstack@'192.168.30.75' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON cinder.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
- mysql&gt; GRANT ALL ON glance.* TO openstack@'192.168.30.73' IDENTIFIED BY 'openstack';
- mysql&gt; flush privileges;
-</code></pre></li>
-</ol>
-
-
-<h3>Keystone配置</h3>
-
-<ul>
-<li><p>在控制节点修改/etc/keystone/keystone.conf配置文件，注释第57行：</p>
-
-<pre><code>  connection = sqlite:////var/lib/keystone/keystone.db
-</code></pre>
-
-<p>加入：</p>
-
-<pre><code>   connection = mysql://openstack:openstack@192.168.30.73/keystone
-</code></pre>
-
-<p>重启keystone后，初始化数据库：</p>
-
-<pre><code>   sudo /etc/init.d/keystone restart
-   sudo keystone-manage db_sync
-</code></pre></li>
-<li><p>创建tenant、user、role，脚本keystone_basic.sh内容如下：</p>
-
-<pre><code>     #!/bin/sh
-     #
-     # Keystone basic configuration
-
-     # Mainly inspired by https://github.com/openstack/keystone/blob/master/tools/sample_data.sh
-
-     # Modified by Bilel Msekni / Institut Telecom
-     #
-     # Support: openstack@lists.launchpad.net
-     # License: Apache Software License (ASL) 2.0
-     #
-     #节点的IP地址
-     HOST_IP=192.168.30.73
-     ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin_pass}
-     SERVICE_PASSWORD=${SERVICE_PASSWORD:-service_pass}
-     export SERVICE_TOKEN="ADMIN"
-     export SERVICE_ENDPOINT="http://${HOST_IP}:35357/v2.0"
-     SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
-
-     get_id () {
-         echo `$@ | awk '/ id / { print $4 }'`
-     }
-
-     # Tenants
-     ADMIN_TENANT=$(get_id keystone tenant-create --name=admin)
-     SERVICE_TENANT=$(get_id keystone tenant-create --name=$SERVICE_TENANT_NAME)
-
-
-     # Users
-     ADMIN_USER=$(get_id keystone user-create --name=admin --pass="$ADMIN_PASSWORD" --email=admin@domain.com)
-
-
-     # Roles
-     ADMIN_ROLE=$(get_id keystone role-create --name=admin)
-     KEYSTONEADMIN_ROLE=$(get_id keystone role-create --name=KeystoneAdmin)
-     KEYSTONESERVICE_ROLE=$(get_id keystone role-create --name=KeystoneServiceAdmin)
-
-     # Add Roles to Users in Tenants
-     keystone user-role-add --user-id $ADMIN_USER --role-id $ADMIN_ROLE --tenant-id $ADMIN_TENANT
-     keystone user-role-add --user-id $ADMIN_USER --role-id $KEYSTONEADMIN_ROLE --tenant-id $ADMIN_TENANT
-     keystone user-role-add --user-id $ADMIN_USER --role-id $KEYSTONESERVICE_ROLE --tenant-id $ADMIN_TENANT
-
-     # The Member role is used by Horizon and Swift
-     MEMBER_ROLE=$(get_id keystone role-create --name=Member)
-
-     # Configure service users/roles
-     NOVA_USER=$(get_id keystone user-create --name=nova --pass="$SERVICE_PASSWORD" --tenant-id $SERVICE_TENANT --email=nova@domain.com)
-     keystone user-role-add --tenant-id $SERVICE_TENANT --user-id $NOVA_USER --role-id $ADMIN_ROLE
-
-     GLANCE_USER=$(get_id keystone user-create --name=glance --pass="$SERVICE_PASSWORD" --tenant-id $SERVICE_TENANT --email=glance@domain.com)
-     keystone user-role-add --tenant-id $SERVICE_TENANT --user-id $GLANCE_USER --role-id $ADMIN_ROLE
-
-     CINDER_USER=$(get_id keystone user-create --name=cinder --pass="$SERVICE_PASSWORD" --tenant-id $SERVICE_TENANT --email=cinder@domain.com)
-     keystone user-role-add --tenant-id $SERVICE_TENANT --user-id $CINDER_USER --role-id $ADMIN_ROLE
-</code></pre></li>
-<li><p>创建endpoint，脚本keystone_endpoints_basic.sh内容如下:</p>
-
-<pre><code>     #!/bin/sh
-     #
-     # Keystone basic Endpoints
-
-     # Mainly inspired by https://github.com/openstack/keystone/blob/master/tools/sample_data.sh
-
-     # Modified by Bilel Msekni / Institut Telecom
-     #
-     # Support: openstack@lists.launchpad.net
-     # License: Apache Software License (ASL) 2.0
-     #
-
-     # Host address
-     #节点的manage network的IP地址
-     HOST_IP=192.168.30.73
-     #节点的public network的IP地址
-     EXT_HOST_IP=192.168.30.73
-
-     # MySQL definitions
-     MYSQL_USER=openstack
-     MYSQL_DATABASE=keystone
-     MYSQL_HOST=$HOST_IP
-     MYSQL_PASSWORD=openstack
-
-     # Keystone definitions
-     KEYSTONE_REGION=RegionOne
-     export SERVICE_TOKEN=ADMIN
-     export SERVICE_ENDPOINT="http://${HOST_IP}:35357/v2.0"
-
-     while getopts "u:D:p:m:K:R:E:T:vh" opt; do
-     case $opt in
-         u)
-           MYSQL_USER=$OPTARG
-           ;;
-         D)
-           MYSQL_DATABASE=$OPTARG
-           ;;
-         p)
-           MYSQL_PASSWORD=$OPTARG
-           ;;
-         m)
-           MYSQL_HOST=$OPTARG
-           ;;
-         K)
-           MASTER=$OPTARG
-           ;;
-         R)
-           KEYSTONE_REGION=$OPTARG
-           ;;
-         E)
-           export SERVICE_ENDPOINT=$OPTARG
-           ;;
-         T)
-           export SERVICE_TOKEN=$OPTARG
-           ;;
-         v)
-           set -x
-           ;;
-         h)
-           cat &lt;&lt;EOF
-     Usage: $0 [-m mysql_hostname] [-u mysql_username] [-D mysql_database] [-p mysql_password]
-     [-K keystone_master ] [ -R keystone_region ] [ -E keystone_endpoint_url ]
-     [ -T keystone_token ]
-     Add -v for verbose mode, -h to display this message.
-     EOF
-           exit 0
-           ;;
-         \?)
-           echo "Unknown option -$OPTARG" &gt;&amp;2
-           exit 1
-           ;;
-         :)
-           echo "Option -$OPTARG requires an argument" &gt;&amp;2
-           exit 1
-           ;;
-       esac
-     done
-
-     if [ -z "$KEYSTONE_REGION" ]; then
-     echo "Keystone region not set. Please set with -R option or set KEYSTONE_REGION variable." &gt;&amp;2
-       missing_args="true"
-     fi
-
-     if [ -z "$SERVICE_TOKEN" ]; then
-     echo "Keystone service token not set. Please set with -T option or set SERVICE_TOKEN variable." &gt;&amp;2
-       missing_args="true"
-     fi
-
-     if [ -z "$SERVICE_ENDPOINT" ]; then
-     echo "Keystone service endpoint not set. Please set with -E option or set SERVICE_ENDPOINT variable." &gt;&amp;2
-       missing_args="true"
-     fi
-
-     if [ -z "$MYSQL_PASSWORD" ]; then
-     echo "MySQL password not set. Please set with -p option or set MYSQL_PASSWORD variable." &gt;&amp;2
-       missing_args="true"
-     fi
-
-     if [ -n "$missing_args" ]; then
-     exit 1
-     fi
-     keystone service-create --name nova --type compute --description 'OpenStack Compute Service'
-     keystone service-create --name cinder --type volume --description 'OpenStack Volume Service'
-     keystone service-create --name glance --type image --description 'OpenStack Image Service'
-     keystone service-create --name keystone --type identity --description 'OpenStack Identity'
-     keystone service-create --name ec2 --type ec2 --description 'OpenStack EC2 service'
-
-     create_endpoint () {
-       case $1 in
-         compute)
-         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':8774/v2/$(tenant_id)s' --adminurl 'http://'"$HOST_IP"':8774/v2/$(tenant_id)s' --internalurl 'http://'"$HOST_IP"':8774/v2/$(tenant_id)s'
-         ;;
-         volume)
-         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':8776/v1/$(tenant_id)s' --adminurl 'http://'"$HOST_IP"':8776/v1/$(tenant_id)s' --internalurl 'http://'"$HOST_IP"':8776/v1/$(tenant_id)s'
-         ;;
-         image)
-         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':9292/v2' --adminurl 'http://'"$HOST_IP"':9292/v2' --internalurl 'http://'"$HOST_IP"':9292/v2'
-         ;;
-         identity)
-         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':5000/v2.0' --adminurl 'http://'"$HOST_IP"':35357/v2.0' --internalurl 'http://'"$HOST_IP"':5000/v2.0'
-         ;;
-         ec2)
-         keystone endpoint-create --region $KEYSTONE_REGION --service-id $2 --publicurl 'http://'"$EXT_HOST_IP"':8773/services/Cloud' --adminurl 'http://'"$HOST_IP"':8773/services/Admin' --internalurl 'http://'"$HOST_IP"':8773/services/Cloud'
-         ;;
-       esac
-     }
-
-     for i in compute volume image object-store identity ec2; do
-     id=`mysql -h "$MYSQL_HOST" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -ss -e "SELECT id FROM service WHERE type='"$i"';"` || exit 1
-       create_endpoint $i $id
-     done
-</code></pre></li>
-<li><p>依次执行：</p>
-
-<pre><code>  sudo chmod +x keystone_*.sh
-  sudo ./keystone_basic.sh
-  sudo ./keystone_endpoints_basic.sh
-</code></pre></li>
-<li><p>创建openrc文件（环境变量）</p>
-
-<pre><code>  export OS_TENANT_NAME=admin
-  export OS_USERNAME=admin
-  export OS_PASSWORD=admin_password
-  export OS_AUTH_URL=http://192.168.30.73:5000/v2.0/
-  export EC2_URL=$(keystone catalog --service ec2 | awk '/ publicURL / { print $4 }')
-  export CREDS=$(keystone ec2-credentials-create)
-  export EC2_ACCESS_KEY=$(echo "$CREDS" | awk '/ access / { print $4 }')
-  export EC2_SECRET_KEY=$(echo "$CREDS" | awk '/ secret / { print $4 }')
-</code></pre></li>
-<li><p>使环境变量生效：</p>
-
-<pre><code>  source openrc
-</code></pre></li>
-<li><p>测试keystone</p>
-
-<pre><code>  keystone user-list
-</code></pre></li>
-</ul>
-
-
-<p>如果没问题，输出内容类似下图：</p>
-
-<p><img src="/images/2013/06/01.png" title="" ></p>
-
-<hr />
-
-<h3>Glance配置</h3>
-
-<h4>更新配置文件</h4>
-
-<ol>
-<li><p>更新glance配置文件：</p>
-
-<pre><code> sudo vi /etc/glance/glance-api-paste.in
-</code></pre></li>
-</ol>
-
-
-<p> 将最后三行修改为：</p>
-
-<pre><code>    [filter:authtoken]
-    paste.filter_factory = keystone.middleware.auth_token:filter_factory
-    auth_host = 192.168.30.73
-    auth_port = 35357
-    auth_protocol = http
-    admin_tenant_name = service
-    admin_user = glance
-    admin_password = service_password
-</code></pre>
-
-<ol>
-<li><p>更新glance配置文件：</p>
-
-<pre><code> sudo vi /etc/glance/glance-registry-paste.ini
-</code></pre></li>
-</ol>
-
-
-<p> 将最后三行修改为：</p>
-
-<pre><code>    [filter:authtoken]
-    paste.filter_factory = keystone.middleware.auth_token:filter_factory
-    auth_host = 192.168.30.73
-    auth_port = 35357
-    auth_protocol = http
-    admin_tenant_name = service
-    admin_user = glance
-    admin_password = service_password
-</code></pre>
-
-<ol>
-<li><p>更新glance配置文件：</p>
-
-<pre><code> sudo vim /etc/glance/glance-api.conf
-</code></pre>
-
-<p> 将49行注释，并加入：</p>
-
-<pre><code> sql_connection = mysql://openstack:openstack@192.168.30.73/glance
-</code></pre>
-
-<p> 在[paste_deploy]（一般在最后几行）节点加入：</p>
-
-<pre><code> flavor = keystone
-</code></pre></li>
-<li><p>更新glance配置文件：</p>
-
-<pre><code> sudo vim /etc/glance/glance-registry.conf
-</code></pre>
-
-<p> 将28行注释，并加入：</p>
-
-<pre><code> sql_connection = mysql://openstack:openstack@192.168.30.73/glance
- [paste_deploy]
- flavor = keystone
-</code></pre></li>
-<li><p>重启glance服务</p>
-
-<pre><code> /etc/init.d/glance-api restart
- sudo /etc/init.d/glance-registry restart
-</code></pre></li>
-<li><p>同步数据库</p>
-
-<pre><code> sudo glance-manage db_sync
-</code></pre>
-
-<p> 并再次重启glance服务：</p>
-
-<pre><code> sudo /etc/init.d/glance-api restart
- sudo /etc/init.d/glance-registry restart
-</code></pre></li>
-</ol>
-
-
-<h4>上传镜像文件</h4>
-
-<pre><code>wget https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img
-source openrc
-glance image-create --name myFirstVM --is-public true --container-format bare --disk-format qcow2 &amp;lt; cirros-0.3.0-x86_64-disk.img
-</code></pre>
-
-<p>如果一切正常，会输出类似以下内容：</p>
-
-<p><img src="/images/2013/06/02.png" title="" ></p>
-
-<hr />
-
-<h3>Cinder配置</h3>
-
-<h4>配置iscsi</h4>
-
-<ol>
-<li><p>配置iscsitarget：</p>
-
-<pre><code> sudo sed -i 's/false/true/g' /etc/default/iscsitarget
- sudo /etc/init.d/iscsitarget restart
- sudo /etc/init.d/open-iscsi restart
-</code></pre></li>
-<li><p>更新配置文件/etc/cinder/api-paste.ini（47行）：</p>
-
-<pre><code> [filter:authtoken]
- paste.filter_factory = keystone.middleware.auth_token:filter_factory
- service_protocol = http
- service_host = 192.168.30.73
- service_port = 5000
- auth_host = 192.168.30.73
- auth_port = 35357
- auth_protocol = http
- admin_tenant_name = service
- admin_user = cinder
- admin_password = service_password
-</code></pre></li>
-<li><p>更新配置文件/etc/cinder/cinder.conf：</p>
-
-<pre><code> [DEFAULT]
- rootwrap_config = /etc/cinder/rootwrap.conf
- sql_connection = mysql://openstack:openstack@192.168.30.73/cinder
- api_paste_confg = /etc/cinder/api-paste.ini
- iscsi_helper = tgtadm
- volume_name_template = volume-%s
- volume_group = cinder-volumes
- verbose = True
- auth_strategy = keystone
- state_path = /var/lib/cinder
- volumes_dir = /var/lib/cinder/volumes
-</code></pre></li>
-<li><p>同步数据库：</p>
-
-<pre><code> sudo cinder-manage db sync
-</code></pre></li>
-</ol>
-
-
-<h4>创建VG</h4>
-
-<ol>
-<li><p>没有独立的硬盘或分区按以下操作：</p>
-
-<p> sudo mkdir -p /opt/data/cinder
- cd /opt/data/cinder
- sudo truncate -s 2G vgfile
- sudo losetup -f &mdash;show vgfile</p></li>
-</ol>
-
-
-<p> 如果正常，会输出以下内容：</p>
-
-<pre><code>    /dev/loop0
-</code></pre>
-
-<p> 接下来开始创建vg：</p>
-
-<pre><code>    sudo vgcreate cinder-volumes /dev/loop0
-</code></pre>
-
-<p> 如果正常，会输出以下内容：</p>
-
-<pre><code>    No physical volume label read from /dev/loop0
-    Writing physical volume data to disk "/dev/loop0"
-    Physical volume "/dev/loop0" successfully created
-    Volume group "cinder-volumes" successfully created
-</code></pre>
-
-<ol>
-<li><p>有独立的硬盘或分区按以下操作(<strong>以/dev/sda7</strong><strong>为例，以下操作有数据丢失风险，请谨慎操作</strong>)：</p>
-
-<pre><code> pvcreate /dev/sda7
- vgcreate cinder-volumes /dev/sda7
- lvcreate -L 1T -n instance-lv data-vg
- mkfs.ext4 /dev/data-vg/instance-lv
- echo "/dev/data-vg/instance-lv        /var/lib/nova/instances ext4    defaults        0 0" &gt;&gt; /etc/fstab
- mount -a
-</code></pre></li>
-</ol>
-
-
-<p> 重启cinder所有相关服务：</p>
-
-<pre><code>    sudo /etc/init.d/cinder-api restart
-    sudo /etc/init.d/cinder-scheduler restart
-    sudo /etc/init.d/cinder-volume restart
-</code></pre>
-
-<hr />
-
-<h3>Nova配置</h3>
-
-<ol>
-<li><p>更新配置文件/etc/nova/api-paste.ini（最后几行）：</p>
-
-<pre><code> [filter:authtoken]
- paste.filter_factory = keystone.middleware.auth_token:filter_factory
- auth_host = 192.168.30.73
- auth_port = 35357
- auth_protocol = http
- admin_tenant_name = service
- admin_user = nova
- admin_password = service_password
- signing_dir = /tmp/keystone-signing-nova
-</code></pre></li>
-<li><p>更新配置文件/etc/nova/nova.conf</p>
-
-<pre><code> [DEFAULT]
- dhcpbridge_flagfile=/etc/nova/nova.conf
- dhcpbridge=/usr/bin/nova-dhcpbridge
- logdir=/var/log/nova
- state_path=/var/lib/nova
- lock_path=/var/lock/nova
- force_dhcp_release=True
- iscsi_helper=tgtadm
- libvirt_use_virtio_for_bridges=True
- connection_type=libvirt
- root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
- verbose=True
- ec2_private_dns_show_ip=True
- api_paste_config=/etc/nova/api-paste.ini
- volumes_path=/var/lib/nova/volumes
-
- # AUTHENTICATION
- auth_strategy=keystone
-
- # SCHEDULER
- scheduler_driver=nova.scheduler.multi.MultiScheduler
- compute_scheduler_driver=nova.scheduler.filter_scheduler.FilterScheduler
-
- # CINDER
- volume_api_class=nova.volume.cinder.API
-
- # DATABASE
- sql_connection=mysql://openstack:openstack@192.168.30.73/nova
-
- # COMPUTE
- # kvm or QUME
- libvirt_type=kvm  
- libvirt_use_virtio_for_bridges=True
- start_guests_on_host_boot=True
- resume_guests_state_on_host_boot=True
- api_paste_config=/etc/nova/api-paste.ini
- allow_admin_api=True
- use_deprecated_auth=False
- nova_url=http://192.168.30.73:8774/v1.1/
- root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
-
- # APIS
- ec2_host=192.168.30.73
- ec2_url=http://192.168.30.73:8773/services/Cloud
- keystone_ec2_url=http://192.168.30.73:5000/v2.0/ec2tokens
- s3_host=192.168.30.73
- cc_host=192.168.30.73
- metadata_host=192.168.30.73
- enabled_apis=ec2,osapi_compute,metadata
-
- # RABBITMQ
- rabbit_host=192.168.30.73
-
- # GLANCE
- image_service=nova.image.glance.GlanceImageService
- glance_api_servers=192.168.30.73:9292
-
- # NETWORK
- network_manager=nova.network.manager.FlatDHCPManager
- force_dhcp_release=True
- dhcpbridge_flagfile=/etc/nova/nova.conf
- dhcpbridge=/usr/bin/nova-dhcpbridge
- firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
- public_interface=eth0    
- flat_interface=eth1     
- flat_network_bridge=br100
- fixed_range=10.10.0.0/24   
- network_size=256
- flat_injected=False
- connection_type=libvirt
- multi_host=True
-
- # NOVNC CONSOLE
- novnc_enabled=True
- novncproxy_base_url=http://192.168.30.73:6080/vnc_auto.html
- vncserver_proxyclient_address=192.168.30.73
- vncserver_listen=192.168.30.73
-</code></pre></li>
-<li><p>修改配置文件/etc/sudoers，在最后一行追加：</p>
-
-<pre><code> nova ALL=(ALL) NOPASSWD:ALL
-</code></pre></li>
-<li><p>同步数据库</p>
-
-<pre><code> sudo nova-manage db sync
-</code></pre></li>
-<li><p>重启nova相关服务</p>
-
-<pre><code> sudo /etc/init.d/nova-api restart
- sudo /etc/init.d/nova-cert restart
- sudo /etc/init.d/nova-consoleauth restart
- sudo /etc/init.d/nova-novncproxy restart
- sudo /etc/init.d/nova-scheduler restart
-</code></pre></li>
-<li><p>检查服务状态</p>
-
-<pre><code> sudo nova-manage service list
-</code></pre></li>
-</ol>
-
-
-<p> 如果正常，会输出类似以下信息：</p>
-
-<p><img src="/images/2013/06/03.png" title="" ></p>
-
-<ol>
-<li><p>创建fixed_ip（内网虚拟机IP）</p>
-
-<pre><code> sudo nova-manage network create private --fixed_range_v4=10.10.0.0/24 --num_networks=1 --bridge=br100 --bridge_interface=eth2 --network_size=256 --multi_host=T
-</code></pre></li>
-<li><p>创建floating_ip（可以理解为floating_rang，并非一个具体的IP地址），它和公网一个段的IP:</p>
-
-<pre><code> nova-manage floating create 192.168.30.1/24
-</code></pre></li>
-<li><p>设置安全策略</p>
-
-<pre><code> nova secgroup-add-rule default tcp 1 65535 0.0.0.0/0
- nova secgroup-add-rule default udp 1 65535 0.0.0.0/0
- nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
-</code></pre></li>
-</ol>
-
-
-<hr />
-
-<h2>计算节点安装</h2>
-
-<h3>安装OpenStack组件</h3>
-
-<pre><code>os_nova="nova-common python-nova python-novaclient nova-compute nova-network nova-api-metadata"
-os_other="kvm libvirt-bin pm-utils bridge-utils"
-sudo apt-get install -y $os_nova $os_other
-</code></pre>
-
-<p>大约71M左右。</p>
-
-<h3>Nova配置</h3>
-
-<ol>
-<li><p>更新配置文件/etc/nova/nova.conf</p>
-
-<pre><code> [DEFAULT]
- logdir=/var/log/nova
- state_path=/var/lib/nova
- lock_path=/run/lock/nova
- verbose=False
- api_paste_config=/etc/nova/api-paste.ini
- scheduler_driver=nova.scheduler.simple.SimpleScheduler
- s3_host=192.168.30.73
- ec2_host=192.168.30.73
- ec2_dmz_host=192.168.30.73
- rabbit_host=192.168.30.73
- cc_host=192.168.30.73
- metadata_host=10.0.0.7
- nova_url=http://192.168.30.73:8774/v1.1/
- sql_connection=mysql://openstack:openstack@192.168.30.73/nova
- ec2_url=http://192.168.30.73:8773/services/Cloud
- root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
-
- # Auth
- use_deprecated_auth=false
- auth_strategy=keystone
- keystone_ec2_url=http://192.168.30.73:5000/v2.0/ec2tokens
- # Imaging service
- glance_api_servers=192.168.30.73:9292
- image_service=nova.image.glance.GlanceImageService
-
- # NOVNC CONSOLE
- novnc_enabled=True
- novncproxy_base_url=http://192.168.30.73:6080/vnc_auto.html
- vncserver_proxyclient_address=192.168.30.74
- vncserver_listen=192.168.30.74
-
- # Network settings
- network_manager=nova.network.manager.FlatDHCPManager
- dhcpbridge_flagfile=/etc/nova/nova.conf
- dhcpbridge=/usr/bin/nova-dhcpbridge
- firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
- public_interface=eth0
- flat_interface=eth1
- flat_network_bridge=br100
- fixed_range=10.10.0.1/24
- floating_range=192.168.30.128/24
- network_size=250
- flat_network_dhcp_start=10.0.0.40
- flat_injected=false
- force_dhcp_release=true
- dhcp_lease_time=604800
- multi_host=true
- iscsi_helper=tgtadm
- connection_type=libvirt
- # Compute #
- compute_driver=libvirt.LibvirtDriver
-
- # Cinder #
- volume_api_class=nova.volume.cinder.API
- osapi_volume_listen_port=5900
-</code></pre></li>
-<li><p>修改配置文件/etc/nova/nova-compute.conf</p>
-
-<pre><code> [DEFAULT]
- libvirt_type=kvm
-</code></pre></li>
-</ol>
-
-
-<p> 除了KVM，你还可以修改成其他的，例如QEMU/XEN等。</p>
-
-<ol>
-<li><p>禁用默认的网桥</p>
-
-<pre><code> virsh net-autostart default --disable
- virsh net-destroy default
-</code></pre></li>
-<li><p>重启nova相关服务</p>
-
-<pre><code> sudo /etc/init.d/nova-api-metadata restart
- sudo /etc/init.d/nova-compute restart
- sudo /etc/init.d/nova-network restart
-</code></pre></li>
-</ol>
-
-
-<hr />
-
-<h2>访问OpenStack DashBoard</h2>
-
-<p>在控制节点重启httpd和memcached：</p>
-
-<pre><code>sudo /etc/init.d/apache2 restart
-sudo /etc/init.d/memcached restart
-</code></pre>
-
-<p>访问 <a href="http://192.168.30.73/horizon">http://192.168.30.73/horizon</a>，用户名和密码分别是admin/admin_password</p>
-
-<hr />
-
-<h2>日常管理</h2>
-
-<h3>控制节点管理</h3>
-
-<h4>创建实例</h4>
-
-<h5>创建虚拟机密钥对</h5>
-
-<p>在控制节点执行以下语句：</p>
-
-<pre><code>    root@control-01:~# ssh-keygen 
-    Generating public/private rsa key pair.
-    Enter file in which to save the key (/root/.ssh/id_rsa): 
-    Created directory '/root/.ssh'.
-    Enter passphrase (empty for no passphrase): 
-    Enter same passphrase again: 
-    Your identification has been saved in /root/.ssh/id_rsa.
-    Your public key has been saved in /root/.ssh/id_rsa.pub.
-    The key fingerprint is:
-    6b:6e:2f:b5:b5:73:a6:8e:96:bf:c0:a5:84:7c:c5:92 root@control-01
-    The key's randomart image is:
-    +--[ RSA 2048]----+
-    |                 |
-    |           o     |
-    |          E o    |
-    |       . . o     |
-    |        S o .    |
-    |         =.o.    |
-    |        o.++ .   |
-    |       oo +oo o  |
-    |       ..+oo=*   |
-    +-----------------+
-</code></pre>
-
-<h5>导入密钥</h5>
-
-<pre><code>    nova keypair-add --pub_key .ssh/id_rsa.pub key2
-    nova keypair-list
-    +------+-------------------------------------------------+
-    | Name | Fingerprint                                     |
-    +------+-------------------------------------------------+
-    | key2 | 6b:6e:2f:b5:b5:73:a6:8e:96:bf:c0:a5:84:7c:c5:92 |
-    +------+-------------------------------------------------+
-</code></pre>
-
-<h5>查看镜像</h5>
-
-<pre><code>    nova image-list
-    +--------------------------------------+--------------+--------+--------+
-    | ID                                   | Name         | Status | Server |
-    +--------------------------------------+--------------+--------+--------+
-    | 533457ef-a1fe-41e0-a351-908975d3550b   | myFirstImage   | ACTIVE |        |
-    +--------------------------------------+--------------+--------+--------+
-</code></pre>
-
-<p>镜像的创建方法请见上传镜像文件。</p>
-
-<h5>查看虚拟机配置模板</h5>
-
-<pre><code>    nova flavor-list
-</code></pre>
-
-<h5>创建实例(虚拟机)</h5>
-
-<pre><code>    nova boot --flavor 1 --image 533457ef-a1fe-41e0-a351-908975d3550b --key_name key2 myFirstvm
-</code></pre>
-
-<p>创建一个名叫：myFirstvm的实例。</p>
-
-<ul>
-<li>&mdash;image             表示使用的哪个镜像文件</li>
-<li>&mdash;flavor             使用哪个配置模板，具体见查看虚拟机配置模板</li>
-<li>&mdash;key_name       指定密钥文件</li>
-</ul>
-
-
-<p>在创建之后会输出以下类似信息：</p>
-
-<p><img src="/images/2013/06/04.png" title="" ></p>
-
-<p>从图中可看出正在创建一个实例。</p>
-
-<h4>配置网络</h4>
-
-<h5>创建与绑定公网</h5>
-
-<ol>
-<li><p>创建一个公网IP，在控制节点执行以下语句：</p>
-
-<pre><code> nova  floating-ip-create
-</code></pre></li>
-<li><p>创建指定的公网IP</p></li>
-</ol>
-
-
-<p> floating-ip-create只是创建一个随机可用（IP池）的可用公网IP，那如何要创建一个指定的IP如何操作？没关系，nova可以做到，请看操作：</p>
-
-<pre><code>    nova add-floating-ip test01 192.168.30.6
-</code></pre>
-
-<ol>
-<li><p>绑定公网IP地址到虚拟机</p>
-
-<pre><code> nova add-floating-ip vm01 192.168.30.1
-</code></pre></li>
-</ol>
-
-
-<p> 表示绑定到vm01这个虚拟机。可通过查看虚拟机状态看到：</p>
-
-<pre><code>    nova show vm01
-</code></pre>
-
-<h5>防火墙设置</h5>
-
-<ol>
-<li><p>允许SSH登录</p>
-
-<pre><code> nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
-</code></pre></li>
-<li><p>允许ICMP Ping</p>
-
-<pre><code> nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
-</code></pre></li>
-<li><p>查看防火墙设置</p>
-
-<pre><code> nova secgroup-list-rules default
-</code></pre></li>
-</ol>
-
-
-<h5>删除或解绑floating-ip</h5>
-
-<p>如果某个公网IP不再需要，你可以通过删除或解绑它：</p>
-
-<pre><code>    nova remove-floating-ip test01 192.168.30.6
-</code></pre>
-
-<p>或</p>
-
-<pre><code>    nova floating-ip-delete test01 192.168.30.6
-</code></pre>
-
-<p>删除之后就会从IP池释放出来，以供其他Tenant使用。</p>
-
-<hr />
-
-<h3>Cinder管理</h3>
-
-<ol>
-<li><p>列出当前用户所有资源</p>
-
-<pre><code> cinder absolute-limits
-</code></pre></li>
-<li><p>创建一个Volume</p>
-
-<pre><code> cinder create --display_name cin01 10
-</code></pre></li>
-<li><p>&mdash;display_name为volume名称，后面的数字表示为10G。</p></li>
-<li><p>查看Volume</p>
-
-<pre><code> cinder list
-</code></pre></li>
-</ol>
-
-
-<p> 或者</p>
-
-<pre><code>    nova volume-list
-</code></pre>
-
-<hr />
-
-<h3>计算节点管理</h3>
-
-<h4>KVM驱动</h4>
-
-<p>要启用KVM，只需要在/etc/nova/nova.conf加入：</p>
-
-<pre><code>    libvirt_type=kvm
-    compute_driver=libvirt.LibvirtDriver
-</code></pre>
-
-<p>KVM支持的虚拟机镜像格式：RAW、QCOW2、VMDK</p>
-
-<h4>QEMU驱动</h4>
-
-<p>要启用QEMU，只需要在/etc/nova/nova.conf加入：</p>
-
-<pre><code>    libvirt_type=qemu
-    compute_driver=libvirt.LibvirtDriver
-</code></pre>
-
-<p>QEMU支持的虚拟机镜像格式：RAW、QCOW2、VMDK</p>
-
-<h4>Xen驱动</h4>
-
-<p>要启用Xen，包括Xen, XenAPI, XenServer and XCP，只需要在/etc/nova/nova.conf加入：</p>
-
-<pre><code>    compute_driver=xenapi.XenAPIDriver
-    xenapi_connection_url=http://your_xenapi_management_ip_address
-    xenapi_connection_username=root
-    xenapi_connection_password=your_password
-</code></pre>
-
-<p>XenAPI支持的虚拟机镜像格式：RAW、VHD</p>
-
-<p>如果您的Xen使用的libvirt管理，只需要在/etc/nova/nova.conf加入：</p>
-
-<pre><code>    libvirt_type=xen
-    compute_driver=libvirt.LibvirtDriver
-</code></pre>
-
-<hr />
-
-<h3>Glance管理</h3>
-
-<h4>磁盘格式</h4>
-
-<ul>
-<li><p>raw 此格式支持兼容转换其他格式文件，类似于中间格式，最大的缺点是<strong>不支持虚拟机的快照功能</strong>，使用空间类似于物理磁盘，使用多少空间实际上就是多少空间，可以通过du -h file.raw 来查看它真正的大小，而ls -lh看到的就是整个raw文件大小（包括剩余空间）</p></li>
-<li><p>qcow2 更小的存储空间，du -h 和ls -h看到的大小一样。且支持虚拟机的快照功能，性能接近于 raw 格式的文件。支持AES加密、zlib压缩。</p></li>
-<li><p>vhd 微软的虚拟磁盘文件，不过也兼容其他虚拟软件。</p></li>
-<li><p>vmdk VMware的专有格式，其在自身的虚拟环境中，无论从性能还是功能，都是最强大、最稳定的，其他虚拟化软件较少用到。</p></li>
-<li><p>iso 经典的ISO文件，不多介绍。</p></li>
-<li><p>vdi VirtualBox的专有格式，一般服务器虚拟化也很少用到。</p></li>
-<li><p>aki Amazon内核镜像文件。</p></li>
-<li><p>ari Amazon 内存（ramdisk）镜像文件。</p></li>
-<li><p>ami Amazon机器镜像文件。</p></li>
-</ul>
-
-
-<h4>容器格式</h4>
-
-<p>Glance的container format主要包括以下格式：</p>
-
-<ul>
-<li><p>bare                  表示镜像没有包括container或元数据，如果不知道选哪个格式，就选bare吧。</p></li>
-<li><p>ovf                   开放式虚拟磁盘文件，最初由VMware发起，支持多种虚拟化。</p></li>
-<li><p>aki                    Amazon内核镜像文件，在 磁盘格式设置为 aki 时使用。</p></li>
-<li><p>ari                    Amazon 内存（ramdisk）镜像文件，在 磁盘格式设置为 ari 时使用。</p></li>
-<li><p>ami                   Amazon机器镜像文件，在 磁盘格式设置为 ami 时使用。</p></li>
-</ul>
-
-
-<p>关于安装与部署，偶暂时写到这里，这只是很简单的一个入门例子而已，下次偶会介绍
-如何制作CentOS5.5、CentOS 6.3及Windows Server 2008的镜像，很多同学因镜像而烦恼。</p>
 ]]></content>
   </entry>
   
