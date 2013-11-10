@@ -9,9 +9,21 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="Keystone介绍 什么是Keystone？
-Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。 安装依赖包 1
-apt- &hellip;">
+  <meta name="description" content="前言 首先得说明一下，此教程是基于H版部署，由于时间关系，文章可能会有错误，如果有发现错误之处，请直接回复，感谢。 环境准备 资源列表 网络配置 控制节点controller网络配置如下： 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+# Internal Network
+auto &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +93,201 @@ apt- &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-10T13:19:00+08:00" pubdate data-updated="true">Nov 10<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>前言</h2>
+
+<p>首先得说明一下，此教程是基于H版部署，由于时间关系，文章可能会有错误，如果有发现错误之处，请直接回复，感谢。</p>
+
+<h2>环境准备</h2>
+
+<h3>资源列表</h3>
+
+<p> <img src="/images/2013/11/openstack-host-list.png" title="" ></p>
+
+<h3>网络配置</h3>
+
+<p>控制节点controller网络配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Internal Network
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 10.0.0.11
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>
+</span><span class='line'>#External Netwok
+</span><span class='line'>auto eth1
+</span><span class='line'>iface eth1 inet static
+</span><span class='line'>address 192.168.30.150
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p>计算节点compute01网络配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Internal Network
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 10.0.0.13
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>
+</span><span class='line'>#External Netwok
+</span><span class='line'>auto eth1
+</span><span class='line'>iface eth1 inet static
+</span><span class='line'>address 192.168.30.151
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置hostname，在所有节点的/etc/hosts中加入：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>10.0.0.11       controller
+</span><span class='line'>10.0.0.13       compute01</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启网络</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service networking restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>IP转发</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+</span><span class='line'>sysctl -p</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>时间同步</h3>
+
+<p>安装NTP：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y ntp
+</span><span class='line'>sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.com\nserver 127.127.1.0\nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
+</span><span class='line'>sudo /etc/init.d/ntp restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其他节点的server都指向控制节点：10.0.0.11</p>
+
+<h3>Mysql和rabbitmq安装</h3>
+
+<p>在控制节点执行，安装过程中会提示输入几个密码，此处为了方便，密码统一设置为openstack (是不是应该打马赛克？)：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y mysql-server python-mysqldb 
+</span><span class='line'>sed -i 's/127.0.0.1/10.0.0.11/g' /etc/mysql/my.cnf
+</span><span class='line'>/etc/init.d/mysql restart
+</span><span class='line'>
+</span><span class='line'>apt-get install -y rabbitmq-server</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>添加Havana 仓库</h3>
+
+<p>安装 Keyring</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install ubuntu-cloud-keyring</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加仓库源</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main" &gt;&gt; /etc/apt/sources.list.d/cloudarchive-havana.list
+</span><span class='line'>echo "deb-src http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main" &gt;&gt; /etc/apt/sources.list.d/cloudarchive-havana.list</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更新系统</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get update
+</span><span class='line'>apt-get dist-upgrade</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果遇到无法update，多半是网络运营商缓存问题导致的，这时使用代理搞定吧：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1561,98 +1768,6 @@ chmod +x /root/realserver.sh</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-07-24T00:00:00+08:00" pubdate data-updated="true">Jul 24<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>前言</h1>
-
-<p>对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
-不敢私藏，故与大家分享小小心得。上次与大家介绍过 <a href="http://agenge.com/cloud-computing/make_openstack-centos-image.html">制作OpenStack CentOS 6.3 镜像</a></p>
-
-<p>本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作：</p>
-
-<ol>
-<li>下载Virtio总线驱动</li>
-</ol>
-
-
-<p> 由于OpenStack只支持Virtio总线的磁盘，所以我们需要在安装之前下载virtio驱动：</p>
-
-<pre><code>    wget http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/virtio-win-0.1-59.iso
-</code></pre>
-
-<ol>
-<li>准备一个Windows Server 2008的ISO文件。</li>
-</ol>
-
-
-<p> 除了Virtio总线驱动，您还需要准备一个Windows Server 2008的ISO，为安装操作系统做准备。
-3. 创建虚拟磁盘文件：</p>
-
-<pre><code>    qemu-img create -f qcow2 winserver2008.img 20G
-</code></pre>
-
-<p> 对于虚拟磁盘文件的各种磁盘格式区别与对比，可以参考 <a href="http://blog.prajnagarden.com/?p=248">qcow2、raw、vmdk等镜像格式</a></p>
-
-<ol>
-<li><p>创建虚拟机，使用kvm或virt-install均可，本次安装使用的virt-install</p>
-
-<pre><code> virt-install --connect qemu:///system -n winserver2008 --vcpus=1 -r 2048 \
-   --disk path=/path/to/winserver2008.img,size=60,format=qcow2,bus=virtio,cache=none \
-   -c /path/iso/windows_server_2008.iso \
-   --vnc --vncport=5909 --vnclisten=0.0.0.0  \
-   --os-type windows --os-variant=win2k8 --accelerate \
-   --network=bridge:br0,model=virtio  \
-   --disk path=/path/to/win_driver/virtio-win-0.1-59.iso,device=cdrom,perms=ro&lt;br /&gt;
-</code></pre></li>
-</ol>
-
-
-<p> 以上参数有点多，不过这里不一一解释，后期偶会专门写一篇介绍KVM相关知识点，这里只是描述几个重要的参数：</p>
-
-<pre><code>- -n  虚拟机的名称
-- --disk  虚拟磁盘存放的路径，即第一步qemu-img创建的虚拟磁盘。&lt;/span&gt;&lt;/li&gt;
-- -c  ISO的路径 &lt;/span&gt;&lt;/li&gt;
-- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。&lt;/span&gt;&lt;/li&gt;
-- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
-</code></pre>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/07/24/make_openstack-windows2008-image/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1668,6 +1783,10 @@ chmod +x /root/realserver.sh</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
       </li>
     
@@ -1681,10 +1800,6 @@ chmod +x /root/realserver.sh</p>
     
       <li class="post">
         <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
       </li>
     
   </ul>

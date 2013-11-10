@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: OpenStack | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/openstack/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-10-24T09:29:31+08:00</updated>
+  <updated>2013-11-10T14:34:53+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,1365 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Openstack安装与部署(Havana)]]></title>
+    <link href="http://agenge.github.io/blog/2013/11/10/openstack-install-with-deploy-for-havana/"/>
+    <updated>2013-11-10T13:19:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/11/10/openstack-install-with-deploy-for-havana</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>首先得说明一下，此教程是基于H版部署，由于时间关系，文章可能会有错误，如果有发现错误之处，请直接回复，感谢。</p>
+
+<h2>环境准备</h2>
+
+<h3>资源列表</h3>
+
+<p> <img src="/images/2013/11/openstack-host-list.png" title="" ></p>
+
+<h3>网络配置</h3>
+
+<p>控制节点controller网络配置如下：</p>
+
+<p>```</p>
+
+<h1>Internal Network</h1>
+
+<p>auto eth0
+iface eth0 inet static
+address 10.0.0.11
+netmask 255.255.255.0</p>
+
+<h1>External Netwok</h1>
+
+<p>auto eth1
+iface eth1 inet static
+address 192.168.30.150
+netmask 255.255.255.0
+gateway 192.168.30.1
+dns-nameservers 218.201.4.3
+```</p>
+
+<p>计算节点compute01网络配置如下：</p>
+
+<p>```</p>
+
+<h1>Internal Network</h1>
+
+<p>auto eth0
+iface eth0 inet static
+address 10.0.0.13
+netmask 255.255.255.0</p>
+
+<h1>External Netwok</h1>
+
+<p>auto eth1
+iface eth1 inet static
+address 192.168.30.151
+netmask 255.255.255.0
+gateway 192.168.30.1
+dns-nameservers 218.201.4.3
+```</p>
+
+<p>设置hostname，在所有节点的/etc/hosts中加入：
+<code>
+10.0.0.11       controller
+10.0.0.13       compute01
+</code></p>
+
+<p>重启网络
+<code>
+service networking restart
+</code></p>
+
+<p>IP转发
+<code>
+sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+sysctl -p
+</code></p>
+
+<h3>时间同步</h3>
+
+<p>安装NTP：</p>
+
+<p><code>
+apt-get install -y ntp
+sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.com\nserver 127.127.1.0\nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
+sudo /etc/init.d/ntp restart
+</code></p>
+
+<p>其他节点的server都指向控制节点：10.0.0.11</p>
+
+<h3>Mysql和rabbitmq安装</h3>
+
+<p>在控制节点执行，安装过程中会提示输入几个密码，此处为了方便，密码统一设置为openstack (是不是应该打马赛克？)：</p>
+
+<p>```
+apt-get install -y mysql-server python-mysqldb
+sed -i &rsquo;s/127.0.0.1/10.0.0.11/g' /etc/mysql/my.cnf
+/etc/init.d/mysql restart</p>
+
+<p>apt-get install -y rabbitmq-server
+```</p>
+
+<h3>添加Havana 仓库</h3>
+
+<p>安装 Keyring
+<code>
+apt-get install ubuntu-cloud-keyring
+</code></p>
+
+<p>添加仓库源
+<code>
+echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main" &gt;&gt; /etc/apt/sources.list.d/cloudarchive-havana.list
+echo "deb-src http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main" &gt;&gt; /etc/apt/sources.list.d/cloudarchive-havana.list
+</code></p>
+
+<p>更新系统
+<code>
+apt-get update
+apt-get dist-upgrade
+</code>
+如果遇到无法update，多半是网络运营商缓存问题导致的，这时使用代理搞定吧：
+<code>
+sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update
+</code></p>
+
+<!-- more -->
+
+
+<h3>初始化数据库</h3>
+
+<p>在控制节点执行，创建数据库，并设置：
+<code>
+mysql -uroot -p
+</code></p>
+
+<p>输入密码后执行以下SQL语句
+```
+CREATE DATABASE keystone;
+CREATE DATABASE nova;
+CREATE DATABASE cinder;
+CREATE DATABASE glance;
+CREATE DATABASE neutron;
+CREATE DATABASE heat;
+GRANT ALL ON neutron.<em> TO neutron@&lsquo;%&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON neutron.</em> TO neutron@&lsquo;10.0.0.11&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON keystone.* TO neutron@&lsquo;%&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;</p>
+
+<p>GRANT ALL ON keystone.<em> TO keystone@&lsquo;%&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON keystone.</em> TO keystone@&lsquo;10.0.0.11&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON nova.<em> TO nova@&lsquo;%&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON nova.</em> TO nova@&lsquo;10.0.0.11&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON cinder.<em> TO cinder@&lsquo;%&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON cinder.</em> TO cinder@&lsquo;10.0.0.11&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON glance.<em> TO glance@&lsquo;%&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON glance.</em> TO glance@&lsquo;10.0.0.11&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON heat.<em> TO heat@&lsquo;%&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;
+GRANT ALL ON heat.</em> TO heat@&lsquo;10.0.0.11&rsquo; IDENTIFIED BY &lsquo;openstack&rsquo;;</p>
+
+<p>flush privileges;
+```
+需要注意的是以上的IP需要你自己根据实际情况而修改。</p>
+
+<hr />
+
+<h2>控制节点</h2>
+
+<h3>Identity Service(Keystone)安装</h3>
+
+<p>在控制节点安装认证服务keystone
+<code>
+apt-get install -y keystone python-keystone python-keystoneclient
+</code></p>
+
+<h4>Keystone配置</h4>
+
+<p>keystone支持mysql、sqlite及LDAP，以下示例我们将使用Mysql来存储keystone认证信息。</p>
+
+<p>在控制节点修改/etc/keystone/keystone.conf配置文件，注释第78行：</p>
+
+<pre><code>connection = sqlite:////var/lib/keystone/keystone.db
+</code></pre>
+
+<p>加入：</p>
+
+<pre><code>connection = mysql://keystone:openstack@10.0.0.11/keystone
+</code></pre>
+
+<p>重启keystone后，初始化数据库：</p>
+
+<p><code>
+keystone-manage db_sync
+/etc/init.d/keystone restart
+</code></p>
+
+<p>配置openssl
+在keystone与OpenStack服务之间如果要使用ssl进行token认证，就需要使用到openssl
+<code>
+openssl rand -hex 10
+8ac14959ce3d1a4fe213
+</code></p>
+
+<p>修改/etc/keystone/keystone.conf的 [DEFAULT]章节
+将 admin_token = admin 修改成：</p>
+
+<pre><code>admin_token = 8ac14959ce3d1a4fe213
+</code></pre>
+
+<p>再次重启keystone，使其生效</p>
+
+<pre><code>/etc/init.d/keystone restart
+</code></pre>
+
+<p>创建User、Tenant、Role、Endpoint、Service
+首先创建两个环境变量
+<code>
+export SERVICE_TOKEN=8ac14959ce3d1a4fe213
+export SERVICE_ENDPOINT=http://10.0.0.11:35357/v2.0
+</code></p>
+
+<h4>创建租户</h4>
+
+<p>创建两个租户分别是：admin和service
+<code>
+keystone tenant-create --name=admin --description="Admin Tenant"
+keystone tenant-create --name=service --description="Service Tenant"
+</code>
+上面2个id 暂时需要记录下来，后面将会用到，例如这里是：</p>
+
+<pre><code>admin   a2ba2a4cd7f54d3b9bed90e16def2b8f
+service 208807d34ff7455e93b39a2820265349
+</code></pre>
+
+<h4>创建用户</h4>
+
+<p><code>
+keystone user-create --name=admin --pass=openstack \
+--email=admin@domain.com --tenant_id=a2ba2a4cd7f54d3b9bed90e16def2b8f \
+--enable=True
+</code>
+user id同样需要记录下来，例如这里是：
+UserId  4fe9772510254b1083962b77d72643c3</p>
+
+<h4>创建角色</h4>
+
+<p>创建一个名称为admin的角色</p>
+
+<pre><code>keystone role-create --name=admin
+</code></pre>
+
+<p>截止到目前，已经分别创建 Tenant、User、Role，先不管Service这个租户，分别是：</p>
+
+<p><code>
+Tenant ID: a2ba2a4cd7f54d3b9bed90e16def2b8f
+User ID:    133e4aa56bba4400a2ccfd4a3ec08b18
+Role ID:    0a788b82f9bb4e849af2b402931f58d2
+</code>
+H版现在不需要我们记录具体的id，貌似只需要指定 名称 即可。</p>
+
+<h4>关联用户、角色、租户</h4>
+
+<p>光创建上面那些身份还不够，最终需要将它们关联起来才能正常使用</p>
+
+<p><code>
+keystone user-role-add --user admin --role admin --tenant admin
+</code></p>
+
+<h4>创建Services 及 API endpoints</h4>
+
+<p>首先创建一个类型为identity的keystone服务，名称为keystone：</p>
+
+<p><code>
+keystone service-create --name=keystone --type=identity \
+--description="Keystone Identity Service"
+</code></p>
+
+<p>创建endpoint，同样只需要记住service name即可：</p>
+
+<p><code>
+keystone endpoint-create --region regionOne \
+--service  keystone  \
+--publicurl http://10.0.0.11:5000/v2.0 \
+--internalurl http://10.0.0.11:5000/v2.0 \
+--adminurl http://10.0.0.11:35357/v2.0
+</code></p>
+
+<p>验证认证服务(Keystone)安装是否成功
+先unset之前的环境变量：</p>
+
+<pre><code>unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+</code></pre>
+
+<p>创建keystonerc(环境变量)</p>
+
+<p>```
+export OS_REGION_NAME=regionOne
+export OS_USERNAME=admin</p>
+
+<h1>export OS_AUTH_STRATEGE=keystone</h1>
+
+<p>export OS_PASSWORD=openstack
+export OS_TENANT_NAME=admin
+export OS_AUTH_URL=<a href="http://10.0.0.11:35357/v2.0">http://10.0.0.11:35357/v2.0</a>
+OS_NO_CACHE=true
+```</p>
+
+<p>添加环境变量
+为避免我们每次登录都要设置环境变量，现在将上面参数直接写到一个文件中，在每天登录时使其自动生效，这样我们后期就可以直接通过  keystone subcommand 来使用，创建keystonerc文件，并将下列信息写入keystonerc ：</p>
+
+<p><code>
+export OS_USERNAME=admin
+export OS_PASSWORD=openstack
+export OS_TENANT_NAME=admin
+export OS_AUTH_URL=http://10.0.0.11:35357/v2.0
+</code>
+保存之后并使环境变量立即生效：</p>
+
+<pre><code>source keystonerc
+</code></pre>
+
+<p>如果没问题，就能看到token信息。但如果有错误，建议注销当前用户，重新登录后测试一下。</p>
+
+<p>测试是否正常：</p>
+
+<pre><code>keystone token-get
+</code></pre>
+
+<p>如果配置正常，将会显示token expires\id\tenant_id\user_id四行。
+下一步，我们加一个 &mdash;os_tenant_name参数试下：</p>
+
+<pre><code>keystone --os_tenant_name admin token-get
+</code></pre>
+
+<p>如果没问题，将会响应和上面类似的输出信息，区别仅是多一行 tenant_id</p>
+
+<hr />
+
+<h3>Image Service(Glance)安装</h3>
+
+<p>镜像服务我们安装在keystone同一台机器，首先直接安装 镜像服务：</p>
+
+<pre><code>apt-get install -y glance
+</code></pre>
+
+<h4>Glance配置</h4>
+
+<p>更新glance配置文件glance-registry.conf：</p>
+
+<pre><code>vim /etc/glance/glance-registry.conf
+</code></pre>
+
+<p>修改mysql数据库连接字符串：</p>
+
+<pre><code>sql_connection = mysql://glance:openstack@10.0.0.11/glance
+</code></pre>
+
+<p>更新glance配置文件：</p>
+
+<pre><code>vim /etc/glance/glance-api.conf
+</code></pre>
+
+<p>在[DEFAULT]章节加入：</p>
+
+<pre><code>sql_connection = mysql://glance:openstack@10.0.0.11/glance
+</code></pre>
+
+<p>同步数据库，将会创建镜像服务相关的表：</p>
+
+<pre><code>glance-manage db_sync
+</code></pre>
+
+<h4>创建用户</h4>
+
+<p>创建名称为glance的认证用户</p>
+
+<p><code>
+keystone user-create --name=glance --pass=glance \
+--email=glance@domain.com \
+--tenant service --enable=True
+</code>
+注意，此处的 tenant 就是租户service。</p>
+
+<p>配置Glance与 Keystone访问
+编辑配置文件/etc/glance/glance-api.conf 和 /etc/glance/glance-registry.conf，在最后加入以下内容：</p>
+
+<p><code>
+[keystone_authtoken]
+auth_host = 10.0.0.11
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = glance
+admin_password = glance
+</code></p>
+
+<p>编辑配置文件/etc/glance/glance-api-paste.ini和/etc/glance/glance-registry-paste.ini，将最后几行修改成：</p>
+
+<p><code>
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+service_protocol = http
+service_host = 10.0.0.11
+service_port = 5000
+auth_host = 10.0.0.11
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://10.0.0.11:5000/
+admin_tenant_name = service
+admin_user = glance
+admin_password = glance
+</code></p>
+
+<h4>创建service服务和endpoint</h4>
+
+<pre><code>keystone service-create --name=glance --type=image --description="Glance Image Service"
+</code></pre>
+
+<p>记录service id，下面创建endpoint将会用到。</p>
+
+<p><code>
+keystone endpoint-create --region regionOne \
+--service glance \
+--publicurl=http://10.0.0.11:9292 \
+--internalurl=http://10.0.0.11:9292 \
+--adminurl=http://10.0.0.11:9292
+</code></p>
+
+<h4>重启glance服务</h4>
+
+<p><code>
+/etc/init.d/glance-registry restart
+/etc/init.d/glance-api restart
+</code></p>
+
+<p>测试镜像服务是否安装成功
+镜像文件可以从互联网下载，或自己制作，centos-63.x86_64-cloud.qcow2是偶自己制作的一个镜像文件，即创建一个名称为 centos-63.x86_64-cloud的镜像文件：</p>
+
+<p><code>
+glance image-create --name centos-63.x86_64-cloud \
+--is-public true --container-format bare \
+--disk-format qcow2 &lt; /home/openstack/centos-63.x86_64-cloud.qcow2
+</code></p>
+
+<p>如果一切正常，会输出类似以下内容：
+<code>
++------------------+--------------------------------------+
+| Property         | Value                                |
++------------------+--------------------------------------+
+| checksum         | 5c80ad5a5667308b74f6f024317f9924     |
+| container_format | bare                                 |
+| created_at       | 2013-10-21T12:21:24                  |
+| deleted          | False                                |
+| deleted_at       | None                                 |
+| disk_format      | qcow2                                |
+| id               | 79a7fe9f-7f0a-480f-a60d-68f9271ce230 |
+| is_public        | True                                 |
+| min_disk         | 0                                    |
+| min_ram          | 0                                    |
+| name             | centos-63.x86_64-cloud               |
+| owner            | None                                 |
+| protected        | False                                |
+| size             | 462219776                            |
+| status           | active                               |
+| updated_at       | 2013-10-21T12:21:27                  |
++------------------+--------------------------------------+
+</code></p>
+
+<p>检查上传是否成功</p>
+
+<pre><code>glance image-list
+</code></pre>
+
+<p>如果 Status字段为 active表示上传成功。</p>
+
+<h3>Compute Service(Nova)安装</h3>
+
+<p>控制节点如果在管理并控制计算服务，需要依赖nova，首先安装以下nova包：</p>
+
+<p><code>
+apt-get install -y nova-novncproxy novnc nova-api \
+nova-ajax-console-proxy nova-cert nova-conductor \
+nova-consoleauth nova-doc nova-scheduler python-novaclient
+</code></p>
+
+<h4>Nova配置</h4>
+
+<p>修改/etc/nova/nova.conf配置文件，在最后加入：</p>
+
+<pre><code>sql_connection=mysql://nova:openstack@10.0.0.11/nova
+</code></pre>
+
+<p>为nova服务创建数据库表：</p>
+
+<pre><code>nova-manage db sync
+</code></pre>
+
+<p>配置VNC，修改配置文件/etc/nova/nova.conf，在最后加入：</p>
+
+<p>```</p>
+
+<h1>VNC</h1>
+
+<p>novnc_enabled=True
+my_ip=192.168.30.150
+novncproxy_base_url=<a href="http://192.168.30.150:6080/vnc_auto.html">http://192.168.30.150:6080/vnc_auto.html</a>
+vncserver_listen=0.0.0.0
+```</p>
+
+<h4>创建用户与角色</h4>
+
+<p>现在创建一个名称为nova的认证用户和角色</p>
+
+<p><code>
+keystone user-create --name=nova --pass=nova \
+--email=nova@domain.com \
+--tenant service --enable=True
+keystone user-role-add --user=nova --tenant=service --role=admin
+</code></p>
+
+<p>修改配置文件/etc/nova/nova.conf</p>
+
+<p>```
+[DEFAULT]</p>
+
+<p>auth_strategy=keystone
+```</p>
+
+<p>修改配置文件/etc/nova/api-paste.ini,并修改以下内容：
+<code>
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = 10.0.0.11
+auth_host = 10.0.0.11
+auth_port = 35357
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+</code></p>
+
+<h4>创建service服务和endpoint</h4>
+
+<pre><code>keystone service-create --name=nova --type=compute --description="Nova Compute Service"
+</code></pre>
+
+<p>创建endpoint
+<code>
+keystone endpoint-create --service nova \
+ --publicurl=http://10.0.0.11:8774/v2/%\(tenant_id\)s \
+ --internalurl=http://10.0.0.11:8774/v2/%\(tenant_id\)s \
+ --adminurl=http://10.0.0.11:8774/v2/%\(tenant_id\)s
+</code></p>
+
+<p>配置计算服务使用RabbitMQ,修改配置文件/etc/nova/nova.conf，添加以下内容：</p>
+
+<p><code>
+rpc_backend=nova.rpc.impl_kombu
+rabbit_host = 10.0.0.11
+</code></p>
+
+<p>nova.conf全部内容如下：</p>
+
+<p>```
+[DEFAULT]
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+logdir=/var/log/nova
+state_path=/var/lib/nova
+lock_path=/var/lock/nova
+force_dhcp_release=True
+iscsi_helper=tgtadm
+libvirt_use_virtio_for_bridges=True
+libvirt_type=qemu
+connection_type=libvirt
+root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
+verbose=True
+ec2_private_dns_show_ip=True
+api_paste_config=/etc/nova/api-paste.ini
+volumes_path=/var/lib/nova/volumes
+enabled_apis=ec2,osapi_compute,metadata
+sql_connection=mysql://nova:openstack@10.0.0.11/nova</p>
+
+<h1>Metadata</h1>
+
+<p>metadata_host=10.0.0.11
+metadata_manager=nova.api.manager.MetadataManager
+metadata_listen=10.0.0.11
+metadata_listen_port=8775</p>
+
+<h1>service_neutron_metadata_proxy=True</h1>
+
+<h1>neutron_metadata_proxy_shared_secret=helloOpenStack</h1>
+
+<h1>Cinder</h1>
+
+<p>volume_api_class=nova.volume.cinder.API
+osapi_volume_listen_port=5900</p>
+
+<p>auth_strategy=keystone
+rpc_backend=nova.rpc.impl_kombu
+rabbit_host = 10.0.0.11</p>
+
+<h1>VNC</h1>
+
+<p>novnc_enabled=True
+my_ip=192.168.30.150
+novncproxy_base_url=<a href="http://192.168.30.150:6080/vnc_auto.html">http://192.168.30.150:6080/vnc_auto.html</a>
+vncserver_listen=0.0.0.0</p>
+
+<h1>vncserver_proxyclient_address=192.168.30.150</h1>
+
+<h1>Network settings</h1>
+
+<p>network_manager=nova.network.manager.FlatDHCPManager
+force_dhcp_release=True
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+public_interface=eth2
+flat_interface=eth0
+floating_range=192.168.30.0/24
+flat_network_bridge=br100
+fixed_range=10.0.0.0/24 <br/>
+network_size=256</p>
+
+<h1>disabled ipv6</h1>
+
+<p>flat_injected=False
+connection_type=libvirt
+multi_host=True
+```</p>
+
+<p>重启所有nova服务</p>
+
+<pre><code>cd /etc/init.d/; for i in $( ls nova-* ); do sudo service $i restart; done
+</code></pre>
+
+<p>测试nova是否安装正常</p>
+
+<pre><code>nova image-list
+</code></pre>
+
+<p>如果正常，输出的信息和glance image-list是一样的。</p>
+
+<h3>Dashborad(Horizon)安装</h3>
+
+<h4>安装dashboard</h4>
+
+<p>这一步相对容易多了，请看操作：</p>
+
+<pre><code>apt-get install -y memcached libapache2-mod-wsgi openstack-dashboard
+</code></pre>
+
+<p>修改/etc/openstack-dashboard/local_settings.py
+将OPENSTACK_HOST修改为：</p>
+
+<pre><code>OPENSTACK_HOST = "10.0.0.11"
+</code></pre>
+
+<p>登陆dashborad：<a href="http://192.168.30.150/horizon">http://192.168.30.150/horizon</a></p>
+
+<hr />
+
+<h2>计算节点</h2>
+
+<p>以下的示例暂时以一台计算节点来测试安装与部署，即10.0.0.13</p>
+
+<h3>Compute Service(Nova)安装</h3>
+
+<p>为计算节点安装相关的包
+<code>
+apt-get install -y python-mysqldb
+apt-get install nova-compute-kvm python-novaclient python-guestfs
+</code></p>
+
+<p>安装过程会提示你，选择”yes”即可。</p>
+
+<p>以下是修复guestfs的一个bug</p>
+
+<pre><code>chmod 0644 /boot/vmlinuz*
+</code></pre>
+
+<p>删除SQLite创建的数据库</p>
+
+<pre><code>rm -f /var/lib/nova/nova.sqlite
+</code></pre>
+
+<p>配置VNC，编辑/etc/nova/nova.conf在[DEFAULT]章节添加以下信息</p>
+
+<p>```</p>
+
+<h1>VNC</h1>
+
+<p>novnc_enabled=True
+novncproxy_base_url=<a href="http://192.168.30.150:6080/vnc_auto.html">http://192.168.30.150:6080/vnc_auto.html</a>
+novncproxy_port=6080
+vncserver_listen=0.0.0.0
+vncserver_proxyclient_address=192.168.30.151
+```</p>
+
+<p>编辑/etc/nova/nova.conf，在[DEFAULT]章节添加以下信息</p>
+
+<p><code>
+glance_host=10.0.0.11
+sql_connection=mysql://nova:openstack@10.0.0.11/nova
+</code></p>
+
+<p>添加keystone认证，从控制节点复制api-paste.conf或编辑/etc/nova/api-paste.conf，并添加以下信息</p>
+
+<p><code>
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = 10.0.0.11
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+</code></p>
+
+<h4>启用网络</h4>
+
+<p>在计算节点启用网络
+本节的网络示例均使用的nova-network，如果使用neutron，请见Networking Server安装一章。
+首先为计算服务安装nova网络包</p>
+
+<pre><code>apt-get install -y nova-network
+</code></pre>
+
+<p>设置网络，编辑/etc/nova/nova.conf，增加以下信息</p>
+
+<p><code>
+network_manager=nova.network.manager.FlatDHCPManager
+firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+network_size=254
+allow_same_net_traffic=False
+multi_host=True
+send_arp_for_ha=True
+share_dhcp_address=True
+force_dhcp_release=True
+flat_network_bridge=br100
+flat_interface=eth1
+public_interface=eth1
+</code></p>
+
+<p>nova.conf 全部内容如下：</p>
+
+<p>```
+[DEFAULT]</p>
+
+<h1>notification_driver=ceilometer.compute.nova_notifier</h1>
+
+<h1>notification_driver=nova.openstack.common.notifier.rpc_notifier</h1>
+
+<p>dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+logdir=/var/log/nova
+state_path=/var/lib/nova
+lock_path=/var/lock/nova
+force_dhcp_release=True
+iscsi_helper=tgtadm
+libvirt_use_virtio_for_bridges=True
+connection_type=libvirt
+root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
+verbose=True
+ec2_private_dns_show_ip=True
+api_paste_config=/etc/nova/api-paste.ini
+volumes_path=/var/lib/nova/volumes
+enabled_apis=ec2,osapi_compute,metadata
+sql_connection=mysql://nova:openstack@10.0.0.11/nova
+libvirt_type=qemu</p>
+
+<h1>Cinder</h1>
+
+<p>volume_api_class=nova.volume.cinder.API
+osapi_volume_listen_port=5900
+cinder_catalog_info=volume:cinder:internalURL</p>
+
+<h1>Metadata</h1>
+
+<p>metadata_host=10.0.0.11
+metadata_manager=nova.api.manager.MetadataManager
+metadata_listen=10.0.0.11
+metadata_listen_port=8775</p>
+
+<h1>service_neutron_metadata_proxy=True</h1>
+
+<h1>neutron_metadata_proxy_shared_secret=helloOpenStack</h1>
+
+<h1>Compute</h1>
+
+<p>compute_driver=libvirt.LibvirtDriver</p>
+
+<h1>RabbitMQ</h1>
+
+<p>rpc_backend = nova.rpc.impl_kombu
+rabbit_host = 10.0.0.11</p>
+
+<h1>Image Servic3</h1>
+
+<p>glance_host=10.0.0.11
+image_service=nova.image.glance.GlanceImageService</p>
+
+<h1>VNC</h1>
+
+<p>novnc_enabled=True</p>
+
+<h1>my_ip=192.168.30.151</h1>
+
+<p>novncproxy_base_url=<a href="http://192.168.30.150:6080/vnc_auto.html">http://192.168.30.150:6080/vnc_auto.html</a>
+novncproxy_port=6080
+vncserver_listen=0.0.0.0
+vncserver_proxyclient_address=192.168.30.151</p>
+
+<h1>Netwok settings</h1>
+
+<p>network_manager=nova.network.manager.FlatDHCPManager
+force_dhcp_release=True
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+public_interface=eth2
+flat_interface=eth0
+floating_range=192.168.30.0/24
+flat_network_dhcp_start=10.0.0.40
+flat_network_bridge=br100
+fixed_range=10.0.0.1/24</p>
+
+<h1>network_size=256</h1>
+
+<p>flat_injected=False
+connection_type=libvirt
+multi_host=True
+dhcp_lease_time=604800
+iscsi_helper=tgtadm
+```</p>
+
+<p>重启nova服务</p>
+
+<p><code>
+/etc/init.d/nova-api restart
+/etc/init.d/nova-compute restart
+</code></p>
+
+<hr />
+
+<h2>Block Storage (Cinder)安装</h2>
+
+<p>首先得准备一台机器，以下的示例将是在控制节点来安装，同样，你也可以选择在控制节点安装，以下示例中的磁盘设备是/dev/sdb，100G</p>
+
+<h3>配置块存储控制</h3>
+
+<p>安装cinder服务依赖包</p>
+
+<pre><code>apt-get install -y cinder-api cinder-scheduler
+</code></pre>
+
+<p>配置块存储服务去使用mysql数据库，编辑/etc/cinder/cinder.conf,添加以下内容</p>
+
+<pre><code>connection = mysql://cinder:openstack@10.0.0.11/cinder
+</code></pre>
+
+<p>为块存储服务创建数据库表</p>
+
+<pre><code>cinder-manage db sync
+</code></pre>
+
+<h4>创建用户和角色</h4>
+
+<p>创建一个 cinder用户，块存储服务使用这个用户去身份认证，使用service租户且给它admin角色</p>
+
+<p><code>
+keystone user-create --name=cinder --pass=cinder --email=cinder@domain.com \
+ --tenant service --enable=True
+keystone user-role-add --user=cinder --tenant=service --role=admin
+</code></p>
+
+<p>编辑/etc/cinder/api-paste.ini，修改以下信息</p>
+
+<p><code>
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = 10.0.0.11
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = cinder
+admin_password = cinder
+</code></p>
+
+<h4>创建service和endpoint</h4>
+
+<p><code>
+keystone service-create --name=cinder --type=volume --description="Cinder Volume Service"
+keystone endpoint-create --service cinder \
+--publicurl=http://10.0.0.11:8776/v1/%\(tenant_id\)s \
+--internalurl=http://10.0.0.11:8776/v1/%\(tenant_id\)s \
+--adminurl=http://10.0.0.11:8776/v1/%\(tenant_id\)s
+</code></p>
+
+<p>再来创建个v2的API
+<code>
+keystone service-create --name=cinder --type=volumev2 \
+ --description="Cinder Volume Service V2"
+</code></p>
+
+<p>记录service id，以下将会使用到
+<code>
+keystone endpoint-create \
+ --service=98b37a6bd88c44a19bc38586c753cfdd \
+ --publicurl=http://10.0.0.11:8776/v2/%\(tenant_id\)s \
+ --internalurl=http://10.0.0.11:8776/v2/%\(tenant_id\)s \
+ --adminurl=http://10.0.0.11:8776/v2/%\(tenant_id\)s
+</code></p>
+
+<p>重启cinder服务
+<code>
+service cinder-scheduler restart
+service cinder-api restart
+</code></p>
+
+<h3>配置块存储节点</h3>
+
+<p>配置块存储服务使用RabbitMQ，编辑/etc/cinder/cinder.conf，增加以下信息
+<code>
+rpc_backend = cinder.openstack.common.rpc.impl_kombu
+rabbit_host = 10.0.0.11
+rabbit_port = 5672
+</code></p>
+
+<p>现在，我们来创建LVM的PV及LV，所以示例全部是使用的第二块设备/dev/sdb，在操作前请确保你的数据是否备份。</p>
+
+<p>安装lvm2和cinder-volume</p>
+
+<pre><code>apt-get install cinder-volume lvm2
+</code></pre>
+
+<p>创建PV 和 VG
+<code>
+root@controller:~# pvcreate /dev/sdb
+root@controller:~# vgcreate cinder-volumes /dev/sdb
+</code></p>
+
+<p>重启cinder服务
+<code>
+service cinder-volume restart
+service tgt restart
+</code></p>
+
+<p>最后去 horizon创建卷就可以使用了，步骤大概为：
+1.  管理员自定义卷类型
+2.  租户创建卷，并选择一个卷类型
+3.  附加到某个VM即可。</p>
+
+<hr />
+
+<h2>Orchestration Server(Heat)安装</h2>
+
+<p>准备一台机器，以下示例将把Heat安装在控制节点，同样，你也可以选择在控制节点安装。</p>
+
+<h3>安装Orchestration服务</h3>
+
+<pre><code>apt-get install -y heat-api heat-api-cfn 
+</code></pre>
+
+<p>初始化数据库服务，具体见最开始的 初始化数据库。</p>
+
+<h3>Orchestration配置</h3>
+
+<p>编辑/etc/heat/heat.conf，修改[DEFAULT]节：</p>
+
+<pre><code>sql_connection=mysql://heat:openstack@10.0.0.11/heat
+</code></pre>
+
+<p>同步数据库，将会自动创建heat服务的数据库表</p>
+
+<pre><code>heat-manage db_sync
+</code></pre>
+
+<h3>创建用户与角色</h3>
+
+<p>创建一个名称为heat的认证用户和角色
+<code>
+keystone user-create --name=heat --pass=heat \
+ --email=heat@domain.com \
+ --tenant service --enable=True
+</code>
+记录user id:  c8b8757e829f461e99a5aa0a72ef78b5</p>
+
+<p>关联租户(service)、用户、角色(admin)
+<code>
+keystone user-role-add --user-id 6570003a874d4dcc9fd4e3c7f6f16db6 \
+ --tenant-id 208807d34ff7455e93b39a2820265349 \
+ --role-id 0a788b82f9bb4e849af2b402931f58d2
+</code></p>
+
+<h3>创建Heat Service和Endpoint</h3>
+
+<p>创建service</p>
+
+<p>```
+keystone service-create &mdash;name=heat &mdash;type=orchestration \
+&mdash;description=&ldquo;Heat Orchestration API&rdquo;</p>
+
+<p>keystone endpoint-create &mdash;region regionOne \
+&mdash;service-id a5743b1fa56b452f9608d17fdd4dfa2b \
+&mdash;publicurl=<a href="http://10.0.0.11:8004/v1/%(tenant_id)s">http://10.0.0.11:8004/v1/%(tenant_id)s</a> \
+&mdash;internalurl=<a href="http://10.0.0.11:8004/v1/%(tenant_id)s">http://10.0.0.11:8004/v1/%(tenant_id)s</a>  \
+&mdash;adminurl=<a href="http://10.0.0.11:8004/v1/%(tenant_id)s">http://10.0.0.11:8004/v1/%(tenant_id)s</a>
+```</p>
+
+<p>heat service id: 06d78bd1404d48698e3f28c01bb2ad30
+heat-cfn service id: 507fa3386d4f4d1caa5dc075621e669a</p>
+
+<p>创建endpoint
+```
+keystone service-create &mdash;name=heat-cfn &mdash;type=cloudformation \
+&mdash;description=&ldquo;Heat CloudFormation API&rdquo;</p>
+
+<p>keystone endpoint-create &mdash;region regionOne \
+&mdash;service-id a7fae41b733f40efb7472b2a17b97794 \
+&mdash;publicurl=<a href="http://10.0.0.11:8000/v1">http://10.0.0.11:8000/v1</a> \
+&mdash;internalurl=<a href="http://10.0.0.11:8000/v1">http://10.0.0.11:8000/v1</a>  \
+&mdash;adminurl=<a href="http://10.0.0.11:8000/v1">http://10.0.0.11:8000/v1</a>
+```</p>
+
+<p>编辑/etc/heat/api-paste.ini，修改[filter:authtoken]节
+<code>
+[filter:authtoken]
+paste.filter_factory = heat.common.auth_token:filter_factory
+auth_host = 10.0.0.11
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = heat
+admin_password = heat
+</code></p>
+
+<p>重启Heat服务</p>
+
+<pre><code>cd /etc/init.d/; for i in $( ls heat-* ); do sudo service $i restart; done
+</code></pre>
+
+<h3>创建和管理stacks</h3>
+
+<p>从模板创建一个stack,其实官方已经提供很多模板，所以暂时先git下来做测试</p>
+
+<pre><code>git clone https://github.com/openstack/heat-templates.git
+</code></pre>
+
+<p>创建stack</p>
+
+<p><code>
+heat stack-create mystack \
+--template-file=/root/heat-templates/cfn/F18/WordPress_Single_Instance.template \
+--parameters="InstanceType=m1.large;DBUsername=wordpress;DBPassword=wordpress;KeyName=HEAT_KEY;LinuxDistribution=F18"
+</code>
+具体参数请参与官方手册。</p>
+
+<hr />
+
+<h2>Metering/Monitoring Server（Ceilometer）安装</h2>
+
+<h3>安装Metering Service</h3>
+
+<p><strong>1. 在控制节点安装依赖包 </strong></p>
+
+<p><code>
+apt-get install -y ceilometer-api ceilometer-collector \
+ceilometer-agent-central python-ceilometerclient
+</code></p>
+
+<p><strong>2. 安装MongoDB </strong>
+Orchestration 服务使用数据库来存储信息，此示例使用MongoDB数据库：</p>
+
+<p><code>
+apt-get install -y mongodb
+</code></p>
+
+<p>建议将/etc/mongodb.conf中的bind_ip修改为：
+<code>
+bind_ip=0.0.0.0
+</code></p>
+
+<p><strong>3. 重启mongodb生效 </strong></p>
+
+<p><code>
+/etc/init.d/mongodb restart
+</code></p>
+
+<p><strong>4. 创建数据库和一个 ceilometer用户 </strong></p>
+
+<p>```
+root@controller:~# mongo</p>
+
+<blockquote><p>use ceilometer
+switched to db ceilometer
+db.addUser ( { user: &ldquo;ceilometer&rdquo;,</p>
+
+<pre><code>         pwd: "ceilometer",
+         roles: [ "readWrite", "dbAdmin"]
+ } )
+</code></pre>
+
+<p>```</p></blockquote>
+
+<p><strong>5. 编辑/etc/ceilometer/ceilometer.conf，替换如下： </strong></p>
+
+<p>```
+[DEFAULT]
+pipeline_cfg_file=pipeline.yaml
+sample_source=openstack
+nova_control_exchange=nova
+libvirt_type=qemu
+glance_control_exchange=glance
+metering_api_port=8777
+debug=true
+verbose=true
+log_file=/var/log/ceilometer/ceilometer.log
+log_dir=/var/log/ceilometer
+notification_topics=notifications
+policy_file=policy.json
+rpc_backend=ceilometer.openstack.common.rpc.impl_kombu
+allowed_rpc_exception_modules=ceilometer.openstack.common.exception,nova.exception,cinder.exception,exceptions
+control_exchange=openstack
+rabbit_host=10.0.0.11
+rabbit_port=5672
+rabbit_userid=guest
+rabbit_password=guest
+database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer
+cinder_control_exchange=cinder</p>
+
+<p>[publisher_rpc]
+metering_topic=metering
+metering_secret=8ac14959ce3d1a4fe213</p>
+
+<p>[ssl]</p>
+
+<p>[database]
+database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer</p>
+
+<p>[alarm]</p>
+
+<p>[rpc_notifier2]</p>
+
+<p>[api]</p>
+
+<p>[service_credentials]
+os_username=ceilometer
+os_password=ceilometer
+os_tenant_name=service
+os_auth_url=<a href="http://10.0.0.11:5000/v2.0">http://10.0.0.11:5000/v2.0</a>
+os_endpoint_type=publicURL</p>
+
+<p>[dispatcher_file]</p>
+
+<p>[keystone_authtoken]
+auth_host=10.0.0.11
+auth_port=35357
+auth_protocol=http
+admin_tenant_name=service
+admin_user=ceilometer
+admin_password=ceilometer
+signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
+
+<p>[collector]</p>
+
+<p>[matchmaker_ring]</p>
+
+<p>[matchmaker_redis]
+```</p>
+
+<p><strong>6. 创建名称为 ceilometer 的用户，以便使用认证服务。使用service 租户并赋予这个用户admin角色: </strong></p>
+
+<p>```
+keystone user-create \
+  &mdash;name=ceilometer &mdash;pass=ceilometer \
+  &mdash;email=<a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#99;&#101;&#105;&#x6c;&#111;&#109;&#x65;&#x74;&#101;&#114;&#x40;&#x64;&#x6f;&#109;&#x61;&#x69;&#x6e;&#x2e;&#x63;&#x6f;&#x6d;">&#x63;&#101;&#x69;&#x6c;&#111;&#109;&#x65;&#x74;&#x65;&#x72;&#64;&#x64;&#111;&#109;&#97;&#105;&#x6e;&#x2e;&#99;&#111;&#109;</a></p>
+
+<p>keystone user-role-add &mdash;user=ceilometer &mdash;tenant=service &mdash;role=admin<br/>
+```</p>
+
+<p><strong>7. 添加服务和endpoint </strong></p>
+
+<p><code>
+keystone service-create --name=ceilometer --type=metering \
+ --description="Ceilometer Metering Service"
+</code></p>
+
+<p>记录service id，在下面创建endpoint要使用。</p>
+
+<p><code>
+keystone endpoint-create \
+ --service-id=94ae66fbf5d44c63b7257d0f3c3a48d6 \
+ --publicurl=http://10.0.0.11:8777/ \
+ --internalurl=http://10.0.0.11:8777/ \
+ --adminurl=http://10.0.0.11:8777/
+</code></p>
+
+<p><strong>8. 配置认证信息，编辑/etc/ceilometer/ceilometer.conf,修改[keystone_authtoken]节 </strong></p>
+
+<p><code>
+[keystone_authtoken]
+auth_host=10.0.0.11
+auth_port=35357
+auth_protocol=http
+auth_uri=http://10.0.0.11:35357/v2.0
+admin_tenant_name=service
+admin_user=ceilometer
+admin_password=ceilometer
+</code></p>
+
+<p><strong>9. 重启所有ceilometer服务 </strong>
+<code>
+cd /etc/init.d/; for i in $( ls ceilometer-* ); do sudo service $i restart; done
+</code></p>
+
+<h3>添加Agent: 计算</h3>
+
+<p>为收集数据，需要在<strong>计算节点</strong>安装一个Agent。</p>
+
+<p><strong>1. 首先在控制节点安装Metering agent服务 </strong></p>
+
+<pre><code>        apt-get install ceilometer-agent-compute
+</code></pre>
+
+<p><strong>2.    编辑/etc/nova/nova.conf，在[DEFAULT]节添加以下信息 </strong></p>
+
+<p>```</p>
+
+<h1>Ceilometer</h1>
+
+<p>instance_usage_audit=True
+instance_usage_period=hour
+notify_on_state_change=vm_and_task_state
+notification_driver=nova.openstack.common.notifier.rpc_notifier
+notification_driver=ceilometer.compute.nova_notifier
+```</p>
+
+<p><strong>3. 编辑/etc/ceilometer/ceilometer.conf，替换如下： </strong></p>
+
+<p>```
+[DEFAULT]
+pipeline_cfg_file=pipeline.yaml
+sample_source=openstack
+nova_control_exchange=nova
+libvirt_type=qemu
+glance_control_exchange=glance
+metering_api_port=8777
+debug=true
+verbose=true
+log_file=/var/log/ceilometer/ceilometer.log
+log_dir=/var/log/ceilometer
+notification_topics=notifications
+policy_file=policy.json
+rpc_backend=ceilometer.openstack.common.rpc.impl_kombu
+allowed_rpc_exception_modules=ceilometer.openstack.common.exception,nova.exception,cinder.exception,exceptions
+control_exchange=openstack
+rabbit_host=10.0.0.11
+rabbit_port=5672
+rabbit_userid=guest
+rabbit_password=guest
+database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer
+cinder_control_exchange=cinder</p>
+
+<p>[publisher_rpc]
+metering_topic=metering
+metering_secret=8ac14959ce3d1a4fe213</p>
+
+<p>[ssl]</p>
+
+<p>[database]
+database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer</p>
+
+<p>[alarm]</p>
+
+<p>[rpc_notifier2]</p>
+
+<p>[api]</p>
+
+<p>[service_credentials]
+os_username=ceilometer
+os_password=ceilometer
+os_tenant_name=service
+os_auth_url=<a href="http://10.0.0.11:5000/v2.0">http://10.0.0.11:5000/v2.0</a>
+os_endpoint_type=publicURL</p>
+
+<p>[dispatcher_file]</p>
+
+<p>[keystone_authtoken]
+auth_host=10.0.0.11
+auth_port=35357
+auth_protocol=http
+admin_tenant_name=service
+admin_user=ceilometer
+admin_password=ceilometer
+signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
+
+<p>[collector]</p>
+
+<p>[matchmaker_ring]</p>
+
+<p>[matchmaker_redis]</p>
+
+<p>```</p>
+
+<p><strong>4. 重启compute agent服务 </strong></p>
+
+<p><code>
+/etc/init.d/ceilometer-agent-compute restart
+</code></p>
+
+<h3>添加Agent: 镜像服务</h3>
+
+<p>要测量镜像服务(Image Service)，只需要在glance-api.conf中修改notifier_strategy = noop为
+notifier_strategy = rabbit 或者 notifier_strategy = qpid，以下示例使用的rabbit。</p>
+
+<p>修改完成后重启镜像服务：</p>
+
+<p><code>
+/etc/init.d/glance-registry restart
+/etc/init.d/glance-api restart
+</code></p>
+
+<h3>添加Agent: 块存储</h3>
+
+<p><strong>1. 要测量块存储服务(Block Storage)，只需要在cinder.conf中加入以下信息： </strong></p>
+
+<p>```</p>
+
+<h1>Ceilometer</h1>
+
+<p>notification_driver = cinder.openstack.common.notifier.rabbit_notifier
+control_exchange = cinder
+```</p>
+
+<p><strong>2. 重启cinder相关服务：</strong></p>
+
+<p><code>
+/etc/init.d/cinder-volume restart
+/etc/init.d/cinder-api restart
+</code></p>
+
+<h3>添加Agent: 对象存储</h3>
+
+<p><strong>1. 要访问对象存储(Object Storage)服务就需要ResellerAdmin角色： </strong></p>
+
+<p>```
+keystone role-create &mdash;name=ResellerAdmin</p>
+
+<p>keystone user-role-add &mdash;tenant_id 208807d34ff7455e93b39a2820265349 \
+&mdash;user_id c538a8fec188450588b71f9d6b6f1ab5 \
+&mdash;role_id 56cb34407d5e4ce596e36bd03475be01
+```</p>
+
+<h3>测试结果</h3>
+
+<p>设置完之后，我们通过Dashboard来查看结果，来张漂亮的图先</p>
+
+<p><img src="/images/2013/11/openstack-resouce-use.png"></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Keystone 源码安装与配置]]></title>
@@ -1308,81 +2667,6 @@ Content-Type: text/plain; charset=utf-8
 </code></pre>
 
 <p> 通过以上的步骤，希望新手能够成功制作一份完美的镜像文件，如果在制作过程中有任何疑问，请留言，最好是邮件，偶在有时间的情况下肯定会第一时间解答。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[制作OpenStack CentOS 6.3 镜像]]></title>
-    <link href="http://agenge.github.io/blog/2013/07/20/make_openstack-centos-image/"/>
-    <updated>2013-07-20T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/07/20/make_openstack-centos-image</id>
-    <content type="html"><![CDATA[<h1>前言</h1>
-
-<p>距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
-OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。</p>
-
-<ol>
-<li><p>准备一个镜像文件，即ISO文件，本示例所使用的为：</p>
-
-<pre><code> CentOS-6.3-i386-minimal.iso
-</code></pre></li>
-</ol>
-
-
-<p> <em>注：无论您是内部测试环境还是生产环境，偶都强烈推荐使用64位操作系统。</em></p>
-
-<ol>
-<li><p>引导并安装系统</p>
-
-<pre><code> virt-install -n CentOS63 -r 2048 --cpu host \
-   -c /data/iso/CentOS-6.3-i386-minimal.iso \
-   --disk path=/data/kvm_data/centos6.3-openstack.img,device=disk,bus=virtio,size=10,format=qcow2 \
-   --vnc --vncport=5908 --vnclisten=0.0.0.0 -v \
-   --network bridge=br0
-</code></pre></li>
-</ol>
-
-
-<p> 这些参数的就请您先自行查找手册，后期有时间偶会补上关于KVM的相关实践手册。</p>
-
-<ol>
-<li>镜像相关设置（此处根据你的需求进行个性化定制，尽量保持简洁）：</li>
-<li><p>分区全部给根分区，防火墙和SELinux禁止.</p>
-
-<pre><code>     chkconfig iptables off
-</code></pre></li>
-</ol>
-
-
-<p> 将/etc/selinux/config 中的 SELINUX=enforcing修改成 SELINUX=disabled
- * 修改分区表：</p>
-
-<pre><code>        vi /etc/fstab
-        # 将UUID=这一行注释，加入：
-        LABEL=cec-rootfs                           / ext4 defaults&lt;b&gt; 0 0&lt;/b&gt;
-</code></pre>
-
-<ul>
-<li><p>修改网络配置：</p>
-
-<pre><code>     vi /etc/sysconfig/network-scripts/ifcfg-eth0
-     #将HWADDR=这行删除或注释即可，并且设置成BOOTPROTO=dhcp
-</code></pre></li>
-<li><p>删除网络规则，因为Centos6之后70-persistent-net.rules这个文件会自动添加除eth0之外的其他网络接口，</p>
-
-<pre><code>     rm -rf /etc/udev/rules.d/70-persistent-net.rules
-</code></pre></li>
-<li>还要把另外一个文件删除，不然上面这个文件还会自动创建滴：
-         mv /lib/udev/write_net_rules{,.bak}</li>
-<li><p>上传镜像</p>
-
-<pre><code> glance image-create --name centos63Image --is-public true --container-format ovf --disk-format qcow2 &amp;lt; /home/agen/centos63.img
-</code></pre></li>
-</ul>
-
-
-<p> 至此，所有操作已经完成，如果一切正常，你所创建的实例访问正常。如网络还存在问题，可能
-和您的OpenStack网络设置有关，不过这已经超出本文的范畴。假如您对OpenStack的环境搭建不是很熟悉的话，建议您再多看看这篇文章：<a title="Openstack安装与部署(Folsom)" href="http://agenge.com/cloud-computing/openstack_install_with_deploy_for_folsom.html">Openstack安装与部署(Folsom)</a>。</p>
 ]]></content>
   </entry>
   

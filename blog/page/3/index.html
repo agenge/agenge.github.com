@@ -9,10 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="1、准备环境： Windows Server 2003
-IIS 6
-ActivePerl-5.16
-awstats-7.0 2、安装ActivePerl 安装Perl for Windows，我们只需要安装ActivePerl 就行了，下载地址为： 32位：ActivePerl-5.16.2 &hellip;">
+  <meta name="description" content="安装Hyper-V前提条件 先决条件一：基于Windows Server 2008 64bit的标准版、企业版、数据中心版.
+先决条件二：硬件辅助虚拟化，即只有特定的CPU虚拟化选项，通常Intel 的技术叫：Intel-VT(Vanderpool Technology)，而AMD称为：AMD-V &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,6 +80,158 @@ awstats-7.0 2、安装ActivePerl 安装Perl for Windows，我们只需要安装A
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/03/08/hyper-v-01/">Hyper-V使用手册之部署与安装</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-08T00:00:00+08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>安装Hyper-V前提条件</h2>
+
+<ul>
+<li>先决条件一：基于Windows Server 2008 64bit的标准版、企业版、数据中心版.</li>
+<li>先决条件二：硬件辅助虚拟化，即只有特定的CPU虚拟化选项，通常Intel 的技术叫：Intel-VT(Vanderpool Technology)，而AMD称为：AMD-V。 通常，绝大部分主板的BIOS在默认情况下未开启VT技术，需要自行进入BIOS修改。</li>
+<li>先决条件三：硬件数据执行保护（DEP. 需要开启，如果CPU支持Windwos Server 2008，默认即开启。</li>
+<li>快速检测系统是否支持虚拟化：</li>
+<li>使用工具securable可轻松检测，三个选项必须全部支持，即全部是绿色的。</li>
+<li>使用工具EVEREST（需要安装. 也可检测CPU是否支持VT，即Menu->Motherboard->CPUID->Virtual Machine Extensions(Vanderpool)，例如下图：</li>
+</ul>
+
+
+<p><img src="/images/2013/03/vtdisabled.png"></p>
+
+<p>表示此计算机不支持VT。</p>
+
+<h2>2、安装Hyper-V及虚拟机</h2>
+
+<h3>2.1 安装Hyper-V</h3>
+
+<p>默认情况下，Windows Server 2008 R2 没有安装Hyper-V相关包，需要手动安装才可使用，过程如下：</p>
+
+<p>点击系统任务栏的“服务器管理器”，在左侧的菜单栏点击角色，这里右侧会相应的显示角色相关信息，在角色摘要下的右边，点击”添加角色”，如：</p>
+
+<p><img src="/images/2013/03/c2-01.png"></p>
+
+<p>点击”添加角色”之后，将会进入“添加角色向导”，点击下一步，在”选择服务器角色”页，勾选Hyper-V，如下图所示：</p>
+
+<p><img src="/images/2013/03/c2-02.png"></p>
+
+<p>默认一直点“下一步”->“安装”，完成后需要重启服务器，如图所示：</p>
+
+<p><img src="/images/2013/03/c2-03.png"></p>
+
+<p>点击“关闭”再确定“重启服务器”就已经完成Hyper-V的安装。如果服务器不支持Hyper-V，则会提示无法安装，如下图所示：</p>
+
+<p><img src="/images/2013/03/c2-04.png"></p>
+
+<h3>2.2 安装虚拟机</h3>
+
+<h4>2.1.1 连接Hyper-V管理器</h4>
+
+<p>安装Hyper-V之后，必然要进行安装虚拟操作系统，即虚拟机，首先打开”服务器管器”(Windows7、8可直接打开Hyper-V管理器,依次展开：角色=>Hyper-V=>Hyper-V管理器，
+在最右边的“操作”面板点击“连接到服务器”，在随即出来的“选择计算机”对话框点击“确定”，如下图所示：</p>
+
+<p><img src="/images/2013/03/c2-05.png"></p>
+
+<ul>
+<li>第一步、新建虚拟机（以下为Win8英文环境. ：
+点击最右侧“Action”栏下面的“New”：</li>
+</ul>
+
+
+<p> <img src="/images/2013/03/c2-06.png"></p>
+
+<p> 点击后将会有3个选择：虚拟机(Virtual Machine)、磁盘(Hard Disk)、软盘(Floppy Disk)，选择“Virtual Machine”进入第二步。</p>
+
+<ul>
+<li>第二步、虚拟机命名：</li>
+</ul>
+
+
+<p> 在”New Virtual Machine Wizard”页的”Name”处键入虚拟机的名称，如MS2008：</p>
+
+<p> <img src="/images/2013/03/c2-07.png"></p>
+
+<p> 点击“Next”。</p>
+
+<ul>
+<li>第三步、内存分配：</li>
+</ul>
+
+
+<p> 在“分配内存”页键入需要的内存，例如输入“1024”：</p>
+
+<p> <img src="/images/2013/03/c2-08.png"></p>
+
+<p> 点击“Next”。</p>
+
+<ul>
+<li>第四步、网络配置：</li>
+</ul>
+
+
+<p> 在“网络配置”页暂时不选择,如下图：</p>
+
+<p> <img src="/images/2013/03/c2-09.png"></p>
+
+<p> 点击“Next”。</p>
+
+<ul>
+<li>第五步、创建虚拟磁盘：</li>
+</ul>
+
+
+<p> <img src="/images/2013/03/c2-10.png"></p>
+
+<p> 创建一个虚拟磁盘</li>
+  * Name:：虚拟磁盘的名字，一个虚拟机可配置多个硬盘，在同一个目录下，虚拟磁盘名字必须唯一；
+  * Location：虚拟磁盘存储位置，默认存放在C盘，点击右侧的“Browser”可自定义虚拟磁盘存储位置；</p>
+
+<p> <strong><em>建议：如果在有条件的环境下，建议将每个虚拟机对应的虚拟磁盘单独放在一个磁盘分区，甚至将每个虚拟磁盘单独存放在单独的磁盘分区。如果条件有限，建议将虚拟磁盘文件尽量放在空闲的系统分区。</em></strong></p>
+
+<ul>
+<li>Size：默认情况下是 127GB，单个虚拟磁盘最大值为64T；</li>
+</ul>
+
+
+<p> 注：此处127GB并不会马上扩展，而是动态扩展，也可自定义大小，最小值依所安装的操作系统而定。
+ * 选择一个已存在的虚拟磁盘</li></p>
+
+<p>  <img src="/images/2013/03/c2-11.png"></p>
+
+<p>  </div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/03/08/hyper-v-01/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -284,7 +434,8 @@ awstats-7.0 2、安装ActivePerl 安装Perl for Windows，我们只需要安装A
 </pre></td><td class='code'><pre><code class=''><span class='line'> ruby -ropenssl -e "puts :yep"</span></code></pre></td></tr></table></div></figure>
 
 
-<blockquote><p> 如果输出“yep”表示无问题。</p></blockquote>
+<p>
+ 如果输出“yep”表示无问题。</p>
 
 <p><strong><em>注意：在安装Puppet之前，如果需要，必须将服务器主机名修改好，否则将会出现很多问题哟！</em></strong></p>
 
@@ -491,6 +642,10 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
       </li>
     
@@ -504,10 +659,6 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
     
       <li class="post">
         <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
       </li>
     
   </ul>

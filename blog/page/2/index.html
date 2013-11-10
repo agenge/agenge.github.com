@@ -9,8 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 距离上次写文章已经N天，即对不住各位，更对不住自己，今天将教大家如何制作
-OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。 准备一个镜像文件，即ISO文件，本示例所使用的为： CentOS-6.3-i386-minimal.iso 注： &hellip;">
+  <meta name="description" content="前言 对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
+不敢私藏，故与大家分享小小心得。上次与大家介绍过 制作OpenStack CentOS 6.3 镜像 本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作： &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,98 @@ OpenStack CentOS 6.3 镜像，费话不多说，咱就开始干活吧。 准备�
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/24/make_openstack-windows2008-image/">制作OpenStack Windows Server 2008 镜像</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-24T00:00:00+08:00" pubdate data-updated="true">Jul 24<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<p>对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
+不敢私藏，故与大家分享小小心得。上次与大家介绍过 <a href="http://agenge.com/cloud-computing/make_openstack-centos-image.html">制作OpenStack CentOS 6.3 镜像</a></p>
+
+<p>本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作：</p>
+
+<ol>
+<li>下载Virtio总线驱动</li>
+</ol>
+
+
+<p> 由于OpenStack只支持Virtio总线的磁盘，所以我们需要在安装之前下载virtio驱动：</p>
+
+<pre><code>    wget http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/virtio-win-0.1-59.iso
+</code></pre>
+
+<ol>
+<li>准备一个Windows Server 2008的ISO文件。</li>
+</ol>
+
+
+<p> 除了Virtio总线驱动，您还需要准备一个Windows Server 2008的ISO，为安装操作系统做准备。
+3. 创建虚拟磁盘文件：</p>
+
+<pre><code>    qemu-img create -f qcow2 winserver2008.img 20G
+</code></pre>
+
+<p> 对于虚拟磁盘文件的各种磁盘格式区别与对比，可以参考 <a href="http://blog.prajnagarden.com/?p=248">qcow2、raw、vmdk等镜像格式</a></p>
+
+<ol>
+<li><p>创建虚拟机，使用kvm或virt-install均可，本次安装使用的virt-install</p>
+
+<pre><code> virt-install --connect qemu:///system -n winserver2008 --vcpus=1 -r 2048 \
+   --disk path=/path/to/winserver2008.img,size=60,format=qcow2,bus=virtio,cache=none \
+   -c /path/iso/windows_server_2008.iso \
+   --vnc --vncport=5909 --vnclisten=0.0.0.0  \
+   --os-type windows --os-variant=win2k8 --accelerate \
+   --network=bridge:br0,model=virtio  \
+   --disk path=/path/to/win_driver/virtio-win-0.1-59.iso,device=cdrom,perms=ro&lt;br /&gt;
+</code></pre></li>
+</ol>
+
+
+<p> 以上参数有点多，不过这里不一一解释，后期偶会专门写一篇介绍KVM相关知识点，这里只是描述几个重要的参数：</p>
+
+<pre><code>- -n  虚拟机的名称
+- --disk  虚拟磁盘存放的路径，即第一步qemu-img创建的虚拟磁盘。&lt;/span&gt;&lt;/li&gt;
+- -c  ISO的路径 &lt;/span&gt;&lt;/li&gt;
+- --vncport  VNC连接端口，后面会用到，这里是5909，且必须是未使用的端口。&lt;/span&gt;&lt;/li&gt;
+- --network   这个地方偶使用的是一个叫 br0 的网桥，所以你的系统必须保证有br0这个网桥。&lt;/span&gt;&lt;/li&gt;
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/07/24/make_openstack-windows2008-image/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1235,158 +1327,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/03/08/hyper-v-01/">Hyper-V使用手册之部署与安装</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-08T00:00:00+08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>安装Hyper-V前提条件</h2>
-
-<ul>
-<li>先决条件一：基于Windows Server 2008 64bit的标准版、企业版、数据中心版.</li>
-<li>先决条件二：硬件辅助虚拟化，即只有特定的CPU虚拟化选项，通常Intel 的技术叫：Intel-VT(Vanderpool Technology)，而AMD称为：AMD-V。 通常，绝大部分主板的BIOS在默认情况下未开启VT技术，需要自行进入BIOS修改。</li>
-<li>先决条件三：硬件数据执行保护（DEP. 需要开启，如果CPU支持Windwos Server 2008，默认即开启。</li>
-<li>快速检测系统是否支持虚拟化：</li>
-<li>使用工具securable可轻松检测，三个选项必须全部支持，即全部是绿色的。</li>
-<li>使用工具EVEREST（需要安装. 也可检测CPU是否支持VT，即Menu->Motherboard->CPUID->Virtual Machine Extensions(Vanderpool)，例如下图：</li>
-</ul>
-
-
-<p><img src="/images/2013/03/vtdisabled.png"></p>
-
-<p>表示此计算机不支持VT。</p>
-
-<h2>2、安装Hyper-V及虚拟机</h2>
-
-<h3>2.1 安装Hyper-V</h3>
-
-<p>默认情况下，Windows Server 2008 R2 没有安装Hyper-V相关包，需要手动安装才可使用，过程如下：</p>
-
-<p>点击系统任务栏的“服务器管理器”，在左侧的菜单栏点击角色，这里右侧会相应的显示角色相关信息，在角色摘要下的右边，点击”添加角色”，如：</p>
-
-<p><img src="/images/2013/03/c2-01.png"></p>
-
-<p>点击”添加角色”之后，将会进入“添加角色向导”，点击下一步，在”选择服务器角色”页，勾选Hyper-V，如下图所示：</p>
-
-<p><img src="/images/2013/03/c2-02.png"></p>
-
-<p>默认一直点“下一步”->“安装”，完成后需要重启服务器，如图所示：</p>
-
-<p><img src="/images/2013/03/c2-03.png"></p>
-
-<p>点击“关闭”再确定“重启服务器”就已经完成Hyper-V的安装。如果服务器不支持Hyper-V，则会提示无法安装，如下图所示：</p>
-
-<p><img src="/images/2013/03/c2-04.png"></p>
-
-<h3>2.2 安装虚拟机</h3>
-
-<h4>2.1.1 连接Hyper-V管理器</h4>
-
-<p>安装Hyper-V之后，必然要进行安装虚拟操作系统，即虚拟机，首先打开”服务器管器”(Windows7、8可直接打开Hyper-V管理器,依次展开：角色=>Hyper-V=>Hyper-V管理器，
-在最右边的“操作”面板点击“连接到服务器”，在随即出来的“选择计算机”对话框点击“确定”，如下图所示：</p>
-
-<p><img src="/images/2013/03/c2-05.png"></p>
-
-<ul>
-<li>第一步、新建虚拟机（以下为Win8英文环境. ：
-点击最右侧“Action”栏下面的“New”：</li>
-</ul>
-
-
-<p> <img src="/images/2013/03/c2-06.png"></p>
-
-<p> 点击后将会有3个选择：虚拟机(Virtual Machine)、磁盘(Hard Disk)、软盘(Floppy Disk)，选择“Virtual Machine”进入第二步。</p>
-
-<ul>
-<li>第二步、虚拟机命名：</li>
-</ul>
-
-
-<p> 在”New Virtual Machine Wizard”页的”Name”处键入虚拟机的名称，如MS2008：</p>
-
-<p> <img src="/images/2013/03/c2-07.png"></p>
-
-<p> 点击“Next”。</p>
-
-<ul>
-<li>第三步、内存分配：</li>
-</ul>
-
-
-<p> 在“分配内存”页键入需要的内存，例如输入“1024”：</p>
-
-<p> <img src="/images/2013/03/c2-08.png"></p>
-
-<p> 点击“Next”。</p>
-
-<ul>
-<li>第四步、网络配置：</li>
-</ul>
-
-
-<p> 在“网络配置”页暂时不选择,如下图：</p>
-
-<p> <img src="/images/2013/03/c2-09.png"></p>
-
-<p> 点击“Next”。</p>
-
-<ul>
-<li>第五步、创建虚拟磁盘：</li>
-</ul>
-
-
-<p> <img src="/images/2013/03/c2-10.png"></p>
-
-<p> 创建一个虚拟磁盘</li>
-  * Name:：虚拟磁盘的名字，一个虚拟机可配置多个硬盘，在同一个目录下，虚拟磁盘名字必须唯一；
-  * Location：虚拟磁盘存储位置，默认存放在C盘，点击右侧的“Browser”可自定义虚拟磁盘存储位置；</p>
-
-<p> <strong><em>建议：如果在有条件的环境下，建议将每个虚拟机对应的虚拟磁盘单独放在一个磁盘分区，甚至将每个虚拟磁盘单独存放在单独的磁盘分区。如果条件有限，建议将虚拟磁盘文件尽量放在空闲的系统分区。</em></strong></p>
-
-<ul>
-<li>Size：默认情况下是 127GB，单个虚拟磁盘最大值为64T；</li>
-</ul>
-
-
-<p> 注：此处127GB并不会马上扩展，而是动态扩展，也可自定义大小，最小值依所安装的操作系统而定。
- * 选择一个已存在的虚拟磁盘</li></p>
-
-<p>  <img src="/images/2013/03/c2-11.png"></p>
-
-<p>  </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/03/08/hyper-v-01/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1404,6 +1344,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
       </li>
     
@@ -1417,10 +1361,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
     
       <li class="post">
         <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a>
       </li>
     
   </ul>

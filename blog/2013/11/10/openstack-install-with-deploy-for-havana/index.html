@@ -1,0 +1,2123 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Openstack安装与部署(Havana) - TaurusHome</title>
+  <meta name="author" content="agenge">
+
+  
+  <meta name="description" content="前言 首先得说明一下，此教程是基于H版部署，由于时间关系，文章可能会有错误，如果有发现错误之处，请直接回复，感谢。 环境准备 资源列表 网络配置 控制节点controller网络配置如下： 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+# Internal Network
+auto &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://agenge.github.io/blog/2013/11/10/openstack-install-with-deploy-for-havana">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-6520474-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">TaurusHome</a></h1>
+  
+    <h2>攻城师</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:agenge.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">归档</a></li>
+  <li><a href="/about">关于我</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Openstack安装与部署(Havana)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-10T13:19:00+08:00" pubdate data-updated="true">Nov 10<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>前言</h2>
+
+<p>首先得说明一下，此教程是基于H版部署，由于时间关系，文章可能会有错误，如果有发现错误之处，请直接回复，感谢。</p>
+
+<h2>环境准备</h2>
+
+<h3>资源列表</h3>
+
+<p> <img src="/images/2013/11/openstack-host-list.png" title="" ></p>
+
+<h3>网络配置</h3>
+
+<p>控制节点controller网络配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Internal Network
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 10.0.0.11
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>
+</span><span class='line'>#External Netwok
+</span><span class='line'>auto eth1
+</span><span class='line'>iface eth1 inet static
+</span><span class='line'>address 192.168.30.150
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p>计算节点compute01网络配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Internal Network
+</span><span class='line'>auto eth0
+</span><span class='line'>iface eth0 inet static
+</span><span class='line'>address 10.0.0.13
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>
+</span><span class='line'>#External Netwok
+</span><span class='line'>auto eth1
+</span><span class='line'>iface eth1 inet static
+</span><span class='line'>address 192.168.30.151
+</span><span class='line'>netmask 255.255.255.0
+</span><span class='line'>gateway 192.168.30.1
+</span><span class='line'>dns-nameservers 218.201.4.3</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置hostname，在所有节点的/etc/hosts中加入：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>10.0.0.11       controller
+</span><span class='line'>10.0.0.13       compute01</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启网络</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service networking restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>IP转发</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+</span><span class='line'>sysctl -p</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>时间同步</h3>
+
+<p>安装NTP：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y ntp
+</span><span class='line'>sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.com\nserver 127.127.1.0\nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
+</span><span class='line'>sudo /etc/init.d/ntp restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其他节点的server都指向控制节点：10.0.0.11</p>
+
+<h3>Mysql和rabbitmq安装</h3>
+
+<p>在控制节点执行，安装过程中会提示输入几个密码，此处为了方便，密码统一设置为openstack (是不是应该打马赛克？)：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y mysql-server python-mysqldb 
+</span><span class='line'>sed -i 's/127.0.0.1/10.0.0.11/g' /etc/mysql/my.cnf
+</span><span class='line'>/etc/init.d/mysql restart
+</span><span class='line'>
+</span><span class='line'>apt-get install -y rabbitmq-server</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>添加Havana 仓库</h3>
+
+<p>安装 Keyring</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install ubuntu-cloud-keyring</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加仓库源</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main" &gt;&gt; /etc/apt/sources.list.d/cloudarchive-havana.list
+</span><span class='line'>echo "deb-src http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main" &gt;&gt; /etc/apt/sources.list.d/cloudarchive-havana.list</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更新系统</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get update
+</span><span class='line'>apt-get dist-upgrade</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果遇到无法update，多半是网络运营商缓存问题导致的，这时使用代理搞定吧：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<h3>初始化数据库</h3>
+
+<p>在控制节点执行，创建数据库，并设置：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql -uroot -p</span></code></pre></td></tr></table></div></figure>
+
+
+<p>输入密码后执行以下SQL语句</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CREATE DATABASE keystone;
+</span><span class='line'>CREATE DATABASE nova;
+</span><span class='line'>CREATE DATABASE cinder;
+</span><span class='line'>CREATE DATABASE glance;
+</span><span class='line'>CREATE DATABASE neutron;
+</span><span class='line'>CREATE DATABASE heat;
+</span><span class='line'>GRANT ALL ON neutron.* TO neutron@'%' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON neutron.* TO neutron@'10.0.0.11' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON keystone.* TO neutron@'%' IDENTIFIED BY 'openstack';
+</span><span class='line'>
+</span><span class='line'>GRANT ALL ON keystone.* TO keystone@'%' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON keystone.* TO keystone@'10.0.0.11' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON nova.* TO nova@'%' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON nova.* TO nova@'10.0.0.11' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON cinder.* TO cinder@'%' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON cinder.* TO cinder@'10.0.0.11' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON glance.* TO glance@'%' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON glance.* TO glance@'10.0.0.11' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON heat.* TO heat@'%' IDENTIFIED BY 'openstack';
+</span><span class='line'>GRANT ALL ON heat.* TO heat@'10.0.0.11' IDENTIFIED BY 'openstack';
+</span><span class='line'>
+</span><span class='line'>flush privileges;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要注意的是以上的IP需要你自己根据实际情况而修改。</p>
+
+<hr />
+
+<h2>控制节点</h2>
+
+<h3>Identity Service(Keystone)安装</h3>
+
+<p>在控制节点安装认证服务keystone</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y keystone python-keystone python-keystoneclient</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Keystone配置</h4>
+
+<p>keystone支持mysql、sqlite及LDAP，以下示例我们将使用Mysql来存储keystone认证信息。</p>
+
+<p>在控制节点修改/etc/keystone/keystone.conf配置文件，注释第78行：</p>
+
+<pre><code>connection = sqlite:////var/lib/keystone/keystone.db
+</code></pre>
+
+<p>加入：</p>
+
+<pre><code>connection = mysql://keystone:openstack@10.0.0.11/keystone
+</code></pre>
+
+<p>重启keystone后，初始化数据库：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone-manage db_sync
+</span><span class='line'>/etc/init.d/keystone restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置openssl
+在keystone与OpenStack服务之间如果要使用ssl进行token认证，就需要使用到openssl</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>openssl rand -hex 10
+</span><span class='line'>8ac14959ce3d1a4fe213</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改/etc/keystone/keystone.conf的 [DEFAULT]章节
+将 admin_token = admin 修改成：</p>
+
+<pre><code>admin_token = 8ac14959ce3d1a4fe213
+</code></pre>
+
+<p>再次重启keystone，使其生效</p>
+
+<pre><code>/etc/init.d/keystone restart
+</code></pre>
+
+<p>创建User、Tenant、Role、Endpoint、Service
+首先创建两个环境变量</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export SERVICE_TOKEN=8ac14959ce3d1a4fe213 
+</span><span class='line'>export SERVICE_ENDPOINT=http://10.0.0.11:35357/v2.0</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>创建租户</h4>
+
+<p>创建两个租户分别是：admin和service</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone tenant-create --name=admin --description="Admin Tenant"
+</span><span class='line'>keystone tenant-create --name=service --description="Service Tenant"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面2个id 暂时需要记录下来，后面将会用到，例如这里是：</p>
+
+<pre><code>admin   a2ba2a4cd7f54d3b9bed90e16def2b8f
+service 208807d34ff7455e93b39a2820265349
+</code></pre>
+
+<h4>创建用户</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create --name=admin --pass=openstack \
+</span><span class='line'>--email=admin@domain.com --tenant_id=a2ba2a4cd7f54d3b9bed90e16def2b8f \
+</span><span class='line'>--enable=True</span></code></pre></td></tr></table></div></figure>
+
+
+<p>user id同样需要记录下来，例如这里是：
+UserId  4fe9772510254b1083962b77d72643c3</p>
+
+<h4>创建角色</h4>
+
+<p>创建一个名称为admin的角色</p>
+
+<pre><code>keystone role-create --name=admin
+</code></pre>
+
+<p>截止到目前，已经分别创建 Tenant、User、Role，先不管Service这个租户，分别是：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Tenant ID: a2ba2a4cd7f54d3b9bed90e16def2b8f
+</span><span class='line'>User ID:  133e4aa56bba4400a2ccfd4a3ec08b18
+</span><span class='line'>Role ID:  0a788b82f9bb4e849af2b402931f58d2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>H版现在不需要我们记录具体的id，貌似只需要指定 名称 即可。</p>
+
+<h4>关联用户、角色、租户</h4>
+
+<p>光创建上面那些身份还不够，最终需要将它们关联起来才能正常使用</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-role-add --user admin --role admin --tenant admin</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>创建Services 及 API endpoints</h4>
+
+<p>首先创建一个类型为identity的keystone服务，名称为keystone：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone service-create --name=keystone --type=identity \
+</span><span class='line'>--description="Keystone Identity Service"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建endpoint，同样只需要记住service name即可：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone endpoint-create --region regionOne \
+</span><span class='line'>--service  keystone  \
+</span><span class='line'>--publicurl http://10.0.0.11:5000/v2.0 \
+</span><span class='line'>--internalurl http://10.0.0.11:5000/v2.0 \
+</span><span class='line'>--adminurl http://10.0.0.11:35357/v2.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>验证认证服务(Keystone)安装是否成功
+先unset之前的环境变量：</p>
+
+<pre><code>unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+</code></pre>
+
+<p>创建keystonerc(环境变量)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export OS_REGION_NAME=regionOne
+</span><span class='line'>export OS_USERNAME=admin
+</span><span class='line'>#export OS_AUTH_STRATEGE=keystone
+</span><span class='line'>export OS_PASSWORD=openstack
+</span><span class='line'>export OS_TENANT_NAME=admin
+</span><span class='line'>export OS_AUTH_URL=http://10.0.0.11:35357/v2.0
+</span><span class='line'>OS_NO_CACHE=true</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加环境变量
+为避免我们每次登录都要设置环境变量，现在将上面参数直接写到一个文件中，在每天登录时使其自动生效，这样我们后期就可以直接通过  keystone subcommand 来使用，创建keystonerc文件，并将下列信息写入keystonerc ：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export OS_USERNAME=admin
+</span><span class='line'>export OS_PASSWORD=openstack
+</span><span class='line'>export OS_TENANT_NAME=admin
+</span><span class='line'>export OS_AUTH_URL=http://10.0.0.11:35357/v2.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>保存之后并使环境变量立即生效：</p>
+
+<pre><code>source keystonerc
+</code></pre>
+
+<p>如果没问题，就能看到token信息。但如果有错误，建议注销当前用户，重新登录后测试一下。</p>
+
+<p>测试是否正常：</p>
+
+<pre><code>keystone token-get
+</code></pre>
+
+<p>如果配置正常，将会显示token expires\id\tenant_id\user_id四行。
+下一步，我们加一个 &mdash;os_tenant_name参数试下：</p>
+
+<pre><code>keystone --os_tenant_name admin token-get
+</code></pre>
+
+<p>如果没问题，将会响应和上面类似的输出信息，区别仅是多一行 tenant_id</p>
+
+<hr />
+
+<h3>Image Service(Glance)安装</h3>
+
+<p>镜像服务我们安装在keystone同一台机器，首先直接安装 镜像服务：</p>
+
+<pre><code>apt-get install -y glance
+</code></pre>
+
+<h4>Glance配置</h4>
+
+<p>更新glance配置文件glance-registry.conf：</p>
+
+<pre><code>vim /etc/glance/glance-registry.conf
+</code></pre>
+
+<p>修改mysql数据库连接字符串：</p>
+
+<pre><code>sql_connection = mysql://glance:openstack@10.0.0.11/glance
+</code></pre>
+
+<p>更新glance配置文件：</p>
+
+<pre><code>vim /etc/glance/glance-api.conf
+</code></pre>
+
+<p>在[DEFAULT]章节加入：</p>
+
+<pre><code>sql_connection = mysql://glance:openstack@10.0.0.11/glance
+</code></pre>
+
+<p>同步数据库，将会创建镜像服务相关的表：</p>
+
+<pre><code>glance-manage db_sync
+</code></pre>
+
+<h4>创建用户</h4>
+
+<p>创建名称为glance的认证用户</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create --name=glance --pass=glance \
+</span><span class='line'>--email=glance@domain.com \
+</span><span class='line'>--tenant service --enable=True</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意，此处的 tenant 就是租户service。</p>
+
+<p>配置Glance与 Keystone访问
+编辑配置文件/etc/glance/glance-api.conf 和 /etc/glance/glance-registry.conf，在最后加入以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[keystone_authtoken]
+</span><span class='line'>auth_host = 10.0.0.11
+</span><span class='line'>auth_port = 35357
+</span><span class='line'>auth_protocol = http
+</span><span class='line'>admin_tenant_name = service
+</span><span class='line'>admin_user = glance
+</span><span class='line'>admin_password = glance</span></code></pre></td></tr></table></div></figure>
+
+
+<p>编辑配置文件/etc/glance/glance-api-paste.ini和/etc/glance/glance-registry-paste.ini，将最后几行修改成：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[filter:authtoken]
+</span><span class='line'>paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+</span><span class='line'>service_protocol = http
+</span><span class='line'>service_host = 10.0.0.11
+</span><span class='line'>service_port = 5000
+</span><span class='line'>auth_host = 10.0.0.11
+</span><span class='line'>auth_port = 35357
+</span><span class='line'>auth_protocol = http
+</span><span class='line'>auth_uri = http://10.0.0.11:5000/
+</span><span class='line'>admin_tenant_name = service
+</span><span class='line'>admin_user = glance
+</span><span class='line'>admin_password = glance</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>创建service服务和endpoint</h4>
+
+<pre><code>keystone service-create --name=glance --type=image --description="Glance Image Service"
+</code></pre>
+
+<p>记录service id，下面创建endpoint将会用到。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone endpoint-create --region regionOne \
+</span><span class='line'>--service glance \
+</span><span class='line'>--publicurl=http://10.0.0.11:9292 \
+</span><span class='line'>--internalurl=http://10.0.0.11:9292 \
+</span><span class='line'>--adminurl=http://10.0.0.11:9292</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>重启glance服务</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/glance-registry restart
+</span><span class='line'>/etc/init.d/glance-api restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>测试镜像服务是否安装成功
+镜像文件可以从互联网下载，或自己制作，centos-63.x86_64-cloud.qcow2是偶自己制作的一个镜像文件，即创建一个名称为 centos-63.x86_64-cloud的镜像文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>glance image-create --name centos-63.x86_64-cloud \
+</span><span class='line'>--is-public true --container-format bare \
+</span><span class='line'>--disk-format qcow2 &lt; /home/openstack/centos-63.x86_64-cloud.qcow2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果一切正常，会输出类似以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>+------------------+--------------------------------------+
+</span><span class='line'>| Property         | Value                                |
+</span><span class='line'>+------------------+--------------------------------------+
+</span><span class='line'>| checksum         | 5c80ad5a5667308b74f6f024317f9924     |
+</span><span class='line'>| container_format | bare                                 |
+</span><span class='line'>| created_at       | 2013-10-21T12:21:24                  |
+</span><span class='line'>| deleted          | False                                |
+</span><span class='line'>| deleted_at       | None                                 |
+</span><span class='line'>| disk_format      | qcow2                                |
+</span><span class='line'>| id               | 79a7fe9f-7f0a-480f-a60d-68f9271ce230 |
+</span><span class='line'>| is_public        | True                                 |
+</span><span class='line'>| min_disk         | 0                                    |
+</span><span class='line'>| min_ram          | 0                                    |
+</span><span class='line'>| name             | centos-63.x86_64-cloud               |
+</span><span class='line'>| owner            | None                                 |
+</span><span class='line'>| protected        | False                                |
+</span><span class='line'>| size             | 462219776                            |
+</span><span class='line'>| status           | active                               |
+</span><span class='line'>| updated_at       | 2013-10-21T12:21:27                  |
+</span><span class='line'>+------------------+--------------------------------------+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>检查上传是否成功</p>
+
+<pre><code>glance image-list
+</code></pre>
+
+<p>如果 Status字段为 active表示上传成功。</p>
+
+<h3>Compute Service(Nova)安装</h3>
+
+<p>控制节点如果在管理并控制计算服务，需要依赖nova，首先安装以下nova包：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y nova-novncproxy novnc nova-api \
+</span><span class='line'>nova-ajax-console-proxy nova-cert nova-conductor \
+</span><span class='line'>nova-consoleauth nova-doc nova-scheduler python-novaclient</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Nova配置</h4>
+
+<p>修改/etc/nova/nova.conf配置文件，在最后加入：</p>
+
+<pre><code>sql_connection=mysql://nova:openstack@10.0.0.11/nova
+</code></pre>
+
+<p>为nova服务创建数据库表：</p>
+
+<pre><code>nova-manage db sync
+</code></pre>
+
+<p>配置VNC，修改配置文件/etc/nova/nova.conf，在最后加入：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># VNC 
+</span><span class='line'>novnc_enabled=True
+</span><span class='line'>my_ip=192.168.30.150
+</span><span class='line'>novncproxy_base_url=http://192.168.30.150:6080/vnc_auto.html
+</span><span class='line'>vncserver_listen=0.0.0.0</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>创建用户与角色</h4>
+
+<p>现在创建一个名称为nova的认证用户和角色</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create --name=nova --pass=nova \
+</span><span class='line'>--email=nova@domain.com \
+</span><span class='line'>--tenant service --enable=True
+</span><span class='line'>keystone user-role-add --user=nova --tenant=service --role=admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改配置文件/etc/nova/nova.conf</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>
+</span><span class='line'>auth_strategy=keystone</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改配置文件/etc/nova/api-paste.ini,并修改以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[filter:authtoken]
+</span><span class='line'>paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+</span><span class='line'>auth_host = 10.0.0.11
+</span><span class='line'>auth_host = 10.0.0.11
+</span><span class='line'>auth_port = 35357
+</span><span class='line'>admin_tenant_name = service
+</span><span class='line'>admin_user = nova
+</span><span class='line'>admin_password = nova</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>创建service服务和endpoint</h4>
+
+<pre><code>keystone service-create --name=nova --type=compute --description="Nova Compute Service"
+</code></pre>
+
+<p>创建endpoint</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone endpoint-create --service nova \
+</span><span class='line'> --publicurl=http://10.0.0.11:8774/v2/%\(tenant_id\)s \
+</span><span class='line'> --internalurl=http://10.0.0.11:8774/v2/%\(tenant_id\)s \
+</span><span class='line'> --adminurl=http://10.0.0.11:8774/v2/%\(tenant_id\)s</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置计算服务使用RabbitMQ,修改配置文件/etc/nova/nova.conf，添加以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpc_backend=nova.rpc.impl_kombu
+</span><span class='line'>rabbit_host = 10.0.0.11</span></code></pre></td></tr></table></div></figure>
+
+
+<p>nova.conf全部内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>dhcpbridge_flagfile=/etc/nova/nova.conf
+</span><span class='line'>dhcpbridge=/usr/bin/nova-dhcpbridge
+</span><span class='line'>logdir=/var/log/nova
+</span><span class='line'>state_path=/var/lib/nova
+</span><span class='line'>lock_path=/var/lock/nova
+</span><span class='line'>force_dhcp_release=True
+</span><span class='line'>iscsi_helper=tgtadm
+</span><span class='line'>libvirt_use_virtio_for_bridges=True
+</span><span class='line'>libvirt_type=qemu
+</span><span class='line'>connection_type=libvirt
+</span><span class='line'>root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
+</span><span class='line'>verbose=True
+</span><span class='line'>ec2_private_dns_show_ip=True
+</span><span class='line'>api_paste_config=/etc/nova/api-paste.ini
+</span><span class='line'>volumes_path=/var/lib/nova/volumes
+</span><span class='line'>enabled_apis=ec2,osapi_compute,metadata
+</span><span class='line'>sql_connection=mysql://nova:openstack@10.0.0.11/nova
+</span><span class='line'>
+</span><span class='line'>#Metadata
+</span><span class='line'>metadata_host=10.0.0.11
+</span><span class='line'>metadata_manager=nova.api.manager.MetadataManager
+</span><span class='line'>metadata_listen=10.0.0.11
+</span><span class='line'>metadata_listen_port=8775
+</span><span class='line'>#service_neutron_metadata_proxy=True
+</span><span class='line'>#neutron_metadata_proxy_shared_secret=helloOpenStack
+</span><span class='line'>
+</span><span class='line'># Cinder 
+</span><span class='line'>volume_api_class=nova.volume.cinder.API
+</span><span class='line'>osapi_volume_listen_port=5900
+</span><span class='line'>
+</span><span class='line'>auth_strategy=keystone
+</span><span class='line'>rpc_backend=nova.rpc.impl_kombu
+</span><span class='line'>rabbit_host = 10.0.0.11
+</span><span class='line'>
+</span><span class='line'># VNC 
+</span><span class='line'>novnc_enabled=True
+</span><span class='line'>my_ip=192.168.30.150
+</span><span class='line'>novncproxy_base_url=http://192.168.30.150:6080/vnc_auto.html
+</span><span class='line'>vncserver_listen=0.0.0.0
+</span><span class='line'>#vncserver_proxyclient_address=192.168.30.150
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>#Network settings
+</span><span class='line'>network_manager=nova.network.manager.FlatDHCPManager
+</span><span class='line'>force_dhcp_release=True
+</span><span class='line'>dhcpbridge_flagfile=/etc/nova/nova.conf
+</span><span class='line'>dhcpbridge=/usr/bin/nova-dhcpbridge
+</span><span class='line'>firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+</span><span class='line'>public_interface=eth2
+</span><span class='line'>flat_interface=eth0
+</span><span class='line'>floating_range=192.168.30.0/24
+</span><span class='line'>flat_network_bridge=br100
+</span><span class='line'>fixed_range=10.0.0.0/24   
+</span><span class='line'>network_size=256
+</span><span class='line'># disabled ipv6
+</span><span class='line'>flat_injected=False
+</span><span class='line'>connection_type=libvirt
+</span><span class='line'>multi_host=True</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启所有nova服务</p>
+
+<pre><code>cd /etc/init.d/; for i in $( ls nova-* ); do sudo service $i restart; done
+</code></pre>
+
+<p>测试nova是否安装正常</p>
+
+<pre><code>nova image-list
+</code></pre>
+
+<p>如果正常，输出的信息和glance image-list是一样的。</p>
+
+<h3>Dashborad(Horizon)安装</h3>
+
+<h4>安装dashboard</h4>
+
+<p>这一步相对容易多了，请看操作：</p>
+
+<pre><code>apt-get install -y memcached libapache2-mod-wsgi openstack-dashboard
+</code></pre>
+
+<p>修改/etc/openstack-dashboard/local_settings.py
+将OPENSTACK_HOST修改为：</p>
+
+<pre><code>OPENSTACK_HOST = "10.0.0.11"
+</code></pre>
+
+<p>登陆dashborad：<a href="http://192.168.30.150/horizon">http://192.168.30.150/horizon</a></p>
+
+<hr />
+
+<h2>计算节点</h2>
+
+<p>以下的示例暂时以一台计算节点来测试安装与部署，即10.0.0.13</p>
+
+<h3>Compute Service(Nova)安装</h3>
+
+<p>为计算节点安装相关的包</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y python-mysqldb 
+</span><span class='line'>apt-get install nova-compute-kvm python-novaclient python-guestfs</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装过程会提示你，选择”yes”即可。</p>
+
+<p>以下是修复guestfs的一个bug</p>
+
+<pre><code>chmod 0644 /boot/vmlinuz*
+</code></pre>
+
+<p>删除SQLite创建的数据库</p>
+
+<pre><code>rm -f /var/lib/nova/nova.sqlite
+</code></pre>
+
+<p>配置VNC，编辑/etc/nova/nova.conf在[DEFAULT]章节添加以下信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#VNC
+</span><span class='line'>novnc_enabled=True
+</span><span class='line'>novncproxy_base_url=http://192.168.30.150:6080/vnc_auto.html
+</span><span class='line'>novncproxy_port=6080
+</span><span class='line'>vncserver_listen=0.0.0.0
+</span><span class='line'>vncserver_proxyclient_address=192.168.30.151</span></code></pre></td></tr></table></div></figure>
+
+
+<p>编辑/etc/nova/nova.conf，在[DEFAULT]章节添加以下信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>glance_host=10.0.0.11
+</span><span class='line'>sql_connection=mysql://nova:openstack@10.0.0.11/nova</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加keystone认证，从控制节点复制api-paste.conf或编辑/etc/nova/api-paste.conf，并添加以下信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[filter:authtoken]
+</span><span class='line'>paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+</span><span class='line'>auth_host = 10.0.0.11
+</span><span class='line'>auth_port = 35357
+</span><span class='line'>auth_protocol = http
+</span><span class='line'>admin_tenant_name = service
+</span><span class='line'>admin_user = nova
+</span><span class='line'>admin_password = nova</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>启用网络</h4>
+
+<p>在计算节点启用网络
+本节的网络示例均使用的nova-network，如果使用neutron，请见Networking Server安装一章。
+首先为计算服务安装nova网络包</p>
+
+<pre><code>apt-get install -y nova-network
+</code></pre>
+
+<p>设置网络，编辑/etc/nova/nova.conf，增加以下信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>network_manager=nova.network.manager.FlatDHCPManager
+</span><span class='line'>firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+</span><span class='line'>network_size=254
+</span><span class='line'>allow_same_net_traffic=False
+</span><span class='line'>multi_host=True
+</span><span class='line'>send_arp_for_ha=True
+</span><span class='line'>share_dhcp_address=True
+</span><span class='line'>force_dhcp_release=True
+</span><span class='line'>flat_network_bridge=br100
+</span><span class='line'>flat_interface=eth1
+</span><span class='line'>public_interface=eth1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>nova.conf 全部内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>#notification_driver=ceilometer.compute.nova_notifier
+</span><span class='line'>#notification_driver=nova.openstack.common.notifier.rpc_notifier
+</span><span class='line'>dhcpbridge_flagfile=/etc/nova/nova.conf
+</span><span class='line'>dhcpbridge=/usr/bin/nova-dhcpbridge
+</span><span class='line'>logdir=/var/log/nova
+</span><span class='line'>state_path=/var/lib/nova
+</span><span class='line'>lock_path=/var/lock/nova
+</span><span class='line'>force_dhcp_release=True
+</span><span class='line'>iscsi_helper=tgtadm
+</span><span class='line'>libvirt_use_virtio_for_bridges=True
+</span><span class='line'>connection_type=libvirt
+</span><span class='line'>root_helper=sudo nova-rootwrap /etc/nova/rootwrap.conf
+</span><span class='line'>verbose=True
+</span><span class='line'>ec2_private_dns_show_ip=True
+</span><span class='line'>api_paste_config=/etc/nova/api-paste.ini
+</span><span class='line'>volumes_path=/var/lib/nova/volumes
+</span><span class='line'>enabled_apis=ec2,osapi_compute,metadata
+</span><span class='line'>sql_connection=mysql://nova:openstack@10.0.0.11/nova
+</span><span class='line'>libvirt_type=qemu
+</span><span class='line'>
+</span><span class='line'># Cinder
+</span><span class='line'>volume_api_class=nova.volume.cinder.API
+</span><span class='line'>osapi_volume_listen_port=5900
+</span><span class='line'>cinder_catalog_info=volume:cinder:internalURL
+</span><span class='line'>
+</span><span class='line'># Metadata
+</span><span class='line'>metadata_host=10.0.0.11
+</span><span class='line'>metadata_manager=nova.api.manager.MetadataManager
+</span><span class='line'>metadata_listen=10.0.0.11
+</span><span class='line'>metadata_listen_port=8775
+</span><span class='line'>#service_neutron_metadata_proxy=True
+</span><span class='line'>#neutron_metadata_proxy_shared_secret=helloOpenStack
+</span><span class='line'>
+</span><span class='line'># Compute
+</span><span class='line'>compute_driver=libvirt.LibvirtDriver
+</span><span class='line'>
+</span><span class='line'># RabbitMQ
+</span><span class='line'>rpc_backend = nova.rpc.impl_kombu
+</span><span class='line'>rabbit_host = 10.0.0.11
+</span><span class='line'>
+</span><span class='line'># Image Servic3
+</span><span class='line'>glance_host=10.0.0.11
+</span><span class='line'>image_service=nova.image.glance.GlanceImageService
+</span><span class='line'>
+</span><span class='line'>#VNC
+</span><span class='line'>novnc_enabled=True
+</span><span class='line'>#my_ip=192.168.30.151
+</span><span class='line'>novncproxy_base_url=http://192.168.30.150:6080/vnc_auto.html
+</span><span class='line'>novncproxy_port=6080
+</span><span class='line'>vncserver_listen=0.0.0.0
+</span><span class='line'>vncserver_proxyclient_address=192.168.30.151
+</span><span class='line'>
+</span><span class='line'># Netwok settings
+</span><span class='line'>network_manager=nova.network.manager.FlatDHCPManager
+</span><span class='line'>force_dhcp_release=True
+</span><span class='line'>dhcpbridge_flagfile=/etc/nova/nova.conf
+</span><span class='line'>dhcpbridge=/usr/bin/nova-dhcpbridge
+</span><span class='line'>firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver
+</span><span class='line'>public_interface=eth2
+</span><span class='line'>flat_interface=eth0
+</span><span class='line'>floating_range=192.168.30.0/24
+</span><span class='line'>flat_network_dhcp_start=10.0.0.40
+</span><span class='line'>flat_network_bridge=br100
+</span><span class='line'>fixed_range=10.0.0.1/24
+</span><span class='line'>#network_size=256
+</span><span class='line'>flat_injected=False
+</span><span class='line'>connection_type=libvirt
+</span><span class='line'>multi_host=True
+</span><span class='line'>dhcp_lease_time=604800
+</span><span class='line'>iscsi_helper=tgtadm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启nova服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/nova-api restart
+</span><span class='line'>/etc/init.d/nova-compute restart</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<h2>Block Storage (Cinder)安装</h2>
+
+<p>首先得准备一台机器，以下的示例将是在控制节点来安装，同样，你也可以选择在控制节点安装，以下示例中的磁盘设备是/dev/sdb，100G</p>
+
+<h3>配置块存储控制</h3>
+
+<p>安装cinder服务依赖包</p>
+
+<pre><code>apt-get install -y cinder-api cinder-scheduler
+</code></pre>
+
+<p>配置块存储服务去使用mysql数据库，编辑/etc/cinder/cinder.conf,添加以下内容</p>
+
+<pre><code>connection = mysql://cinder:openstack@10.0.0.11/cinder
+</code></pre>
+
+<p>为块存储服务创建数据库表</p>
+
+<pre><code>cinder-manage db sync
+</code></pre>
+
+<h4>创建用户和角色</h4>
+
+<p>创建一个 cinder用户，块存储服务使用这个用户去身份认证，使用service租户且给它admin角色</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create --name=cinder --pass=cinder --email=cinder@domain.com \
+</span><span class='line'> --tenant service --enable=True
+</span><span class='line'>keystone user-role-add --user=cinder --tenant=service --role=admin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>编辑/etc/cinder/api-paste.ini，修改以下信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[filter:authtoken]
+</span><span class='line'>paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+</span><span class='line'>auth_host = 10.0.0.11
+</span><span class='line'>auth_port = 35357
+</span><span class='line'>auth_protocol = http
+</span><span class='line'>admin_tenant_name = service
+</span><span class='line'>admin_user = cinder
+</span><span class='line'>admin_password = cinder</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>创建service和endpoint</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone service-create --name=cinder --type=volume --description="Cinder Volume Service"
+</span><span class='line'>keystone endpoint-create --service cinder \
+</span><span class='line'>--publicurl=http://10.0.0.11:8776/v1/%\(tenant_id\)s \
+</span><span class='line'>--internalurl=http://10.0.0.11:8776/v1/%\(tenant_id\)s \
+</span><span class='line'>--adminurl=http://10.0.0.11:8776/v1/%\(tenant_id\)s</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再来创建个v2的API</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone service-create --name=cinder --type=volumev2 \
+</span><span class='line'> --description="Cinder Volume Service V2"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>记录service id，以下将会使用到</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone endpoint-create \
+</span><span class='line'> --service=98b37a6bd88c44a19bc38586c753cfdd \
+</span><span class='line'> --publicurl=http://10.0.0.11:8776/v2/%\(tenant_id\)s \
+</span><span class='line'> --internalurl=http://10.0.0.11:8776/v2/%\(tenant_id\)s \
+</span><span class='line'> --adminurl=http://10.0.0.11:8776/v2/%\(tenant_id\)s</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启cinder服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service cinder-scheduler restart
+</span><span class='line'>service cinder-api restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>配置块存储节点</h3>
+
+<p>配置块存储服务使用RabbitMQ，编辑/etc/cinder/cinder.conf，增加以下信息</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpc_backend = cinder.openstack.common.rpc.impl_kombu
+</span><span class='line'>rabbit_host = 10.0.0.11
+</span><span class='line'>rabbit_port = 5672</span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在，我们来创建LVM的PV及LV，所以示例全部是使用的第二块设备/dev/sdb，在操作前请确保你的数据是否备份。</p>
+
+<p>安装lvm2和cinder-volume</p>
+
+<pre><code>apt-get install cinder-volume lvm2
+</code></pre>
+
+<p>创建PV 和 VG</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@controller:~# pvcreate /dev/sdb 
+</span><span class='line'>root@controller:~# vgcreate cinder-volumes /dev/sdb</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启cinder服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service cinder-volume restart
+</span><span class='line'>service tgt restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后去 horizon创建卷就可以使用了，步骤大概为：
+1.  管理员自定义卷类型
+2.  租户创建卷，并选择一个卷类型
+3.  附加到某个VM即可。</p>
+
+<hr />
+
+<h2>Orchestration Server(Heat)安装</h2>
+
+<p>准备一台机器，以下示例将把Heat安装在控制节点，同样，你也可以选择在控制节点安装。</p>
+
+<h3>安装Orchestration服务</h3>
+
+<pre><code>apt-get install -y heat-api heat-api-cfn 
+</code></pre>
+
+<p>初始化数据库服务，具体见最开始的 初始化数据库。</p>
+
+<h3>Orchestration配置</h3>
+
+<p>编辑/etc/heat/heat.conf，修改[DEFAULT]节：</p>
+
+<pre><code>sql_connection=mysql://heat:openstack@10.0.0.11/heat
+</code></pre>
+
+<p>同步数据库，将会自动创建heat服务的数据库表</p>
+
+<pre><code>heat-manage db_sync
+</code></pre>
+
+<h3>创建用户与角色</h3>
+
+<p>创建一个名称为heat的认证用户和角色</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create --name=heat --pass=heat \
+</span><span class='line'> --email=heat@domain.com \
+</span><span class='line'> --tenant service --enable=True</span></code></pre></td></tr></table></div></figure>
+
+
+<p>记录user id:  c8b8757e829f461e99a5aa0a72ef78b5</p>
+
+<p>关联租户(service)、用户、角色(admin)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-role-add --user-id 6570003a874d4dcc9fd4e3c7f6f16db6 \
+</span><span class='line'> --tenant-id 208807d34ff7455e93b39a2820265349 \
+</span><span class='line'> --role-id 0a788b82f9bb4e849af2b402931f58d2</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>创建Heat Service和Endpoint</h3>
+
+<p>创建service</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone service-create --name=heat --type=orchestration \
+</span><span class='line'>--description="Heat Orchestration API"
+</span><span class='line'>
+</span><span class='line'>keystone endpoint-create --region regionOne \
+</span><span class='line'>--service-id a5743b1fa56b452f9608d17fdd4dfa2b \
+</span><span class='line'>--publicurl=http://10.0.0.11:8004/v1/%\(tenant_id\)s \
+</span><span class='line'>--internalurl=http://10.0.0.11:8004/v1/%\(tenant_id\)s  \
+</span><span class='line'>--adminurl=http://10.0.0.11:8004/v1/%\(tenant_id\)s</span></code></pre></td></tr></table></div></figure>
+
+
+<p>heat service id: 06d78bd1404d48698e3f28c01bb2ad30
+heat-cfn service id: 507fa3386d4f4d1caa5dc075621e669a</p>
+
+<p>创建endpoint</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone service-create --name=heat-cfn --type=cloudformation \
+</span><span class='line'>--description="Heat CloudFormation API"
+</span><span class='line'>
+</span><span class='line'>keystone endpoint-create --region regionOne \
+</span><span class='line'>--service-id a7fae41b733f40efb7472b2a17b97794 \
+</span><span class='line'>--publicurl=http://10.0.0.11:8000/v1 \
+</span><span class='line'>--internalurl=http://10.0.0.11:8000/v1  \
+</span><span class='line'>--adminurl=http://10.0.0.11:8000/v1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>编辑/etc/heat/api-paste.ini，修改[filter:authtoken]节</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[filter:authtoken]
+</span><span class='line'>paste.filter_factory = heat.common.auth_token:filter_factory
+</span><span class='line'>auth_host = 10.0.0.11
+</span><span class='line'>auth_port = 35357
+</span><span class='line'>auth_protocol = http
+</span><span class='line'>admin_tenant_name = service
+</span><span class='line'>admin_user = heat
+</span><span class='line'>admin_password = heat</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启Heat服务</p>
+
+<pre><code>cd /etc/init.d/; for i in $( ls heat-* ); do sudo service $i restart; done
+</code></pre>
+
+<h3>创建和管理stacks</h3>
+
+<p>从模板创建一个stack,其实官方已经提供很多模板，所以暂时先git下来做测试</p>
+
+<pre><code>git clone https://github.com/openstack/heat-templates.git
+</code></pre>
+
+<p>创建stack</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>heat stack-create mystack \
+</span><span class='line'>--template-file=/root/heat-templates/cfn/F18/WordPress_Single_Instance.template \
+</span><span class='line'>--parameters="InstanceType=m1.large;DBUsername=wordpress;DBPassword=wordpress;KeyName=HEAT_KEY;LinuxDistribution=F18"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>具体参数请参与官方手册。</p>
+
+<hr />
+
+<h2>Metering/Monitoring Server（Ceilometer）安装</h2>
+
+<h3>安装Metering Service</h3>
+
+<p><strong>1. 在控制节点安装依赖包 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y ceilometer-api ceilometer-collector \
+</span><span class='line'>ceilometer-agent-central python-ceilometerclient</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>2. 安装MongoDB </strong>
+Orchestration 服务使用数据库来存储信息，此示例使用MongoDB数据库：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install -y mongodb</span></code></pre></td></tr></table></div></figure>
+
+
+<p>建议将/etc/mongodb.conf中的bind_ip修改为：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>bind_ip=0.0.0.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>3. 重启mongodb生效 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/mongodb restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>4. 创建数据库和一个 ceilometer用户 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@controller:~# mongo
+</span><span class='line'>&gt; 
+</span><span class='line'>&gt; use ceilometer
+</span><span class='line'>switched to db ceilometer
+</span><span class='line'>&gt; db.addUser ( { user: "ceilometer",
+</span><span class='line'>             pwd: "ceilometer",
+</span><span class='line'>             roles: [ "readWrite", "dbAdmin"]
+</span><span class='line'>     } )</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>5. 编辑/etc/ceilometer/ceilometer.conf，替换如下： </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>pipeline_cfg_file=pipeline.yaml
+</span><span class='line'>sample_source=openstack
+</span><span class='line'>nova_control_exchange=nova
+</span><span class='line'>libvirt_type=qemu
+</span><span class='line'>glance_control_exchange=glance
+</span><span class='line'>metering_api_port=8777
+</span><span class='line'>debug=true
+</span><span class='line'>verbose=true
+</span><span class='line'>log_file=/var/log/ceilometer/ceilometer.log
+</span><span class='line'>log_dir=/var/log/ceilometer
+</span><span class='line'>notification_topics=notifications
+</span><span class='line'>policy_file=policy.json
+</span><span class='line'>rpc_backend=ceilometer.openstack.common.rpc.impl_kombu
+</span><span class='line'>allowed_rpc_exception_modules=ceilometer.openstack.common.exception,nova.exception,cinder.exception,exceptions
+</span><span class='line'>control_exchange=openstack
+</span><span class='line'>rabbit_host=10.0.0.11
+</span><span class='line'>rabbit_port=5672
+</span><span class='line'>rabbit_userid=guest
+</span><span class='line'>rabbit_password=guest
+</span><span class='line'>database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer
+</span><span class='line'>cinder_control_exchange=cinder
+</span><span class='line'>
+</span><span class='line'>[publisher_rpc]
+</span><span class='line'>metering_topic=metering
+</span><span class='line'>metering_secret=8ac14959ce3d1a4fe213
+</span><span class='line'>
+</span><span class='line'>[ssl]
+</span><span class='line'>
+</span><span class='line'>[database]
+</span><span class='line'>database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer
+</span><span class='line'>
+</span><span class='line'>[alarm]
+</span><span class='line'>
+</span><span class='line'>[rpc_notifier2]
+</span><span class='line'>
+</span><span class='line'>[api]
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>[service_credentials]
+</span><span class='line'>os_username=ceilometer
+</span><span class='line'>os_password=ceilometer
+</span><span class='line'>os_tenant_name=service
+</span><span class='line'>os_auth_url=http://10.0.0.11:5000/v2.0
+</span><span class='line'>os_endpoint_type=publicURL
+</span><span class='line'>
+</span><span class='line'>[dispatcher_file]
+</span><span class='line'>
+</span><span class='line'>[keystone_authtoken]
+</span><span class='line'>auth_host=10.0.0.11
+</span><span class='line'>auth_port=35357
+</span><span class='line'>auth_protocol=http
+</span><span class='line'>admin_tenant_name=service
+</span><span class='line'>admin_user=ceilometer
+</span><span class='line'>admin_password=ceilometer
+</span><span class='line'>signing_dir=/var/lib/ceilometer/ceilometer-signing
+</span><span class='line'>
+</span><span class='line'>[collector]
+</span><span class='line'>
+</span><span class='line'>[matchmaker_ring]
+</span><span class='line'>
+</span><span class='line'>[matchmaker_redis]</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>6. 创建名称为 ceilometer 的用户，以便使用认证服务。使用service 租户并赋予这个用户admin角色: </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone user-create \
+</span><span class='line'>  --name=ceilometer --pass=ceilometer \
+</span><span class='line'>  --email=ceilometer@domain.com
+</span><span class='line'>  
+</span><span class='line'>keystone user-role-add --user=ceilometer --tenant=service --role=admin  </span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>7. 添加服务和endpoint </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone service-create --name=ceilometer --type=metering \
+</span><span class='line'> --description="Ceilometer Metering Service"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>记录service id，在下面创建endpoint要使用。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone endpoint-create \
+</span><span class='line'> --service-id=94ae66fbf5d44c63b7257d0f3c3a48d6 \
+</span><span class='line'> --publicurl=http://10.0.0.11:8777/ \
+</span><span class='line'> --internalurl=http://10.0.0.11:8777/ \
+</span><span class='line'> --adminurl=http://10.0.0.11:8777/</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>8. 配置认证信息，编辑/etc/ceilometer/ceilometer.conf,修改[keystone_authtoken]节 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[keystone_authtoken]
+</span><span class='line'>auth_host=10.0.0.11
+</span><span class='line'>auth_port=35357
+</span><span class='line'>auth_protocol=http
+</span><span class='line'>auth_uri=http://10.0.0.11:35357/v2.0
+</span><span class='line'>admin_tenant_name=service
+</span><span class='line'>admin_user=ceilometer
+</span><span class='line'>admin_password=ceilometer</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>9. 重启所有ceilometer服务 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /etc/init.d/; for i in $( ls ceilometer-* ); do sudo service $i restart; done</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>添加Agent: 计算</h3>
+
+<p>为收集数据，需要在<strong>计算节点</strong>安装一个Agent。</p>
+
+<p><strong>1. 首先在控制节点安装Metering agent服务 </strong></p>
+
+<pre><code>        apt-get install ceilometer-agent-compute
+</code></pre>
+
+<p><strong>2.    编辑/etc/nova/nova.conf，在[DEFAULT]节添加以下信息 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Ceilometer
+</span><span class='line'>instance_usage_audit=True
+</span><span class='line'>instance_usage_period=hour
+</span><span class='line'>notify_on_state_change=vm_and_task_state
+</span><span class='line'>notification_driver=nova.openstack.common.notifier.rpc_notifier
+</span><span class='line'>notification_driver=ceilometer.compute.nova_notifier</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>3. 编辑/etc/ceilometer/ceilometer.conf，替换如下： </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[DEFAULT]
+</span><span class='line'>pipeline_cfg_file=pipeline.yaml
+</span><span class='line'>sample_source=openstack
+</span><span class='line'>nova_control_exchange=nova
+</span><span class='line'>libvirt_type=qemu
+</span><span class='line'>glance_control_exchange=glance
+</span><span class='line'>metering_api_port=8777
+</span><span class='line'>debug=true
+</span><span class='line'>verbose=true
+</span><span class='line'>log_file=/var/log/ceilometer/ceilometer.log
+</span><span class='line'>log_dir=/var/log/ceilometer
+</span><span class='line'>notification_topics=notifications
+</span><span class='line'>policy_file=policy.json
+</span><span class='line'>rpc_backend=ceilometer.openstack.common.rpc.impl_kombu
+</span><span class='line'>allowed_rpc_exception_modules=ceilometer.openstack.common.exception,nova.exception,cinder.exception,exceptions
+</span><span class='line'>control_exchange=openstack
+</span><span class='line'>rabbit_host=10.0.0.11
+</span><span class='line'>rabbit_port=5672
+</span><span class='line'>rabbit_userid=guest
+</span><span class='line'>rabbit_password=guest
+</span><span class='line'>database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer
+</span><span class='line'>cinder_control_exchange=cinder
+</span><span class='line'>
+</span><span class='line'>[publisher_rpc]
+</span><span class='line'>metering_topic=metering
+</span><span class='line'>metering_secret=8ac14959ce3d1a4fe213
+</span><span class='line'>
+</span><span class='line'>[ssl]
+</span><span class='line'>
+</span><span class='line'>[database]
+</span><span class='line'>database_connection=mongodb://ceilometer:ceilometer@10.0.0.11:27017/ceilometer
+</span><span class='line'>
+</span><span class='line'>[alarm]
+</span><span class='line'>
+</span><span class='line'>[rpc_notifier2]
+</span><span class='line'>
+</span><span class='line'>[api]
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>[service_credentials]
+</span><span class='line'>os_username=ceilometer
+</span><span class='line'>os_password=ceilometer
+</span><span class='line'>os_tenant_name=service
+</span><span class='line'>os_auth_url=http://10.0.0.11:5000/v2.0
+</span><span class='line'>os_endpoint_type=publicURL
+</span><span class='line'>
+</span><span class='line'>[dispatcher_file]
+</span><span class='line'>
+</span><span class='line'>[keystone_authtoken]
+</span><span class='line'>auth_host=10.0.0.11
+</span><span class='line'>auth_port=35357
+</span><span class='line'>auth_protocol=http
+</span><span class='line'>admin_tenant_name=service
+</span><span class='line'>admin_user=ceilometer
+</span><span class='line'>admin_password=ceilometer
+</span><span class='line'>signing_dir=/var/lib/ceilometer/ceilometer-signing
+</span><span class='line'>
+</span><span class='line'>[collector]
+</span><span class='line'>
+</span><span class='line'>[matchmaker_ring]
+</span><span class='line'>
+</span><span class='line'>[matchmaker_redis]
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>4. 重启compute agent服务 </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/ceilometer-agent-compute restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>添加Agent: 镜像服务</h3>
+
+<p>要测量镜像服务(Image Service)，只需要在glance-api.conf中修改notifier_strategy = noop为
+notifier_strategy = rabbit 或者 notifier_strategy = qpid，以下示例使用的rabbit。</p>
+
+<p>修改完成后重启镜像服务：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/glance-registry restart
+</span><span class='line'>/etc/init.d/glance-api restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>添加Agent: 块存储</h3>
+
+<p><strong>1. 要测量块存储服务(Block Storage)，只需要在cinder.conf中加入以下信息： </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Ceilometer
+</span><span class='line'>notification_driver = cinder.openstack.common.notifier.rabbit_notifier
+</span><span class='line'>control_exchange = cinder</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>2. 重启cinder相关服务：</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/cinder-volume restart
+</span><span class='line'>/etc/init.d/cinder-api restart</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>添加Agent: 对象存储</h3>
+
+<p><strong>1. 要访问对象存储(Object Storage)服务就需要ResellerAdmin角色： </strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>keystone role-create --name=ResellerAdmin
+</span><span class='line'>
+</span><span class='line'>keystone user-role-add --tenant_id 208807d34ff7455e93b39a2820265349 \
+</span><span class='line'>--user_id c538a8fec188450588b71f9d6b6f1ab5 \
+</span><span class='line'>--role_id 56cb34407d5e4ce596e36bd03475be01</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>测试结果</h3>
+
+<p>设置完之后，我们通过Dashboard来查看结果，来张漂亮的图先</p>
+
+<p><img src="/images/2013/11/openstack-resouce-use.png"></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">agenge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-10T13:19:00+08:00" pubdate data-updated="true">Nov 10<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/openstack/'>OpenStack</a>, <a class='category' href='/blog/categories/yun-ji-suan/'>云计算</a>
+  
+</span>
+
+
+	  
+
+<DIV style="font-size:12px;BORDER-BOTTOM: #bbbbbb 1px solid; BORDER-LEFT: #bbbbbb 1px solid; BACKGROUND: #f6f6f6; HEIGHT: 120px; BORDER-TOP: #bbbbbb 1px solid; BORDER-RIGHT: #bbbbbb 1px solid" class=oec2003right>
+<DIV style="MARGIN-TOP: 10px; FLOAT: left; MARGIN-LEFT: 5px; MARGIN-RIGHT: 10px"></DIV>
+<DIV style="LINE-HEIGHT: 200%; MARGIN-TOP: 10px; COLOR: #000000">
+作者： <A href="http://agenge.com">agenge</A> <BR>
+出处： <A href="http://agenge.com">http://agenge.com</A> 
+<BR>本博客所有的原创文章，作者皆保留版权。转载必须包含本声明，保持本文完整，并以超链接形式注明作者
+<a href=mailto:huanggeng.8552@gmail.com> agenge </a>。 </DIV></DIV>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1372596309207111" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
+<!-- UY END -->
+ 
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/" title="Previous Post: Keystone 源码安装与配置">&laquo; Keystone 源码安装与配置</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
+      </li>
+    
+  </ul>
+</section>
+<section> 
+  <h1>文章分类</h1> 
+  <ul id="categories"> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+  </ul> 
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - agenge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
