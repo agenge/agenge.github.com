@@ -9,21 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 首先得说明一下，此教程是基于H版部署，由于时间关系，文章可能会有错误，如果有发现错误之处，请直接回复，感谢。 环境准备 资源列表 网络配置 控制节点controller网络配置如下： 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-# Internal Network
-auto &hellip;">
+  <meta name="description" content="前言 虚拟化已经不是一个新鲜话题，不过仍然看到很多新手连KVM都没有入门，甚至是先接触OpenStack才遇到KVM，所以今天给各位新手提供一个安装教程。 安装KVM依赖包 目前绝大部分的CPU都支持Intel VT或AMD-V ，此处检查步骤略过。 1
+yum install -y bridge &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -93,6 +80,95 @@ auto &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">Centos 6.X 安装KVM与安装实例</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-15T21:58:00+08:00" pubdate data-updated="true">Nov 15<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>前言</h2>
+
+<p>虚拟化已经不是一个新鲜话题，不过仍然看到很多新手连KVM都没有入门，甚至是先接触OpenStack才遇到KVM，所以今天给各位新手提供一个安装教程。</p>
+
+<h2>安装KVM依赖包</h2>
+
+<p>目前绝大部分的CPU都支持Intel VT或AMD-V ，此处检查步骤略过。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum install -y bridge-utils kvm kmod-kvm qemu kvm-qemu-img virt-viewer virt-manager libvirt libvirt-python python-virtinst</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建一个叫 br0 的网桥：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /etc/sysconfig/network-scripts/
+</span><span class='line'>cp ifcfg-eth0 ifcfg-br0
+</span><span class='line'>vi ifcfg-eth0 </span></code></pre></td></tr></table></div></figure>
+
+
+<p>增加：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>BRIDGE=br0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将ifcfg-br0 修改为：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>DEVICE="br0"
+</span><span class='line'>TYPE="Bridge"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后重启网络：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/network restart
+</span><span class='line'>ifconfig br0
+</span><span class='line'>/etc/init.d/libvirtd restart</span></code></pre></td></tr></table></div></figure>
+
+
+<p>经过上面的简单安装与设置之后，KVM就已经安装完成，但怎么通过命令行创建虚拟机呢？</p>
+
+<h2>创建虚拟机</h2>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1696,78 +1772,6 @@ chmod +x /root/realserver.sh</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-07-28T00:00:00+08:00" pubdate data-updated="true">Jul 28<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>前言</h2>
-
-<p>最近有幸接触到流媒体领域，这可是偶之前一直灰常弱的一方面，可以说完全没有任何概念，经过Google的N次方搜索之后，头脑中总算有个概念，以下文章均来自互联网，偶就不一一帖出原链接，如果有语句或解释，很可能是偶借鉴您的文章，希望不要介意。当然，有些是偶自己写的，您就凑合着看，对于新手来讲，我相信收获肯定不少。</p>
-
-<h3>阅读对象</h3>
-
-<ol>
-<li>流媒体新手或渴望了解流媒体</li>
-<li>这篇文章合适有耐心的人，如果您觉得没那么多时间看这些”费话“，请直接关闭当前标签页
-会更好。</li>
-<li>永远追求上进的学习爱好者。</li>
-<li><strong>不适合</strong>流媒体的牛逼人物。</li>
-</ol>
-
-
-<hr />
-
-<h2>视频扫盲</h2>
-
-<h3>什么是编解码？什么是codec？</h3>
-
-<p>所谓编解码，就是codec。 <strong>CODEC</strong>= <strong>CO</strong>de（编码）+<strong>DEC</strong>ode（解码）.假设显示器的设置是：每秒刷新60次，也就是刷新率为60Hz，1024 * 768的分辨率，那么此时显卡每秒要处理的数据量是 60 * 1024 * 768 个像素点，可想而知，视频文件的大小是很恐怖的。如果不用任何方法压缩，就单纯的存储视频文件，那么1GB的文件，也只能存储37秒左右的视频内容。所以，咱们需要一个方式来压缩（code,编码）它，再存储起来，要播放的时候，再解压缩（decode,解码）。这样牺牲一些时间，来换取很大一部分空间，这是值得的，并且咱们的硬件设备也有这个能力做到。</p>
-
-<h3>屏幕比例与分辨率的联系</h3>
-
-<p>4:3、16:9、16:10，还有5:4，1920x1024、1280x720、1024x768、640x480等，已经被这些比例和分辨率搞得头昏脑涨？目前市场上针对比例和分辨率还比较混乱，下面的扫盲<strong>仅限于</strong>常见的几种。其实我们最常见的屏幕比例无非上面提到的4:3、16:9、16:10这三种，而5:4只是一个特殊比例，每种比例都算是一个家庭，其中4:3是最最常见的，也是历史最久的比例，它所对应的最高分辨率为：640x480，更小的分辨率此处不再一一列出。16:9 主要用于HD电视领域，也就是我们经常听到的720p、1080p，两个比例对应的分辨率：</p>
-
-<ul>
-<li>720p   1280x720</li>
-<li>1080p 1920x1080</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/07/28/video-decoder-intro/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1781,6 +1785,10 @@ chmod +x /root/realserver.sh</p>
     <section>
   <h1>最新文章</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">Centos 6.X 安装KVM与安装实例</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
@@ -1798,16 +1806,12 @@ chmod +x /root/realserver.sh</p>
         <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
-      </li>
-    
   </ul>
 </section>
 <section> 
   <h1>文章分类</h1> 
   <ul id="categories"> 
-    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
   </ul> 
 </section>
 

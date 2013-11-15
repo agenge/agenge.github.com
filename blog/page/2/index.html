@@ -9,8 +9,7 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 对于OpenStack中，制作一个Windows 的镜像让很多新手极为烦恼，偶有幸成功制作，
-不敢私藏，故与大家分享小小心得。上次与大家介绍过 制作OpenStack CentOS 6.3 镜像 本次主要是记录如何制作一个Windows Server 2008的镜像，请看操作： &hellip;">
+  <meta name="description" content="前言 最近有幸接触到流媒体领域，这可是偶之前一直灰常弱的一方面，可以说完全没有任何概念，经过Google的N次方搜索之后，头脑中总算有个概念，以下文章均来自互联网，偶就不一一帖出原链接，如果有语句或解释，很可能是偶借鉴您的文章，希望不要介意。当然，有些是偶自己写的，您就凑合着看，对于新手来讲， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +79,78 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/28/video-decoder-intro/">视频编解码术语概念介绍</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-28T00:00:00+08:00" pubdate data-updated="true">Jul 28<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>前言</h2>
+
+<p>最近有幸接触到流媒体领域，这可是偶之前一直灰常弱的一方面，可以说完全没有任何概念，经过Google的N次方搜索之后，头脑中总算有个概念，以下文章均来自互联网，偶就不一一帖出原链接，如果有语句或解释，很可能是偶借鉴您的文章，希望不要介意。当然，有些是偶自己写的，您就凑合着看，对于新手来讲，我相信收获肯定不少。</p>
+
+<h3>阅读对象</h3>
+
+<ol>
+<li>流媒体新手或渴望了解流媒体</li>
+<li>这篇文章合适有耐心的人，如果您觉得没那么多时间看这些”费话“，请直接关闭当前标签页
+会更好。</li>
+<li>永远追求上进的学习爱好者。</li>
+<li><strong>不适合</strong>流媒体的牛逼人物。</li>
+</ol>
+
+
+<hr />
+
+<h2>视频扫盲</h2>
+
+<h3>什么是编解码？什么是codec？</h3>
+
+<p>所谓编解码，就是codec。 <strong>CODEC</strong>= <strong>CO</strong>de（编码）+<strong>DEC</strong>ode（解码）.假设显示器的设置是：每秒刷新60次，也就是刷新率为60Hz，1024 * 768的分辨率，那么此时显卡每秒要处理的数据量是 60 * 1024 * 768 个像素点，可想而知，视频文件的大小是很恐怖的。如果不用任何方法压缩，就单纯的存储视频文件，那么1GB的文件，也只能存储37秒左右的视频内容。所以，咱们需要一个方式来压缩（code,编码）它，再存储起来，要播放的时候，再解压缩（decode,解码）。这样牺牲一些时间，来换取很大一部分空间，这是值得的，并且咱们的硬件设备也有这个能力做到。</p>
+
+<h3>屏幕比例与分辨率的联系</h3>
+
+<p>4:3、16:9、16:10，还有5:4，1920x1024、1280x720、1024x768、640x480等，已经被这些比例和分辨率搞得头昏脑涨？目前市场上针对比例和分辨率还比较混乱，下面的扫盲<strong>仅限于</strong>常见的几种。其实我们最常见的屏幕比例无非上面提到的4:3、16:9、16:10这三种，而5:4只是一个特殊比例，每种比例都算是一个家庭，其中4:3是最最常见的，也是历史最久的比例，它所对应的最高分辨率为：640x480，更小的分辨率此处不再一一列出。16:9 主要用于HD电视领域，也就是我们经常听到的720p、1080p，两个比例对应的分辨率：</p>
+
+<ul>
+<li>720p   1280x720</li>
+<li>1080p 1920x1080</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/07/28/video-decoder-intro/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1248,85 +1319,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/03/10/kindle-paperwhite-open/">Kindle PaperWhite开箱</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-10T00:00:00+08:00" pubdate data-updated="true">Mar 10<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>自从Amazon发布PaperWhite之后，一直想拥有它，119刀，确实不贵。由于身在天朝，无法直接在Amazon网上邮购，海掏捏，偶觉得麻烦(主要是没经验)，且周期太长，淘宝的代购价普遍1100左右，最后通过朋友推荐，</p>
-
-<p>淘宝有日版PaperWhite才780元(人民币)，还包邮。于是就下定决心购买，下面是不同阶段的过程。</p>
-
-<ol>
-<li>购买
-下单之后，整体来讲快递的速度相当快，先来看整个交易时间周期：</li>
-</ol>
-
-
-<p><img src="/images/2013/03/jy-01.jpg"></p>
-
-<p>注：货是2013年02月08日下午收到的，由于刚好过春节，偶直到02月13日才上网确认收货。</p>
-
-<p>下面是整个物流传递信息，可以看到在2013年01月25日下单，2013年02月05日才发货(估计卖家订单量太多，无法及时处理)，不过整个传递速度还是非常快滴。</p>
-
-<p><img src="/images/2013/03/wl-01.jpg"></p>
-
-<p>2.开箱
-包装正面图：</p>
-
-<p><img src="/images/2013/03/pw-01.jpg"></p>
-
-<p>包装内部图1：</p>
-
-<p><img src="/images/2013/03/pw-03.jpg"></p>
-
-<p>机身正面图：</p>
-
-<p><img src="/images/2013/03/pw-06.jpg"></p>
-
-<p>细心的同学可能已经发现这是多看系统的屏保。 :)</p>
-
-<p>皮套正面图：</p>
-
-<p><img src="/images/2013/03/pw-05.jpg"></p>
-
-<p>我的阅历：</p>
-
-<p><img src="/images/2013/03/pw-07.jpg"></p>
-
-<p>介个时间分布的统计方式有严重Bug，偶每天6:50起床，00:00&mdash;6:50之间的数据何来？现在看来此问题只有多看团队能够解答。</p>
-
-<p>最后，希望多看团队再接再厉吧，尽管Kindle原生系统已经非常优秀，但偶更喜欢对中文支持最好的多看系统。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1344,6 +1336,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">Centos 6.X 安装KVM与安装实例</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
       </li>
     
@@ -1359,16 +1355,12 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
         <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/10/12/the-lvs-keepalived-do-red5-ha-lb/">LVS+Keepalived做Red5高可用和负载均衡</a>
-      </li>
-    
   </ul>
 </section>
 <section> 
   <h1>文章分类</h1> 
   <ul id="categories"> 
-    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
   </ul> 
 </section>
 
