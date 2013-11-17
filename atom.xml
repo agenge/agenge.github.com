@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-17T22:47:26+08:00</updated>
+  <updated>2013-11-17T23:10:12+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -105,7 +105,7 @@
 </span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
 
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#x61;&#x69;&#108;&#116;&#111;&#58;&#114;&#97;&#x62;&#98;&#x69;&#116;&#64;&#x6c;&#x6f;&#x63;&#97;&#x6c;&#x68;&#111;&#x73;&#116;&#x2e;&#108;&#111;&#x67;">&#114;&#x61;&#x62;&#x62;&#x69;&#x74;&#64;&#108;&#x6f;&#x63;&#97;&#x6c;&#104;&#111;&#115;&#116;&#x2e;&#x6c;&#x6f;&#x67;</a></p>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#58;&#114;&#97;&#x62;&#98;&#105;&#x74;&#64;&#x6c;&#111;&#99;&#97;&#108;&#104;&#x6f;&#115;&#x74;&#x2e;&#108;&#x6f;&#x67;">&#x72;&#97;&#98;&#x62;&#x69;&#116;&#x40;&#x6c;&#111;&#99;&#97;&#108;&#104;&#111;&#x73;&#x74;&#x2e;&#108;&#x6f;&#x67;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -5193,22 +5193,15 @@ rake watch                     # Watch the site and regenerate when it changes
 
 <h2>准备工作</h2>
 
-<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
+<p>准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
 
-<p>主节点(Primary Node)
-次节点(Secondary Node)
-主机名
-drbd-01.i.12582.com
-drbd-02.i.12582.com
-操作系统
-CentOS 6.3 x86_64位
-CentOS 6.3 x86_64位
-硬盘分区
-/dev/sdb  8G
-/dev/sdb  8G
-IP地址
-192.168.30.234
-192.168.30.235</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>IP地址             硬盘分区        主机名                   操作系统
+</span><span class='line'>192.168.30.234        /dev/sdb,8G     drbd-01.i.12582.com     CentOS 6.3 x86_64位   主节点(Primary Node) 
+</span><span class='line'>192.168.30.235        /dev/sdb,8G     drbd-02.i.12582.com     CentOS 6.3 x86_64位   次节点(Secondary Node)</span></code></pre></td></tr></table></div></figure>
+
 
 <p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
 
@@ -5218,16 +5211,18 @@ IP地址
 
 <p>2  在所有节点/etc/hosts加入以下内容：</p>
 
-<pre><code>192.168.30.234  drbd-01.i.12582.com drbd-01
-192.168.30.235  drbd-02.i.12582.com drbd-02
-</code></pre>
-
-<!-- more -->
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.30.234  drbd-01.i.12582.com drbd-01
+</span><span class='line'>192.168.30.235  drbd-02.i.12582.com drbd-02</span></code></pre></td></tr></table></div></figure>
 
 
 <p>3  所有节点创建独立分区：</p>
 
-<pre><code>fdisk /dev/sdbDevice contains neither a valid DOS partition table, nor Sun, SGI or OSF disklabelBuilding a new DOS disklabel with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
+<pre><code>fdisk /dev/sdb
+Device contains neither a valid DOS partition table, nor Sun, SGI or OSF disk label
+Building a new DOS disk
+label with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
 After that, of course, the previous content won't be recoverable.
 Warning: invalid flag 0x0000 of partition table 4 will be corrected by w(rite)
 WARNING: DOS-compatible mode is deprecated. It's strongly recommended to
@@ -5260,6 +5255,9 @@ The partition table has been altered!
 Calling ioctl() to re-read partition table.
 Syncing disks.
 </code></pre>
+
+<!-- more -->
+
 
 <h2>安装Hearbeat</h2>
 
@@ -5649,12 +5647,12 @@ m:res  cs         ro                 ds        
 
 <pre><code> ip a
 
- 1: lo: &amp;lt;LOOPBACK,UP,LOWER_UP&amp;gt; mtu 16436 qdisc noqueue state UNKNOWN
+ 1: lo: LOOPBACK,UP,LOWER_UP&amp;gt; mtu 16436 qdisc noqueue state UNKNOWN
      link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
      inet 127.0.0.1/8 scope host lo
      inet6 ::1/128 scope host
          valid_lft forever preferred_lft forever
- 2: eth0: &amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
+ 2: eth0:  BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
      link/ether 08:00:27:98:a2:6c brd ff:ff:ff:ff:ff:ff
      inet 192.168.30.234/24 brd 192.168.30.255 scope global eth0
      inet &lt;b&gt;192.168.30.229&lt;/b&gt;/24 brd 192.168.30.255 scope global secondary eth0:0
@@ -7792,7 +7790,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#116;&#101;&#115;&#x74;&#95;&#x7a;&#97;&#x62;&#98;&#105;&#x78;&#64;&#103;&#109;&#97;&#105;&#x6c;&#x2e;&#99;&#111;&#109;">&#116;&#x65;&#x73;&#116;&#95;&#x7a;&#97;&#x62;&#98;&#x69;&#120;&#64;&#x67;&#109;&#x61;&#105;&#x6c;&#x2e;&#99;&#111;&#109;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#116;&#x65;&#x73;&#x74;&#95;&#122;&#x61;&#x62;&#x62;&#105;&#120;&#x40;&#x67;&#x6d;&#x61;&#105;&#108;&#x2e;&#x63;&#x6f;&#109;">&#x74;&#x65;&#x73;&#x74;&#x5f;&#122;&#97;&#98;&#x62;&#105;&#120;&#x40;&#103;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#111;&#109;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
