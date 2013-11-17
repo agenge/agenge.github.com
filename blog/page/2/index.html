@@ -124,36 +124,32 @@
 
 <p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
 
-<table class="table table-bordered table-striped table-condensed">
-    <tr>
-        <td valign="top" width="180"></td>
-        <td valign="top" width="182">主节点(Primary Node)</td>
-        <td valign="top" width="183">次节点(Secondary Node)</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">主机名</td>
-        <td valign="top" width="182">drbd-01.i.12582.com</td>
-        <td valign="top" width="183">drbd-02.i.12582.com</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">操作系统</td>
-        <td valign="top" width="182">CentOS 6.3 x86_64位</td>
-        <td valign="top" width="183">CentOS 6.3 x86_64位</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">硬盘分区</td>
-        <td valign="top" width="182">/dev/sdb  8G</td>
-        <td valign="top" width="183">/dev/sdb  8G</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">IP地址</td>
-        <td valign="top" width="182">192.168.30.234</td>
-        <td valign="top" width="183">192.168.30.235</td>
-    </tr>
-</table>
-
+<p>主节点(Primary Node)
+次节点(Secondary Node)
+主机名
+drbd-01.i.12582.com
+drbd-02.i.12582.com
+操作系统
+CentOS 6.3 x86_64位
+CentOS 6.3 x86_64位
+硬盘分区
+/dev/sdb  8G
+/dev/sdb  8G
+IP地址
+192.168.30.234
+192.168.30.235</p>
 
 <p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+<h2>初始化设置</h2>
+
+<p>1  所有节点关闭iptables和SELinux</p>
+
+<p>2  在所有节点/etc/hosts加入以下内容：</p>
+
+<pre><code>192.168.30.234  drbd-01.i.12582.com drbd-01
+192.168.30.235  drbd-02.i.12582.com drbd-02
+</code></pre>
 
 </div>
   
@@ -1248,7 +1244,7 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <section> 
   <h1>文章分类</h1> 
   <ul id="categories"> 
-    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/mysql'>Mysql</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
   </ul> 
 </section>
 

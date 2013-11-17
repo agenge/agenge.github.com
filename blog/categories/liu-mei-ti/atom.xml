@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 流媒体 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/liu-mei-ti/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-17T21:23:02+08:00</updated>
+  <updated>2013-11-17T22:47:26+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -96,7 +96,7 @@ cp /usr/local/sbin/keepalived /usr/sbin/
 </code></pre>
 
 <p>   }
-   notification_email_from <a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#58;&#65;&#x6c;&#x65;&#x78;&#97;&#x6e;&#100;&#x72;&#101;&#x2e;&#x43;&#97;&#115;&#x73;&#101;&#110;&#64;&#102;&#x69;&#114;&#x65;&#x77;&#97;&#x6c;&#x6c;&#x2e;&#108;&#111;&#x63;">&#65;&#x6c;&#101;&#120;&#97;&#110;&#100;&#x72;&#101;&#46;&#67;&#97;&#x73;&#115;&#x65;&#110;&#64;&#102;&#105;&#x72;&#101;&#119;&#x61;&#108;&#108;&#46;&#108;&#111;&#99;</a>
+   notification_email_from <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#65;&#x6c;&#101;&#120;&#97;&#110;&#x64;&#x72;&#x65;&#x2e;&#x43;&#97;&#115;&#x73;&#x65;&#x6e;&#64;&#102;&#105;&#114;&#x65;&#119;&#x61;&#x6c;&#x6c;&#x2e;&#108;&#111;&#x63;">&#65;&#108;&#101;&#120;&#97;&#x6e;&#100;&#114;&#x65;&#46;&#x43;&#97;&#x73;&#115;&#101;&#x6e;&#x40;&#102;&#105;&#114;&#x65;&#119;&#97;&#x6c;&#108;&#x2e;&#x6c;&#111;&#x63;</a>
    smtp_server 127.0.0.1
    smtp_connect_timeout 30
    router_id LVS_DEVEL
