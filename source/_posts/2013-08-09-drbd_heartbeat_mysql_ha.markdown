@@ -25,37 +25,30 @@ DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据
 
 
 ##准备工作
-1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：
+准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：
 
-主节点(Primary Node)
-次节点(Secondary Node)
-主机名
-drbd-01.i.12582.com
-drbd-02.i.12582.com
-操作系统
-CentOS 6.3 x86_64位
-CentOS 6.3 x86_64位
-硬盘分区
-/dev/sdb  8G
-/dev/sdb  8G
-IP地址
-192.168.30.234
-192.168.30.235
-
+```
+IP地址    			硬盘分区		主机名					操作系统
+192.168.30.234		/dev/sdb,8G		drbd-01.i.12582.com		CentOS 6.3 x86_64位   主节点(Primary Node) 
+192.168.30.235		/dev/sdb,8G		drbd-02.i.12582.com		CentOS 6.3 x86_64位   次节点(Secondary Node)
+```
 注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。
 ##初始化设置
 
 1  所有节点关闭iptables和SELinux
 
 2  在所有节点/etc/hosts加入以下内容：
-
+```
     192.168.30.234  drbd-01.i.12582.com drbd-01
     192.168.30.235  drbd-02.i.12582.com drbd-02
+```
 
-<!-- more -->
 3  所有节点创建独立分区：
 
-    fdisk /dev/sdbDevice contains neither a valid DOS partition table, nor Sun, SGI or OSF disklabelBuilding a new DOS disklabel with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
+    fdisk /dev/sdb
+	Device contains neither a valid DOS partition table, nor Sun, SGI or OSF disk label
+	Building a new DOS disk
+	label with disk identifier 0x46b64833.Changes will remain in memory only, until you decide to write them.
     After that, of course, the previous content won't be recoverable.
     Warning: invalid flag 0x0000 of partition table 4 will be corrected by w(rite)
     WARNING: DOS-compatible mode is deprecated. It's strongly recommended to
@@ -87,7 +80,7 @@ IP地址
     The partition table has been altered!
     Calling ioctl() to re-read partition table.
     Syncing disks.
-
+<!-- more -->
 ##安装Hearbeat
 
     wget ftp://mirror.switch.ch/pool/1/mirror/scientificlinux/6rolling/i386/os/Packages/epel-release-6-5.noarch.rpm
@@ -431,12 +424,12 @@ IP地址
 
         ip a
 
-        1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 16436 qdisc noqueue state UNKNOWN
+        1: lo: LOOPBACK,UP,LOWER_UP&gt; mtu 16436 qdisc noqueue state UNKNOWN
             link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
             inet 127.0.0.1/8 scope host lo
             inet6 ::1/128 scope host
                 valid_lft forever preferred_lft forever
-        2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
+        2: eth0:  BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
             link/ether 08:00:27:98:a2:6c brd ff:ff:ff:ff:ff:ff
             inet 192.168.30.234/24 brd 192.168.30.255 scope global eth0
             inet <b>192.168.30.229</b>/24 brd 192.168.30.255 scope global secondary eth0:0
