@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 运维 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-wei/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-15T22:38:31+08:00</updated>
+  <updated>2013-11-17T21:23:02+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,244 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CentOS 6 安装RabbitMQ]]></title>
+    <link href="http://agenge.github.io/blog/2013/11/17/centos-install-rabbitmq/"/>
+    <updated>2013-11-17T21:18:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/11/17/centos-install-rabbitmq</id>
+    <content type="html"><![CDATA[<h2>系统信息</h2>
+
+<ul>
+<li>操作系统:  CentOS 6.3 64位</li>
+<li>Erlang:    5.8.5 64位</li>
+<li>RabbitMQ:  3.1.5</li>
+</ul>
+
+
+<h2>安装依赖包</h2>
+
+<h3>启用并安装EPEL(Extra Packeages for Enterprise Linux)</h3>
+
+<p><code>
+wget http://mirror.neu.edu.cn/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+rpm -ivh epel-release-6-8.noarch.rpm
+</code></p>
+
+<p>添加 erlang 仓库源
+由于 RabbitMQ 是erlang编写，所以要依赖它</p>
+
+<p><code>
+wget -O /etc/yum.repos.d/epel-erlang.repo http://repos.fedorapeople.org/repos/peter/erlang/epel-erlang.repo
+</code></p>
+
+<h3>安装erlang</h3>
+
+<p><code>
+yum clear all
+yum install -y erlang
+</code>
+然后测试下erlang是否成功：
+```
+erl -v
+Erlang R14B04 (erts-5.8.5) [source] [64-bit] [rq:1] [async-threads:0] [kernel-poll:false]</p>
+
+<p>Eshell V5.8.5  (abort with ^G)
+```
+从输出结果来看，已经安装成功，版本信息为：V5.8.5</p>
+
+<hr />
+
+<h2>安装 RabbitMQ</h2>
+
+<p>把依赖包安装好，就可以进行rabbitmq的安装，包名为：rabbitmq-server:
+<code>
+yum -y install rabbitmq-server
+</code></p>
+
+<!-- more -->
+
+
+<h3>启动与设置rabbitmq</h3>
+
+<p>安装之后，我们就可以来启动rabbitmq server，启动方式有两种：
+&ndash; 通过系统服务启动
+<code>
+service rabbitmq-server start
+Starting rabbitmq-server: SUCCESS
+rabbitmq-server.
+</code>
+&ndash; 直接运行启动脚本(推荐使用)
+<code>
+/etc/init.d/rabbitmq-server start
+Starting rabbitmq-server: SUCCESS
+rabbitmq-server.
+</code></p>
+
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#x61;&#105;&#108;&#x74;&#x6f;&#x3a;&#x72;&#x61;&#98;&#98;&#x69;&#x74;&#x40;&#108;&#111;&#99;&#x61;&#x6c;&#104;&#111;&#115;&#x74;&#46;&#x6c;&#111;&#103;">&#x72;&#x61;&#98;&#98;&#105;&#x74;&#x40;&#108;&#x6f;&#99;&#97;&#x6c;&#104;&#111;&#x73;&#116;&#46;&#x6c;&#x6f;&#x67;</a>
+```
+=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Starting RabbitMQ 3.1.5 on Erlang R14B04
+Copyright &copy; 2007-2013 GoPivotal, Inc.
+Licensed under the MPL.  See <a href="http://www.rabbitmq.com/">http://www.rabbitmq.com/</a></p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+node           : rabbit@localhost
+home dir       : /var/lib/rabbitmq
+config file(s) : (none)
+cookie hash    : GA+C2KHxoRs776SK+Ki+qg==
+log            : /var/log/rabbitmq/<a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#x3a;&#x72;&#97;&#98;&#x62;&#x69;&#x74;&#x40;&#x6c;&#111;&#x63;&#97;&#x6c;&#x68;&#x6f;&#x73;&#x74;&#46;&#x6c;&#111;&#103;">&#114;&#x61;&#x62;&#98;&#105;&#x74;&#64;&#x6c;&#x6f;&#x63;&#97;&#108;&#104;&#x6f;&#x73;&#116;&#x2e;&#108;&#x6f;&#x67;</a>
+sasl log       : /var/log/rabbitmq/<a href="&#109;&#97;&#105;&#x6c;&#116;&#111;&#x3a;&#x72;&#97;&#98;&#x62;&#x69;&#x74;&#x40;&#x6c;&#x6f;&#99;&#x61;&#108;&#x68;&#x6f;&#x73;&#x74;&#45;&#115;&#97;&#x73;&#108;&#x2e;&#108;&#x6f;&#x67;">&#x72;&#x61;&#x62;&#x62;&#x69;&#x74;&#64;&#108;&#x6f;&#x63;&#97;&#x6c;&#x68;&#x6f;&#x73;&#116;&#x2d;&#115;&#x61;&#x73;&#x6c;&#46;&#108;&#x6f;&#x67;</a>
+database dir   : /var/lib/rabbitmq/mnesia/rabbit@localhost</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Limiting to approx 924 file handles (829 sockets)</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Memory limit set to 398MB of 996MB total.</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Disk free limit set to 1000MB</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+msg_store_transient: using rabbit_msg_store_ets_index to provide index</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+msg_store_persistent: using rabbit_msg_store_ets_index to provide index</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+started TCP Listener on [::]:5672</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Server startup complete; 0 plugins started.
+```</p>
+
+<p>除了这个日志，平常在维护及故障排除时，还可以查看其他更多的日志：
+```
+tree /var/log/rabbitmq/
+/var/log/rabbitmq/
+├── <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#58;&#114;&#x61;&#98;&#98;&#x69;&#x74;&#64;&#108;&#111;&#99;&#97;&#108;&#x68;&#111;&#115;&#116;&#x2e;&#108;&#x6f;&#103;">&#114;&#97;&#98;&#98;&#x69;&#x74;&#x40;&#108;&#111;&#x63;&#97;&#x6c;&#x68;&#111;&#115;&#116;&#x2e;&#108;&#111;&#103;</a>
+├── <a href="&#109;&#97;&#105;&#x6c;&#116;&#111;&#x3a;&#x72;&#97;&#98;&#x62;&#x69;&#116;&#x40;&#x6c;&#x6f;&#x63;&#97;&#108;&#x68;&#111;&#x73;&#x74;&#45;&#x73;&#97;&#x73;&#108;&#x2e;&#108;&#111;&#x67;">&#114;&#x61;&#98;&#98;&#105;&#116;&#64;&#108;&#111;&#99;&#x61;&#x6c;&#x68;&#x6f;&#x73;&#x74;&#x2d;&#x73;&#x61;&#x73;&#x6c;&#x2e;&#108;&#x6f;&#103;</a>
+├── shutdown_err
+├── shutdown_log
+├── startup_err
+└── startup_log</p>
+
+<p>0 directories, 6 files
+```</p>
+
+<h3>设置开机启动</h3>
+
+<p>RabbitMQ安装的默认配置是没有开机自启动的，如：
+<code>
+chkconfig --list rabbitmq-server
+rabbitmq-server 0:off   1:off   2:off   3:off   4:off   5:off   6:off
+</code></p>
+
+<p>设置下rabbitmq为on即可：
+<code>
+chkconfig --list rabbitmq-server
+rabbitmq-server 0:off   1:off   2:on    3:on    4:on    5:on    6:off
+</code>
+或者直接指定启动级别：
+<code>
+chkconfig --level 35 rabbitmq-server on
+chkconfig --list rabbitmq-server    
+rabbitmq-server 0:off   1:off   2:off   3:on    4:off   5:on    6:off
+</code></p>
+
+<p>另外，RabbitMQ默认还提供一个强大的工具：rabbitmqctl，例如查看RabbitMQ状态：
+<code>
+rabbitmqctl status
+</code>
+输出结果如下：
+```
+Status of node rabbit@localhost &hellip;
+[{pid,1961},
+ {running_applications,[{rabbit,&ldquo;RabbitMQ&rdquo;,&ldquo;3.1.5&rdquo;},</p>
+
+<pre><code>                    {os_mon,"CPO  CXC 138 46","2.2.7"},
+                    {xmerl,"XML parser","1.2.10"},
+                    {mnesia,"MNESIA  CXC 138 12","4.5"},
+                    {sasl,"SASL  CXC 138 11","2.1.10"},
+                    {stdlib,"ERTS  CXC 138 10","1.17.5"},
+                    {kernel,"ERTS  CXC 138 10","2.14.5"}]},
+</code></pre>
+
+<p> {os,{unix,linux}},
+ {erlang_version,&ldquo;Erlang R14B04 (erts-5.8.5) [source] [64-bit] [rq:1] [async-threads:30] [kernel-poll:true]\n&rdquo;},
+ {memory,[{total,26976648},</p>
+
+<pre><code>      {connection_procs,2648},
+      {queue_procs,5296},
+      {plugins,0},
+      {other_proc,9052880},
+      {mnesia,56656},
+      {mgmt_db,0},
+      {msg_index,33664},
+      {other_ets,761160},
+      {binary,1872},
+      {code,14419185},
+      {atom,1354457},
+      {other_system,1288830}]},
+</code></pre>
+
+<p> {vm_memory_high_watermark,0.4},
+ {vm_memory_limit,418077081},
+ {disk_free_limit,1000000000},
+ {disk_free,49057206272},
+ {file_descriptors,[{total_limit,924},</p>
+
+<pre><code>                {total_used,3},
+                {sockets_limit,829},
+                {sockets_used,1}]},
+</code></pre>
+
+<p> {processes,[{limit,1048576},{used,122}]},
+ {run_queue,0},
+ {uptime,836}]
+&hellip;done.
+```</p>
+
+<h3>安装管理界面插件</h3>
+
+<p>除了命令行管理工具，还提供了一个WEB管理界面，该管理界面是以插件的方式存在，不过默认没有启用，要启用它也很简单：
+<code>
+/usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
+</code>
+如果启用成功，将会提示如下：
+<code>
+The following plugins have been enabled:
+  mochiweb
+  webmachine
+  rabbitmq_web_dispatch
+  amqp_client
+  rabbitmq_management_agent
+  rabbitmq_management
+Plugin configuration has changed. Restart RabbitMQ for changes to take effect.
+</code>
+提示重启rabbitmq server:
+<code>
+/etc/init.d/rabbitmq-server restart
+Restarting rabbitmq-server: SUCCESS
+rabbitmq-server.
+</code></p>
+
+<p>通过浏览器打开: <a href="http://192.168.1.108:55672/mgmt/">http://192.168.1.108:55672/mgmt/</a> ，默认的用户名和密码都是guest.</p>
+
+<p>RabbitMQ管理界面的截图：
+<img src="/images/2013/11/rabbitmq-mg.jpg"></p>
+
+<p>如果无法打开，可能会是以下几个问题造成的：</p>
+
+<ul>
+<li>RabbitMQ Server可能启动失败，进一步的排错可通过查看详细的日志。</li>
+<li>防火墙阻挡，包括iptables和企业内部防火墙。</li>
+<li>SELinux开启，禁用它即可。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[DRBD+Heartbeat+Mysql高可用配置]]></title>
@@ -2915,177 +3153,6 @@ PassengerRuby /usr/bin/ruby
 
 
 <p>最后，你要是有任何疑问，请留言。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[基于KVM和Hyper-V的Windows系统测试报告]]></title>
-    <link href="http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test/"/>
-    <updated>2013-03-13T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test</id>
-    <content type="html"><![CDATA[<p>最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
-由于我们的新系统是采用的C#开发，故部署在Windows，从而</p>
-
-<p>引发这个测试，具体介绍如下：</p>
-
-<h2>测试环境</h2>
-
-<ul>
-<li>硬件资源</li>
-</ul>
-
-
-<table width="609" border="1" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">IP
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">功能
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">OS
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">CPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">内存
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">备注
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.61
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">宿主机
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">CentOS 6.3 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">忽略
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">忽略
-</td>
-<td rowspan="2" nowrap="nowrap" width="72">
-<p align="center">KVM
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.120
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">Guest OS
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">4*VCPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">8G
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.63
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">宿主机
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">忽略
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">忽略
-</td>
-<td rowspan="2" nowrap="nowrap" width="72">Hyper-v</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.136
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">Guest OS
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">4*VCPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">4G
-</td>
-</tr>
-</tbody>
-</table>
-
-
-<ul>
-<li><p>版本信息</p>
-
-<ul>
-<li>Libvirtd: 0.9.10</span></li></li>
-<li>Hyper-V：6.1（基于Windows Server 2008的组件）</li>
-</ul>
-</li>
-<li><p>测试工具</p>
-
-<ul>
-<li>HD Tune Pro 5.0</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>性能测试结果</h2>
-
-<p>为了尽量保持客观及测试的准确性，本次主要测试：随机访问读、文件基准
-* 随机访问读
-基于KVM的Windows 2008，192.168.30.120测试结果如下：</p>
-
-<p><img src="/images/2013/03/k-h-test_01.png"></p>
-
-<p>基于Hyper-V的Windows 2008，192.168.30.136测试结果如下：</p>
-
-<p><img src="/images/2013/03/k-h-test_02.png"></p>
-
-<p>从以上两个结果集中的IOPS和平均读取速率两个参数可看出，基于Hyper-V随机读的明显要优于基于KVM随机读。</p>
-
-<ul>
-<li>文件基准
-基于KVM的Windows 2008，192.168.30.120，文件大小：10G，数据随机读写，测试结果如下：</li>
-</ul>
-
-
-<p><img src="/images/2013/03/k-h-test_03.png"></p>
-
-<p>基于Hyper-V的Windows 2008，192.168.30.136，文件大小：10G，数据随机读写，测试结果如下：</p>
-
-<p><img src="/images/2013/03/k-h-test_04.png"></p>
-
-<p>通过文件基准得出以下几个结论：</p>
-
-<ol>
-<li><p>基于KVM的小文件写要优于基于Hyper-V小文件写，而基于Hyper-V小文件读明显要好很多；</p></li>
-<li><p>从整体来看，基于Hyper-V连续的小文件传输速度的IOPS要明显优于基于KVM；</p></li>
-<li><p>通过块大小为64M的文件可看出，基于Hyper-V的读写都要强于基于KVM很多；</p></li>
-</ol>
-
-
-<p>以上的2个测试点几乎可判断出，基于Hyper-V的Windows客户机整体上来讲要占优势，如果客户机是Windows，强烈建议使用基于Hyper-V的虚拟化。最后欢迎各位吐槽。</p>
 ]]></content>
   </entry>
   

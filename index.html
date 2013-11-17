@@ -9,8 +9,11 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 虚拟化已经不是一个新鲜话题，不过仍然看到很多新手连KVM都没有入门，甚至是先接触OpenStack才遇到KVM，所以今天给各位新手提供一个安装教程。 安装KVM依赖包 目前绝大部分的CPU都支持Intel VT或AMD-V ，此处检查步骤略过。 1
-yum install -y bridge &hellip;">
+  <meta name="description" content="系统信息 操作系统: CentOS 6.3 64位
+Erlang: 5.8.5 64位
+RabbitMQ: 3.1.5 安装依赖包 启用并安装EPEL(Extra Packeages for Enterprise Linux) 1
+2
+wget http://mirror.neu.edu.cn/ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +83,103 @@ yum install -y bridge &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/17/centos-install-rabbitmq/">CentOS 6 安装RabbitMQ</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-17T21:18:00+08:00" pubdate data-updated="true">Nov 17<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>系统信息</h2>
+
+<ul>
+<li>操作系统:  CentOS 6.3 64位</li>
+<li>Erlang:    5.8.5 64位</li>
+<li>RabbitMQ:  3.1.5</li>
+</ul>
+
+
+<h2>安装依赖包</h2>
+
+<h3>启用并安装EPEL(Extra Packeages for Enterprise Linux)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirror.neu.edu.cn/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</span><span class='line'>rpm -ivh epel-release-6-8.noarch.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加 erlang 仓库源
+由于 RabbitMQ 是erlang编写，所以要依赖它</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget -O /etc/yum.repos.d/epel-erlang.repo http://repos.fedorapeople.org/repos/peter/erlang/epel-erlang.repo</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装erlang</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum clear all
+</span><span class='line'>yum install -y erlang</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后测试下erlang是否成功：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>erl -v
+</span><span class='line'>Erlang R14B04 (erts-5.8.5) [source] [64-bit] [rq:1] [async-threads:0] [kernel-poll:false]
+</span><span class='line'>
+</span><span class='line'>Eshell V5.8.5  (abort with ^G)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>从输出结果来看，已经安装成功，版本信息为：V5.8.5</p>
+
+<hr />
+
+<h2>安装 RabbitMQ</h2>
+
+<p>把依赖包安装好，就可以进行rabbitmq的安装，包名为：rabbitmq-server:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install rabbitmq-server</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/17/centos-install-rabbitmq/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1686,92 +1786,6 @@ chmod +x /root/realserver.sh</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-09T00:00:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>介绍</h2>
-
-<p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
-
-<p>DRBD工作需要在两个节点上同时准备一块一模一样的分区组成镜像，这就是为什么它叫做分布式复制块设备，它主要通过复制数据来实现文件同步（备份），主要用于集群文件共享， 我们通过它的工作原理来了解块复制和文件复制的不同。</p>
-
-<p>首先，您需要知道，DRBD是工作在系统内核空间，而不是用户空间，它直接复制的是二进制数据，这是它速度快的根本原因。其次，DRBD至少需要两个节点来工作，一主一次。</p>
-
-<p>DRBD的文件同步过程和普通复制过程的不同：</p>
-
-<p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
-
-<h2>准备工作</h2>
-
-<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
-
-<table class="table table-bordered table-striped table-condensed">
-    <tr>
-        <td valign="top" width="180"></td>
-        <td valign="top" width="182">主节点(Primary Node)</td>
-        <td valign="top" width="183">次节点(Secondary Node)</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">主机名</td>
-        <td valign="top" width="182">drbd-01.i.12582.com</td>
-        <td valign="top" width="183">drbd-02.i.12582.com</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">操作系统</td>
-        <td valign="top" width="182">CentOS 6.3 x86_64位</td>
-        <td valign="top" width="183">CentOS 6.3 x86_64位</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">硬盘分区</td>
-        <td valign="top" width="182">/dev/sdb  8G</td>
-        <td valign="top" width="183">/dev/sdb  8G</td>
-    </tr>
-    <tr>
-        <td valign="top" width="180">IP地址</td>
-        <td valign="top" width="182">192.168.30.234</td>
-        <td valign="top" width="183">192.168.30.235</td>
-    </tr>
-</table>
-
-
-<p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1787,6 +1801,10 @@ chmod +x /root/realserver.sh</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/17/centos-install-rabbitmq/">CentOS 6 安装RabbitMQ</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">Centos 6.X 安装KVM与安装实例</a>
       </li>
     
@@ -1800,10 +1818,6 @@ chmod +x /root/realserver.sh</p>
     
       <li class="post">
         <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
       </li>
     
   </ul>

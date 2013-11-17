@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: OpenStack | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/openstack/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-15T22:38:31+08:00</updated>
+  <updated>2013-11-17T21:23:02+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,244 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CentOS 6 安装RabbitMQ]]></title>
+    <link href="http://agenge.github.io/blog/2013/11/17/centos-install-rabbitmq/"/>
+    <updated>2013-11-17T21:18:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/11/17/centos-install-rabbitmq</id>
+    <content type="html"><![CDATA[<h2>系统信息</h2>
+
+<ul>
+<li>操作系统:  CentOS 6.3 64位</li>
+<li>Erlang:    5.8.5 64位</li>
+<li>RabbitMQ:  3.1.5</li>
+</ul>
+
+
+<h2>安装依赖包</h2>
+
+<h3>启用并安装EPEL(Extra Packeages for Enterprise Linux)</h3>
+
+<p><code>
+wget http://mirror.neu.edu.cn/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+rpm -ivh epel-release-6-8.noarch.rpm
+</code></p>
+
+<p>添加 erlang 仓库源
+由于 RabbitMQ 是erlang编写，所以要依赖它</p>
+
+<p><code>
+wget -O /etc/yum.repos.d/epel-erlang.repo http://repos.fedorapeople.org/repos/peter/erlang/epel-erlang.repo
+</code></p>
+
+<h3>安装erlang</h3>
+
+<p><code>
+yum clear all
+yum install -y erlang
+</code>
+然后测试下erlang是否成功：
+```
+erl -v
+Erlang R14B04 (erts-5.8.5) [source] [64-bit] [rq:1] [async-threads:0] [kernel-poll:false]</p>
+
+<p>Eshell V5.8.5  (abort with ^G)
+```
+从输出结果来看，已经安装成功，版本信息为：V5.8.5</p>
+
+<hr />
+
+<h2>安装 RabbitMQ</h2>
+
+<p>把依赖包安装好，就可以进行rabbitmq的安装，包名为：rabbitmq-server:
+<code>
+yum -y install rabbitmq-server
+</code></p>
+
+<!-- more -->
+
+
+<h3>启动与设置rabbitmq</h3>
+
+<p>安装之后，我们就可以来启动rabbitmq server，启动方式有两种：
+&ndash; 通过系统服务启动
+<code>
+service rabbitmq-server start
+Starting rabbitmq-server: SUCCESS
+rabbitmq-server.
+</code>
+&ndash; 直接运行启动脚本(推荐使用)
+<code>
+/etc/init.d/rabbitmq-server start
+Starting rabbitmq-server: SUCCESS
+rabbitmq-server.
+</code></p>
+
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#58;&#x72;&#x61;&#98;&#x62;&#x69;&#x74;&#64;&#108;&#111;&#99;&#97;&#x6c;&#x68;&#111;&#115;&#x74;&#46;&#x6c;&#111;&#x67;">&#x72;&#97;&#x62;&#x62;&#105;&#116;&#x40;&#108;&#x6f;&#x63;&#97;&#108;&#104;&#x6f;&#x73;&#x74;&#46;&#108;&#111;&#103;</a>
+```
+=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Starting RabbitMQ 3.1.5 on Erlang R14B04
+Copyright &copy; 2007-2013 GoPivotal, Inc.
+Licensed under the MPL.  See <a href="http://www.rabbitmq.com/">http://www.rabbitmq.com/</a></p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+node           : rabbit@localhost
+home dir       : /var/lib/rabbitmq
+config file(s) : (none)
+cookie hash    : GA+C2KHxoRs776SK+Ki+qg==
+log            : /var/log/rabbitmq/<a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#58;&#x72;&#97;&#98;&#98;&#x69;&#x74;&#x40;&#108;&#x6f;&#x63;&#x61;&#x6c;&#x68;&#x6f;&#115;&#x74;&#x2e;&#108;&#111;&#x67;">&#114;&#x61;&#98;&#x62;&#105;&#x74;&#64;&#108;&#111;&#99;&#97;&#108;&#104;&#x6f;&#115;&#x74;&#x2e;&#x6c;&#x6f;&#103;</a>
+sasl log       : /var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#111;&#x3a;&#114;&#97;&#x62;&#98;&#105;&#116;&#64;&#108;&#x6f;&#x63;&#x61;&#108;&#x68;&#111;&#x73;&#x74;&#45;&#x73;&#97;&#115;&#x6c;&#46;&#x6c;&#x6f;&#x67;">&#114;&#x61;&#98;&#x62;&#x69;&#116;&#64;&#x6c;&#111;&#99;&#x61;&#x6c;&#x68;&#111;&#x73;&#116;&#45;&#115;&#97;&#x73;&#x6c;&#x2e;&#x6c;&#111;&#103;</a>
+database dir   : /var/lib/rabbitmq/mnesia/rabbit@localhost</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Limiting to approx 924 file handles (829 sockets)</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Memory limit set to 398MB of 996MB total.</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Disk free limit set to 1000MB</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+msg_store_transient: using rabbit_msg_store_ets_index to provide index</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+msg_store_persistent: using rabbit_msg_store_ets_index to provide index</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+started TCP Listener on [::]:5672</p>
+
+<p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+Server startup complete; 0 plugins started.
+```</p>
+
+<p>除了这个日志，平常在维护及故障排除时，还可以查看其他更多的日志：
+```
+tree /var/log/rabbitmq/
+/var/log/rabbitmq/
+├── <a href="&#x6d;&#97;&#105;&#108;&#x74;&#111;&#58;&#x72;&#x61;&#98;&#x62;&#x69;&#116;&#64;&#108;&#111;&#99;&#x61;&#x6c;&#104;&#x6f;&#x73;&#x74;&#x2e;&#108;&#x6f;&#103;">&#x72;&#x61;&#x62;&#98;&#105;&#x74;&#64;&#108;&#x6f;&#x63;&#97;&#x6c;&#x68;&#x6f;&#x73;&#116;&#46;&#x6c;&#x6f;&#103;</a>
+├── <a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#58;&#x72;&#97;&#x62;&#98;&#x69;&#x74;&#x40;&#108;&#x6f;&#99;&#x61;&#x6c;&#104;&#111;&#x73;&#x74;&#x2d;&#115;&#97;&#115;&#108;&#x2e;&#x6c;&#111;&#103;">&#x72;&#97;&#x62;&#98;&#105;&#116;&#x40;&#108;&#x6f;&#x63;&#x61;&#108;&#104;&#x6f;&#115;&#x74;&#x2d;&#x73;&#x61;&#115;&#x6c;&#x2e;&#108;&#111;&#x67;</a>
+├── shutdown_err
+├── shutdown_log
+├── startup_err
+└── startup_log</p>
+
+<p>0 directories, 6 files
+```</p>
+
+<h3>设置开机启动</h3>
+
+<p>RabbitMQ安装的默认配置是没有开机自启动的，如：
+<code>
+chkconfig --list rabbitmq-server
+rabbitmq-server 0:off   1:off   2:off   3:off   4:off   5:off   6:off
+</code></p>
+
+<p>设置下rabbitmq为on即可：
+<code>
+chkconfig --list rabbitmq-server
+rabbitmq-server 0:off   1:off   2:on    3:on    4:on    5:on    6:off
+</code>
+或者直接指定启动级别：
+<code>
+chkconfig --level 35 rabbitmq-server on
+chkconfig --list rabbitmq-server    
+rabbitmq-server 0:off   1:off   2:off   3:on    4:off   5:on    6:off
+</code></p>
+
+<p>另外，RabbitMQ默认还提供一个强大的工具：rabbitmqctl，例如查看RabbitMQ状态：
+<code>
+rabbitmqctl status
+</code>
+输出结果如下：
+```
+Status of node rabbit@localhost &hellip;
+[{pid,1961},
+ {running_applications,[{rabbit,&ldquo;RabbitMQ&rdquo;,&ldquo;3.1.5&rdquo;},</p>
+
+<pre><code>                    {os_mon,"CPO  CXC 138 46","2.2.7"},
+                    {xmerl,"XML parser","1.2.10"},
+                    {mnesia,"MNESIA  CXC 138 12","4.5"},
+                    {sasl,"SASL  CXC 138 11","2.1.10"},
+                    {stdlib,"ERTS  CXC 138 10","1.17.5"},
+                    {kernel,"ERTS  CXC 138 10","2.14.5"}]},
+</code></pre>
+
+<p> {os,{unix,linux}},
+ {erlang_version,&ldquo;Erlang R14B04 (erts-5.8.5) [source] [64-bit] [rq:1] [async-threads:30] [kernel-poll:true]\n&rdquo;},
+ {memory,[{total,26976648},</p>
+
+<pre><code>      {connection_procs,2648},
+      {queue_procs,5296},
+      {plugins,0},
+      {other_proc,9052880},
+      {mnesia,56656},
+      {mgmt_db,0},
+      {msg_index,33664},
+      {other_ets,761160},
+      {binary,1872},
+      {code,14419185},
+      {atom,1354457},
+      {other_system,1288830}]},
+</code></pre>
+
+<p> {vm_memory_high_watermark,0.4},
+ {vm_memory_limit,418077081},
+ {disk_free_limit,1000000000},
+ {disk_free,49057206272},
+ {file_descriptors,[{total_limit,924},</p>
+
+<pre><code>                {total_used,3},
+                {sockets_limit,829},
+                {sockets_used,1}]},
+</code></pre>
+
+<p> {processes,[{limit,1048576},{used,122}]},
+ {run_queue,0},
+ {uptime,836}]
+&hellip;done.
+```</p>
+
+<h3>安装管理界面插件</h3>
+
+<p>除了命令行管理工具，还提供了一个WEB管理界面，该管理界面是以插件的方式存在，不过默认没有启用，要启用它也很简单：
+<code>
+/usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
+</code>
+如果启用成功，将会提示如下：
+<code>
+The following plugins have been enabled:
+  mochiweb
+  webmachine
+  rabbitmq_web_dispatch
+  amqp_client
+  rabbitmq_management_agent
+  rabbitmq_management
+Plugin configuration has changed. Restart RabbitMQ for changes to take effect.
+</code>
+提示重启rabbitmq server:
+<code>
+/etc/init.d/rabbitmq-server restart
+Restarting rabbitmq-server: SUCCESS
+rabbitmq-server.
+</code></p>
+
+<p>通过浏览器打开: <a href="http://192.168.1.108:55672/mgmt/">http://192.168.1.108:55672/mgmt/</a> ，默认的用户名和密码都是guest.</p>
+
+<p>RabbitMQ管理界面的截图：
+<img src="/images/2013/11/rabbitmq-mg.jpg"></p>
+
+<p>如果无法打开，可能会是以下几个问题造成的：</p>
+
+<ul>
+<li>RabbitMQ Server可能启动失败，进一步的排错可通过查看详细的日志。</li>
+<li>防火墙阻挡，包括iptables和企业内部防火墙。</li>
+<li>SELinux开启，禁用它即可。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Centos 6.X 安装KVM与安装实例]]></title>
@@ -1325,7 +1563,7 @@ signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
 <p>```
 keystone user-create \
   &mdash;name=ceilometer &mdash;pass=ceilometer \
-  &mdash;email=<a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x63;&#x65;&#x69;&#108;&#x6f;&#x6d;&#x65;&#x74;&#x65;&#114;&#64;&#100;&#111;&#109;&#x61;&#105;&#110;&#46;&#x63;&#x6f;&#x6d;">&#x63;&#101;&#x69;&#108;&#111;&#x6d;&#101;&#x74;&#x65;&#x72;&#64;&#100;&#111;&#x6d;&#x61;&#105;&#x6e;&#46;&#x63;&#x6f;&#x6d;</a></p>
+  &mdash;email=<a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#111;&#x3a;&#x63;&#101;&#105;&#x6c;&#x6f;&#x6d;&#x65;&#116;&#101;&#x72;&#x40;&#x64;&#x6f;&#x6d;&#97;&#105;&#110;&#46;&#x63;&#111;&#x6d;">&#x63;&#101;&#105;&#x6c;&#x6f;&#x6d;&#x65;&#x74;&#101;&#x72;&#x40;&#x64;&#x6f;&#109;&#x61;&#x69;&#x6e;&#46;&#99;&#111;&#109;</a></p>
 
 <p>keystone user-role-add &mdash;user=ceilometer &mdash;tenant=service &mdash;role=admin<br/>
 ```</p>
@@ -2176,542 +2414,6 @@ X-Timestamp: 1381816448.74507
 Content-Type: application/x-tar
 Date: Tue, 15 Oct 2013 05:55:53 GMT
 </code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[OpenStack Swift安装与配置]]></title>
-    <link href="http://agenge.github.io/blog/2013/10/15/openstack-swift-install/"/>
-    <updated>2013-10-15T14:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/10/15/openstack-swift-install</id>
-    <content type="html"><![CDATA[<h2>准备环境</h2>
-
-<p><code>
-192.168.30.150  proxy server
-192.168.30.151  storage server
-192.168.30.152  storage server
-</code></p>
-
-<h2>网络配置</h2>
-
-<p><strong> Proxy 代理节点网络(单网卡)  </strong></p>
-
-<p>```
-auto lo
-iface lo inet loopback</p>
-
-<h1>The primary network interface</h1>
-
-<p>auto eth0
-iface eth0 inet static
-address 192.168.30.150
-netmask 255.255.255.0
-gateway 192.168.30.1
-network 192.168.30.0
-broadcast 192.168.30.255
-dns-nameservers 218.201.4.3
-```</p>
-
-<p><strong> 存储节点网络(单网卡)  </strong>
-存储节点1：</p>
-
-<p>```
-auto lo
-iface lo inet loopback</p>
-
-<h1>The primary network interface</h1>
-
-<p>auto eth0
-iface eth0 inet static
-address 192.168.30.151
-netmask 255.255.255.0
-gateway 192.168.30.1
-network 192.168.30.0
-broadcast 192.168.30.255
-dns-nameservers 218.201.4.3
-```</p>
-
-<p>存储节点2：</p>
-
-<p>```
-auto lo
-iface lo inet loopback</p>
-
-<h1>The primary network interface</h1>
-
-<p>auto eth0
-iface eth0 inet static
-address 192.168.30.152
-netmask 255.255.255.0
-gateway 192.168.30.1
-network 192.168.30.0
-broadcast 192.168.30.255
-dns-nameservers 218.201.4.3
-```</p>
-
-<h2>安装公共组件</h2>
-
-<p>以下操作在所有节点全部安装：</p>
-
-<h3>添加源</h3>
-
-<p><code>
-cat &gt; /etc/apt/sources.list.d/grizzly.list &lt;&lt; _END_
-deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-deb  http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
-_END_
-</code></p>
-
-<p>更新源</p>
-
-<p><code>
-sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 5EDB1B62EC4926EA
-apt-get update
-apt-get upgrade
-apt-get install ubuntu-cloud-keyring
-</code></p>
-
-<!-- more -->
-
-
-<h2>安装 Swift</h2>
-
-<p><code>
-os_swift="python-swift swift swift-proxy swift-account swift-container swift-object python-memcache xfsprogs"
-os_keystone="python-keystone python-keystoneclient"
-apt-get install -y $os_swift $os_keystone
-</code></p>
-
-<p>安装之后需要手工创建 swift相关配置文件:</p>
-
-<p><code>
-mkdir /etc/swift
-touch /etc/swift/swift.conf
-touch /etc/swift/proxy-server.conf
-chown -R swift:swift /etc/swift
-</code></p>
-
-<p>添加 swift.conf内容：</p>
-
-<p>```
-cat > /etc/swift/swift.conf &lt;&lt; <em>END</em>
-[swift-hash]</p>
-
-<h1>od -t x8 -N 8 -A n &lt; /dev/random</h1>
-
-<h1>The above command can be used to generate random a string.</h1>
-
-<p>swift_hash_path_suffix = 50ea1ddb6e88b991
-<em>END</em>
-```</p>
-
-<p>将以下内容添加到 /etc/swift/proxy-server.conf内容：</p>
-
-<p>```
-[DEFAULT]
-bind_port = 8080
-bind_ip = 0.0.0.0
-user = swift
-swift_dir = /etc/swift</p>
-
-<p>log_facility = LOG_LOCAL0
-log_level = DEBUG</p>
-
-<p>[pipeline:main]
-pipeline = catch_errors healthcheck cache authtoken keystoneauth container-quotas account-quotas proxy-server</p>
-
-<p>[app:proxy-server]
-use = egg:swift#proxy
-allow_account_management = true
-account_autocreate = true</p>
-
-<p>[filter:keystoneauth]
-use = egg:swift#keystoneauth
-operator_roles = Member,admin</p>
-
-<p>[filter:authtoken]
-paste.filter_factory = keystone.middleware.auth_token:filter_factory
-service_protocol = http
-service_port = 5000
-service_host = 192.168.30.150
-auth_port = 35357
-auth_host = 192.168.30.150
-auth_protocol = http
-admin_tenant_name = service
-admin_user = swift
-admin_password = password
-signing_dir = /etc/swift</p>
-
-<p>[filter:cache]
-use = egg:swift#memcache
-set log_name = cache
-memcache_servers = 192.168.30.150:11211</p>
-
-<p>[filter:catch_errors]
-use = egg:swift#catch_errors</p>
-
-<p>[filter:healthcheck]
-use = egg:swift#healthcheck</p>
-
-<p>[filter:proxy-logging]
-use = egg:swift#proxy_logging</p>
-
-<p>[filter:ratelimit]
-use = egg:swift#ratelimit
-[filter:container-quotas]
-use = egg:swift#container_quotas</p>
-
-<p>[filter:account-quotas]
-use = egg:swift#account_quotas
-```</p>
-
-<p>如果不使用 Keystone 认证，请使用以下的配置文件：</p>
-
-<p>```
-[DEFAULT]
-bind_port = 8080
-bind_ip = 192.168.30.150
-user = swift</p>
-
-<p>[pipeline:main]
-pipeline = healthcheck cache tempauth proxy-server</p>
-
-<p>[app:proxy-server]
-use = egg:swift#proxy
-allow_account_management = true
-account_autocreate = true</p>
-
-<p>[filter:tempauth]
-use = egg:swift#tempauth
-user_admin_admin = admin .admin .reseller_admin
-user_test_tester = testing .admin
-user_test2_tester2 = testing2 .admin
-user_test_tester3 = testing3</p>
-
-<p>[filter:healthcheck]
-use = egg:swift#healthcheck</p>
-
-<p>[filter:cache]
-use = egg:swift#memcache
-memcache_servers = 192.168.30.150:11211
-```</p>
-
-<p>格式： user<em><login1></em><login2> = <password> <privileges>
-登录的时候就是：</p>
-
-<p><code>
-login = admin:admin
-password = admin
-privileges = .admin .reseller_admin
-</code></p>
-
-<p>配置rsyslog</p>
-
-<p><code>
-echo "local0.*    /var/log/swift/proxy-server.log" &gt;&gt; /etc/rsyslog.conf
-mkdir /var/log/swift
-</code></p>
-
-<p>配置 环 Ring</p>
-
-<p><code>
-cd /etc/swift
-sudo swift-ring-builder account.builder create 6 2 1
-sudo swift-ring-builder container.builder create 6 2 1
-sudo swift-ring-builder object.builder create 6 2 1
-</code>
-说明</p>
-
-<ul>
-<li>第一个数字：6表示分区(环)将被处理为2<sup>6th</sup>，即使用2的6次方个分区，创建完之后应有 64个分区</li>
-<li>第二个数字：每个存储对象保存2份，即创建2个副本；由于偶只有两台storage，故只写2</li>
-<li>第三个数字：1表示限制分区数据转移的时间，此处表示1小时，即分区被连续移动两次之间的最小时间间隔</li>
-</ul>
-
-
-<p>添加设备
-添加新设备到Ring上，但add操作不会分配partitions到新的设备上，只有运行“rebalance”命令后才会进行分区的分配，所以这种方式可以有这种优势： 允许一次添加多个设备，只执行一次rebalance就可以了，以下操作步骤：</p>
-
-<p>```
-sudo swift-ring-builder account.builder add z1-192.168.30.151:6002/sdb1 100
-sudo swift-ring-builder account.builder add z2-192.168.30.152:6002/sdb1 100</p>
-
-<p>sudo swift-ring-builder container.builder add z1-192.168.30.151:6001/sdb1 100
-sudo swift-ring-builder container.builder add z2-192.168.30.152:6001/sdb1 100</p>
-
-<p>sudo swift-ring-builder object.builder add z1-192.168.30.151:6000/sdb1 100
-sudo swift-ring-builder object.builder add z2-192.168.30.152:6000/sdb1 100
-```</p>
-
-<p>查看 Ring信息
-可通过以下命令查到到Ring和Ring中的设备信息：
-* 查询account信息：</p>
-
-<pre><code>    swift-ring-builder account.builder
-</code></pre>
-
-<ul>
-<li><p>查询container信息：</p>
-
-<pre><code>  swift-ring-builder container.builder
-</code></pre></li>
-<li><p>查询object信息</p>
-
-<pre><code>  swift-ring-builder object.builder
-</code></pre></li>
-<li><p>生成 Ring
-如果确认一切之后，最终还要生成Ring，来进行分区的分配，即之前提到的rebalance：</p></li>
-</ul>
-
-
-<p><code>
-sudo swift-ring-builder account.builder rebalance
-sudo swift-ring-builder container.builder rebalance
-sudo swift-ring-builder object.builder rebalance
-</code></p>
-
-<p>设置权限</p>
-
-<p><code>
-chown -R swift:swift /etc/swift
-chown -R swift:swift /var/cache/swift
-</code></p>
-
-<hr />
-
-<h2>存储节点安装与配置</h2>
-
-<p>添加设备：
-先创建分区，另外一定要是 XFS文件系统</p>
-
-<p><code>
-mkdir -p /srv/node/sdb1
-chown -R swift:swift /srv/node/
-mkfs.xfs -i size=1024 /dev/sdb1 -f
-echo "/dev/sdb1 /srv/node/sdb1 xfs noatime,nodiratime,nobarrier,logbufs=8 0 0" &gt;&gt; /etc/fstab
-mount /srv/node/sdb1  
-</code></p>
-
-<p>设置 rsyncd.conf</p>
-
-<p>```
-uid = swift
-gid = swift</p>
-
-<p>log file = /var/log/rsyncd.log
-pid file = /var/run/rsyncd.pid
-address = 192.168.30.151</p>
-
-<p>[account]
-max_connections = 2
-path = /srv/node/
-read only = false
-lock file = /var/lock/account.lock</p>
-
-<p>[container]
-max_connections = 2
-path = /srv/node/
-read only = false
-lock file = /var/lock/container.lock</p>
-
-<p>[object]
-max_connections = 2
-path = /srv/node/
-read only = false
-lock file = /var/lock/object.lock
-```</p>
-
-<p>设置 rsync开机自启动</p>
-
-<pre><code>sudo sed -i 's/RSYNC_ENABLE=false/RSYNC_ENABLE=true/g' /etc/default/rsync
-</code></pre>
-
-<p>启动 rsync服务</p>
-
-<pre><code>sudo service rsync start
-</code></pre>
-
-<p>创建/etc/account-server.conf：</p>
-
-<p>```
-[DEFAULT]
-bind_ip = 0.0.0.0
-bind_port = 6002
-workers = 1
-user = swift
-swift_dir = /etc/swift
-devices = /srv/node</p>
-
-<p>[pipeline:main]
-pipeline = account-server</p>
-
-<p>[app:account-server]
-use = egg:swift#account</p>
-
-<p>[account-replicator]</p>
-
-<p>[account-auditor]</p>
-
-<p>[account-reaper]</p>
-
-<p>```</p>
-
-<p>创建/etc/container-server.conf</p>
-
-<p>```
-[DEFAULT]
-bind_ip = 0.0.0.0
-bind_port = 6001
-workers = 1
-user = swift
-swift_dir = /etc/swift
-devices = /srv/node</p>
-
-<p>[pipeline:main]
-pipeline = container-server</p>
-
-<p>[app:container-server]
-use = egg:swift#container</p>
-
-<p>[container-replicator]</p>
-
-<p>[container-updater]</p>
-
-<p>[container-auditor]</p>
-
-<p>[container-sync]
-```</p>
-
-<p>创建/etc/object-server.conf</p>
-
-<p>```
-[DEFAULT]
-bind_ip = 0.0.0.0
-bind_port = 6000
-workers = 1
-user = swift
-swift_dir = /etc/swift
-devices = /srv/node</p>
-
-<p>[pipeline:main]
-pipeline = recon object-server</p>
-
-<p>[app:object-server]
-use = egg:swift#object</p>
-
-<p>[filter:recon]
-use = egg:swift#recon
-recon_cache_path = /var/cache/swift</p>
-
-<p>[object-replicator]</p>
-
-<p>[object-updater]</p>
-
-<p>[object-auditor]
-```</p>
-
-<h3>重启服务</h3>
-
-<p>在所有存储节点重启以下服务：</p>
-
-<p><code>
-sudo swift-init object-server start
-sudo swift-init object-replicator start
-sudo swift-init object-updater start
-sudo swift-init object-auditor start
-sudo swift-init container-server start
-sudo swift-init container-replicator start
-sudo swift-init container-updater start
-sudo swift-init container-auditor start
-sudo swift-init account-server start
-sudo swift-init account-replicator start
-sudo swift-init account-auditor start
-</code></p>
-
-<p>在代理节点启动以下服务：</p>
-
-<p><code>
-sudo swift-init all restart
-</code></p>
-
-<h2>Swift操作</h2>
-
-<p>获得 X-Storage-Url 和 X-Auth-Token:</p>
-
-<pre><code>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0
-</code></pre>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-* About to connect() to 192.168.30.150 port 8080 (#0)
-*   Trying 192.168.30.150&hellip; connected</p>
-
-<blockquote><p>GET /auth/v1.0 HTTP/1.1
-User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
-Host: 192.168.30.150:8080
-Accept: <em>/</em>
-X-Storage-User: admin:admin
-X-Storage-Pass: admin</p>
-
-<p>&lt; HTTP/1.1 200 OK
-&lt; X-Storage-Url: <a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a>
-&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Type: text/html; charset=UTF-8
-&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Length: 0
-&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
-&lt;
-* Connection #0 to host 192.168.30.150 left intact
-* Closing connection #0
-```</p></blockquote>
-
-<p>检查账号</p>
-
-<pre><code>    curl -k -v -H 'X-Auth-Token: &lt;token-from-x-auth-token-above&gt;' &lt;url-from-xstorage-url-above&gt;  
-</code></pre>
-
-<p>这里的token-from-x-auth-token-above 就是上面输出的 AUTH_tk8a85916d63b14c568a4633b7920623c5，url-from-xstorage-url-above对应：<a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a></p>
-
-<p>检测 swift 命令是否工作正常</p>
-
-<pre><code>    swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin stat
-</code></pre>
-
-<p>正常输出类似以下信息：</p>
-
-<p>```
-   Account: AUTH_admin
-Containers: 0
-   Objects: 0</p>
-
-<pre><code> Bytes: 0
-</code></pre>
-
-<p>Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-Content-Type: text/plain; charset=utf-8
-```</p>
-
-<p>上传</p>
-
-<pre><code>swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin upload test apache-tomcat-6.0.36.tar.gz
-</code></pre>
-
-<p>删除</p>
-
-<pre><code>swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin delete test apache-tomcat-6.0.36.tar.gz
-</code></pre>
-
-<h2>排错思路</h2>
-
-<ol>
-<li>直接看控制台打印的日志</li>
-<li>检查配置文件是否正确</li>
-<li>通过观察日志，例如/var/log/syslog</li>
-<li>修改配置文件之后，需要重启对应的服务</li>
-</ol>
-
 ]]></content>
   </entry>
   

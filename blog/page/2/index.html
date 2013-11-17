@@ -9,7 +9,7 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 最近有幸接触到流媒体领域，这可是偶之前一直灰常弱的一方面，可以说完全没有任何概念，经过Google的N次方搜索之后，头脑中总算有个概念，以下文章均来自互联网，偶就不一一帖出原链接，如果有语句或解释，很可能是偶借鉴您的文章，希望不要介意。当然，有些是偶自己写的，您就凑合着看，对于新手来讲， &hellip;">
+  <meta name="description" content="介绍 DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +79,92 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">DRBD+Heartbeat+Mysql高可用配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-09T00:00:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>介绍</h2>
+
+<p>DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。</p>
+
+<p>DRBD工作需要在两个节点上同时准备一块一模一样的分区组成镜像，这就是为什么它叫做分布式复制块设备，它主要通过复制数据来实现文件同步（备份），主要用于集群文件共享， 我们通过它的工作原理来了解块复制和文件复制的不同。</p>
+
+<p>首先，您需要知道，DRBD是工作在系统内核空间，而不是用户空间，它直接复制的是二进制数据，这是它速度快的根本原因。其次，DRBD至少需要两个节点来工作，一主一次。</p>
+
+<p>DRBD的文件同步过程和普通复制过程的不同：</p>
+
+<p>DRBD在数据进入Buffer Cache时，先经过DRBD这一层，复制一份数据经过TCP/IP协议封装，发送到另一个节点上，另一个节点通过TCP/IP协议来接受复制过来的数据，同步到次节点的DRBD设备上。</p>
+
+<h2>准备工作</h2>
+
+<p>1  准备至少2台服务器，且每台服务器有一块磁盘或一个单独未使用的分区，偶的环境如下：</p>
+
+<table class="table table-bordered table-striped table-condensed">
+    <tr>
+        <td valign="top" width="180"></td>
+        <td valign="top" width="182">主节点(Primary Node)</td>
+        <td valign="top" width="183">次节点(Secondary Node)</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">主机名</td>
+        <td valign="top" width="182">drbd-01.i.12582.com</td>
+        <td valign="top" width="183">drbd-02.i.12582.com</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">操作系统</td>
+        <td valign="top" width="182">CentOS 6.3 x86_64位</td>
+        <td valign="top" width="183">CentOS 6.3 x86_64位</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">硬盘分区</td>
+        <td valign="top" width="182">/dev/sdb  8G</td>
+        <td valign="top" width="183">/dev/sdb  8G</td>
+    </tr>
+    <tr>
+        <td valign="top" width="180">IP地址</td>
+        <td valign="top" width="182">192.168.30.234</td>
+        <td valign="top" width="183">192.168.30.235</td>
+    </tr>
+</table>
+
+
+<p>注意：如果有服务器有2块或以上网卡的同学，建议将其中一块网卡专门用来做网络心跳线，甚至接入另外一台单独的交换机，本次环境只有单网卡。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/08/09/drbd_heartbeat_mysql_ha/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1121,204 +1207,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/03/13/kvm-hyper-v-base-win-test/">基于KVM和Hyper-V的Windows系统测试报告</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-13T00:00:00+08:00" pubdate data-updated="true">Mar 13<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
-由于我们的新系统是采用的C#开发，故部署在Windows，从而</p>
-
-<p>引发这个测试，具体介绍如下：</p>
-
-<h2>测试环境</h2>
-
-<ul>
-<li>硬件资源</li>
-</ul>
-
-
-<table width="609" border="1" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">IP
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">功能
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">OS
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">CPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">内存
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">备注
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.61
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">宿主机
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">CentOS 6.3 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">忽略
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">忽略
-</td>
-<td rowspan="2" nowrap="nowrap" width="72">
-<p align="center">KVM
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.120
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">Guest OS
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">4*VCPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">8G
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.63
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">宿主机
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">忽略
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">忽略
-</td>
-<td rowspan="2" nowrap="nowrap" width="72">Hyper-v</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.136
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">Guest OS
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">4*VCPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">4G
-</td>
-</tr>
-</tbody>
-</table>
-
-
-<ul>
-<li><p>版本信息</p>
-
-<ul>
-<li>Libvirtd: 0.9.10</span></li></li>
-<li>Hyper-V：6.1（基于Windows Server 2008的组件）</li>
-</ul>
-</li>
-<li><p>测试工具</p>
-
-<ul>
-<li>HD Tune Pro 5.0</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>性能测试结果</h2>
-
-<p>为了尽量保持客观及测试的准确性，本次主要测试：随机访问读、文件基准
-* 随机访问读
-基于KVM的Windows 2008，192.168.30.120测试结果如下：</p>
-
-<p><img src="/images/2013/03/k-h-test_01.png"></p>
-
-<p>基于Hyper-V的Windows 2008，192.168.30.136测试结果如下：</p>
-
-<p><img src="/images/2013/03/k-h-test_02.png"></p>
-
-<p>从以上两个结果集中的IOPS和平均读取速率两个参数可看出，基于Hyper-V随机读的明显要优于基于KVM随机读。</p>
-
-<ul>
-<li>文件基准
-基于KVM的Windows 2008，192.168.30.120，文件大小：10G，数据随机读写，测试结果如下：</li>
-</ul>
-
-
-<p><img src="/images/2013/03/k-h-test_03.png"></p>
-
-<p>基于Hyper-V的Windows 2008，192.168.30.136，文件大小：10G，数据随机读写，测试结果如下：</p>
-
-<p><img src="/images/2013/03/k-h-test_04.png"></p>
-
-<p>通过文件基准得出以下几个结论：</p>
-
-<ol>
-<li><p>基于KVM的小文件写要优于基于Hyper-V小文件写，而基于Hyper-V小文件读明显要好很多；</p></li>
-<li><p>从整体来看，基于Hyper-V连续的小文件传输速度的IOPS要明显优于基于KVM；</p></li>
-<li><p>通过块大小为64M的文件可看出，基于Hyper-V的读写都要强于基于KVM很多；</p></li>
-</ol>
-
-
-<p>以上的2个测试点几乎可判断出，基于Hyper-V的Windows客户机整体上来讲要占优势，如果客户机是Windows，强烈建议使用基于Hyper-V的虚拟化。最后欢迎各位吐槽。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1336,6 +1224,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/17/centos-install-rabbitmq/">CentOS 6 安装RabbitMQ</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">Centos 6.X 安装KVM与安装实例</a>
       </li>
     
@@ -1349,10 +1241,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
     
       <li class="post">
         <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/15/openstack-swift-install/">OpenStack Swift安装与配置</a>
       </li>
     
   </ul>

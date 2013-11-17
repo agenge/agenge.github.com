@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-15T22:38:31+08:00</updated>
+  <updated>2013-11-17T21:23:02+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,358 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CentOS 6 安装RabbitMQ]]></title>
+    <link href="http://agenge.github.io/blog/2013/11/17/centos-install-rabbitmq/"/>
+    <updated>2013-11-17T21:18:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/11/17/centos-install-rabbitmq</id>
+    <content type="html"><![CDATA[<h2>系统信息</h2>
+
+<ul>
+<li>操作系统:  CentOS 6.3 64位</li>
+<li>Erlang:    5.8.5 64位</li>
+<li>RabbitMQ:  3.1.5</li>
+</ul>
+
+
+<h2>安装依赖包</h2>
+
+<h3>启用并安装EPEL(Extra Packeages for Enterprise Linux)</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirror.neu.edu.cn/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</span><span class='line'>rpm -ivh epel-release-6-8.noarch.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>添加 erlang 仓库源
+由于 RabbitMQ 是erlang编写，所以要依赖它</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget -O /etc/yum.repos.d/epel-erlang.repo http://repos.fedorapeople.org/repos/peter/erlang/epel-erlang.repo</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装erlang</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum clear all
+</span><span class='line'>yum install -y erlang</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后测试下erlang是否成功：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>erl -v
+</span><span class='line'>Erlang R14B04 (erts-5.8.5) [source] [64-bit] [rq:1] [async-threads:0] [kernel-poll:false]
+</span><span class='line'>
+</span><span class='line'>Eshell V5.8.5  (abort with ^G)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>从输出结果来看，已经安装成功，版本信息为：V5.8.5</p>
+
+<hr />
+
+<h2>安装 RabbitMQ</h2>
+
+<p>把依赖包安装好，就可以进行rabbitmq的安装，包名为：rabbitmq-server:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install rabbitmq-server</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<h3>启动与设置rabbitmq</h3>
+
+<p>安装之后，我们就可以来启动rabbitmq server，启动方式有两种：
+&ndash; 通过系统服务启动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service rabbitmq-server start
+</span><span class='line'>Starting rabbitmq-server: SUCCESS
+</span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>直接运行启动脚本(推荐使用)</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/rabbitmq-server start
+</span><span class='line'>Starting rabbitmq-server: SUCCESS
+</span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#x61;&#105;&#x6c;&#x74;&#x6f;&#58;&#x72;&#97;&#x62;&#98;&#x69;&#116;&#x40;&#108;&#x6f;&#99;&#x61;&#108;&#104;&#x6f;&#x73;&#x74;&#46;&#108;&#111;&#x67;">&#x72;&#97;&#98;&#x62;&#x69;&#x74;&#x40;&#108;&#111;&#x63;&#x61;&#108;&#104;&#111;&#115;&#x74;&#46;&#108;&#x6f;&#103;</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>Starting RabbitMQ 3.1.5 on Erlang R14B04
+</span><span class='line'>Copyright (C) 2007-2013 GoPivotal, Inc.
+</span><span class='line'>Licensed under the MPL.  See http://www.rabbitmq.com/
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>node           : rabbit@localhost
+</span><span class='line'>home dir       : /var/lib/rabbitmq
+</span><span class='line'>config file(s) : (none)
+</span><span class='line'>cookie hash    : GA+C2KHxoRs776SK+Ki+qg==
+</span><span class='line'>log            : /var/log/rabbitmq/rabbit@localhost.log
+</span><span class='line'>sasl log       : /var/log/rabbitmq/rabbit@localhost-sasl.log
+</span><span class='line'>database dir   : /var/lib/rabbitmq/mnesia/rabbit@localhost
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>Limiting to approx 924 file handles (829 sockets)
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>Memory limit set to 398MB of 996MB total.
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>Disk free limit set to 1000MB
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>msg_store_transient: using rabbit_msg_store_ets_index to provide index
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>msg_store_persistent: using rabbit_msg_store_ets_index to provide index
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>started TCP Listener on [::]:5672
+</span><span class='line'>
+</span><span class='line'>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
+</span><span class='line'>Server startup complete; 0 plugins started.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>除了这个日志，平常在维护及故障排除时，还可以查看其他更多的日志：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tree /var/log/rabbitmq/
+</span><span class='line'>/var/log/rabbitmq/
+</span><span class='line'>├── rabbit@localhost.log
+</span><span class='line'>├── rabbit@localhost-sasl.log
+</span><span class='line'>├── shutdown_err
+</span><span class='line'>├── shutdown_log
+</span><span class='line'>├── startup_err
+</span><span class='line'>└── startup_log
+</span><span class='line'>
+</span><span class='line'>0 directories, 6 files</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>设置开机启动</h3>
+
+<p>RabbitMQ安装的默认配置是没有开机自启动的，如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --list rabbitmq-server
+</span><span class='line'>rabbitmq-server 0:off   1:off   2:off   3:off   4:off   5:off   6:off</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置下rabbitmq为on即可：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --list rabbitmq-server
+</span><span class='line'>rabbitmq-server 0:off   1:off   2:on    3:on    4:on    5:on    6:off</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或者直接指定启动级别：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --level 35 rabbitmq-server on
+</span><span class='line'>chkconfig --list rabbitmq-server    
+</span><span class='line'>rabbitmq-server 0:off   1:off   2:off   3:on    4:off   5:on    6:off</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外，RabbitMQ默认还提供一个强大的工具：rabbitmqctl，例如查看RabbitMQ状态：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rabbitmqctl status</span></code></pre></td></tr></table></div></figure>
+
+
+<p>输出结果如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Status of node rabbit@localhost ...
+</span><span class='line'>[{pid,1961},
+</span><span class='line'> {running_applications,[{rabbit,"RabbitMQ","3.1.5"},
+</span><span class='line'>                        {os_mon,"CPO  CXC 138 46","2.2.7"},
+</span><span class='line'>                        {xmerl,"XML parser","1.2.10"},
+</span><span class='line'>                        {mnesia,"MNESIA  CXC 138 12","4.5"},
+</span><span class='line'>                        {sasl,"SASL  CXC 138 11","2.1.10"},
+</span><span class='line'>                        {stdlib,"ERTS  CXC 138 10","1.17.5"},
+</span><span class='line'>                        {kernel,"ERTS  CXC 138 10","2.14.5"}]},
+</span><span class='line'> {os,{unix,linux}},
+</span><span class='line'> {erlang_version,"Erlang R14B04 (erts-5.8.5) [source] [64-bit] [rq:1] [async-threads:30] [kernel-poll:true]\n"},
+</span><span class='line'> {memory,[{total,26976648},
+</span><span class='line'>          {connection_procs,2648},
+</span><span class='line'>          {queue_procs,5296},
+</span><span class='line'>          {plugins,0},
+</span><span class='line'>          {other_proc,9052880},
+</span><span class='line'>          {mnesia,56656},
+</span><span class='line'>          {mgmt_db,0},
+</span><span class='line'>          {msg_index,33664},
+</span><span class='line'>          {other_ets,761160},
+</span><span class='line'>          {binary,1872},
+</span><span class='line'>          {code,14419185},
+</span><span class='line'>          {atom,1354457},
+</span><span class='line'>          {other_system,1288830}]},
+</span><span class='line'> {vm_memory_high_watermark,0.4},
+</span><span class='line'> {vm_memory_limit,418077081},
+</span><span class='line'> {disk_free_limit,1000000000},
+</span><span class='line'> {disk_free,49057206272},
+</span><span class='line'> {file_descriptors,[{total_limit,924},
+</span><span class='line'>                    {total_used,3},
+</span><span class='line'>                    {sockets_limit,829},
+</span><span class='line'>                    {sockets_used,1}]},
+</span><span class='line'> {processes,[{limit,1048576},{used,122}]},
+</span><span class='line'> {run_queue,0},
+</span><span class='line'> {uptime,836}]
+</span><span class='line'>...done.</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装管理界面插件</h3>
+
+<p>除了命令行管理工具，还提供了一个WEB管理界面，该管理界面是以插件的方式存在，不过默认没有启用，要启用它也很简单：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果启用成功，将会提示如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>The following plugins have been enabled:
+</span><span class='line'>  mochiweb
+</span><span class='line'>  webmachine
+</span><span class='line'>  rabbitmq_web_dispatch
+</span><span class='line'>  amqp_client
+</span><span class='line'>  rabbitmq_management_agent
+</span><span class='line'>  rabbitmq_management
+</span><span class='line'>Plugin configuration has changed. Restart RabbitMQ for changes to take effect.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>提示重启rabbitmq server:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/rabbitmq-server restart
+</span><span class='line'>Restarting rabbitmq-server: SUCCESS
+</span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过浏览器打开: <a href="http://192.168.1.108:55672/mgmt/">http://192.168.1.108:55672/mgmt/</a> ，默认的用户名和密码都是guest.</p>
+
+<p>RabbitMQ管理界面的截图：
+<img src="http://agenge.github.io/images/2013/11/rabbitmq-mg.jpg"></p>
+
+<p>如果无法打开，可能会是以下几个问题造成的：</p>
+
+<ul>
+<li>RabbitMQ Server可能启动失败，进一步的排错可通过查看详细的日志。</li>
+<li>防火墙阻挡，包括iptables和企业内部防火墙。</li>
+<li>SELinux开启，禁用它即可。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Centos 6.X 安装KVM与安装实例]]></title>
@@ -8493,7 +8845,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#105;&#108;&#116;&#111;&#58;&#x74;&#101;&#x73;&#x74;&#95;&#x7a;&#x61;&#x62;&#98;&#105;&#120;&#x40;&#x67;&#109;&#97;&#105;&#x6c;&#46;&#99;&#x6f;&#109;">&#116;&#x65;&#115;&#x74;&#95;&#122;&#x61;&#98;&#x62;&#x69;&#120;&#64;&#103;&#x6d;&#x61;&#105;&#x6c;&#46;&#99;&#x6f;&#109;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#x69;&#108;&#116;&#x6f;&#x3a;&#116;&#x65;&#x73;&#x74;&#x5f;&#122;&#x61;&#x62;&#x62;&#105;&#120;&#x40;&#103;&#x6d;&#97;&#x69;&#x6c;&#46;&#99;&#x6f;&#x6d;">&#116;&#x65;&#x73;&#116;&#95;&#x7a;&#x61;&#x62;&#98;&#x69;&#x78;&#x40;&#103;&#x6d;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -10052,177 +10404,6 @@ PassengerRuby /usr/bin/ruby
 <p>&#8220;`</p>
 
 <p>最后，你要是有任何疑问，请留言。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[基于KVM和Hyper-V的Windows系统测试报告]]></title>
-    <link href="http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test/"/>
-    <updated>2013-03-13T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/03/13/kvm-hyper-v-base-win-test</id>
-    <content type="html"><![CDATA[<p>最近由于工作原因，要做一个KVM和Hyper-V的测试报告，
-由于我们的新系统是采用的C#开发，故部署在Windows，从而</p>
-
-<p>引发这个测试，具体介绍如下：</p>
-
-<h2>测试环境</h2>
-
-<ul>
-<li>硬件资源</li>
-</ul>
-
-
-<table width="609" border="1" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">IP
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">功能
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">OS
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">CPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">内存
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">备注
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.61
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">宿主机
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">CentOS 6.3 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">忽略
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">忽略
-</td>
-<td rowspan="2" nowrap="nowrap" width="72">
-<p align="center">KVM
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.120
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">Guest OS
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">4*VCPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">8G
-</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.63
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">宿主机
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">忽略
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">忽略
-</td>
-<td rowspan="2" nowrap="nowrap" width="72">Hyper-v</td>
-</tr>
-<tr>
-<td nowrap="nowrap" width="129">
-<p align="center">192.168.30.136
-</td>
-<td nowrap="nowrap" width="81">
-<p align="center">Guest OS
-</td>
-<td nowrap="nowrap" width="140">
-<p align="center">Windows 2008 64位
-</td>
-<td nowrap="nowrap" width="115">
-<p align="center">4*VCPU
-</td>
-<td nowrap="nowrap" width="72">
-<p align="center">4G
-</td>
-</tr>
-</tbody>
-</table>
-
-
-<ul>
-<li><p>版本信息</p>
-
-<ul>
-<li>Libvirtd: 0.9.10</span></li></li>
-<li>Hyper-V：6.1（基于Windows Server 2008的组件）</li>
-</ul>
-</li>
-<li><p>测试工具</p>
-
-<ul>
-<li>HD Tune Pro 5.0</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>性能测试结果</h2>
-
-<p>为了尽量保持客观及测试的准确性，本次主要测试：随机访问读、文件基准
-* 随机访问读
-基于KVM的Windows 2008，192.168.30.120测试结果如下：</p>
-
-<p><img src="http://agenge.github.io/images/2013/03/k-h-test_01.png"></p>
-
-<p>基于Hyper-V的Windows 2008，192.168.30.136测试结果如下：</p>
-
-<p><img src="http://agenge.github.io/images/2013/03/k-h-test_02.png"></p>
-
-<p>从以上两个结果集中的IOPS和平均读取速率两个参数可看出，基于Hyper-V随机读的明显要优于基于KVM随机读。</p>
-
-<ul>
-<li>文件基准
-基于KVM的Windows 2008，192.168.30.120，文件大小：10G，数据随机读写，测试结果如下：</li>
-</ul>
-
-
-<p><img src="http://agenge.github.io/images/2013/03/k-h-test_03.png"></p>
-
-<p>基于Hyper-V的Windows 2008，192.168.30.136，文件大小：10G，数据随机读写，测试结果如下：</p>
-
-<p><img src="http://agenge.github.io/images/2013/03/k-h-test_04.png"></p>
-
-<p>通过文件基准得出以下几个结论：</p>
-
-<ol>
-<li><p>基于KVM的小文件写要优于基于Hyper-V小文件写，而基于Hyper-V小文件读明显要好很多；</p></li>
-<li><p>从整体来看，基于Hyper-V连续的小文件传输速度的IOPS要明显优于基于KVM；</p></li>
-<li><p>通过块大小为64M的文件可看出，基于Hyper-V的读写都要强于基于KVM很多；</p></li>
-</ol>
-
-
-<p>以上的2个测试点几乎可判断出，基于Hyper-V的Windows客户机整体上来讲要占优势，如果客户机是Windows，强烈建议使用基于Hyper-V的虚拟化。最后欢迎各位吐槽。</p>
 ]]></content>
   </entry>
   
