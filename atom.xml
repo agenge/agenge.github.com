@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-18T00:06:36+08:00</updated>
+  <updated>2013-11-18T00:09:57+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -56,6 +56,9 @@
 </pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf rubygems-1.8.24.tgz 
 </span><span class='line'>cd rubygems-1.8.24
 </span><span class='line'>ruby setup.rb </span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
 
 
 <p>为了与apache结合使用，需要创建apache用户与组；</p>
@@ -473,7 +476,7 @@
 </span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
 
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#114;&#x61;&#98;&#x62;&#105;&#x74;&#64;&#108;&#x6f;&#99;&#97;&#x6c;&#x68;&#x6f;&#115;&#116;&#46;&#x6c;&#111;&#x67;">&#114;&#x61;&#98;&#98;&#x69;&#116;&#64;&#108;&#111;&#x63;&#97;&#108;&#104;&#x6f;&#x73;&#116;&#x2e;&#108;&#x6f;&#103;</a></p>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#x6f;&#58;&#x72;&#x61;&#x62;&#x62;&#105;&#x74;&#64;&#108;&#x6f;&#99;&#x61;&#x6c;&#104;&#111;&#x73;&#x74;&#46;&#108;&#111;&#x67;">&#x72;&#97;&#98;&#98;&#x69;&#116;&#64;&#108;&#111;&#x63;&#x61;&#x6c;&#104;&#111;&#x73;&#x74;&#46;&#x6c;&#x6f;&#x67;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -8158,7 +8161,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#116;&#101;&#115;&#116;&#x5f;&#122;&#x61;&#98;&#98;&#105;&#120;&#64;&#x67;&#109;&#x61;&#105;&#x6c;&#46;&#x63;&#111;&#109;">&#116;&#x65;&#115;&#x74;&#x5f;&#x7a;&#x61;&#98;&#98;&#105;&#x78;&#64;&#103;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#58;&#116;&#101;&#x73;&#116;&#95;&#122;&#x61;&#x62;&#98;&#105;&#x78;&#64;&#103;&#109;&#x61;&#x69;&#108;&#x2e;&#x63;&#111;&#x6d;">&#116;&#101;&#115;&#x74;&#x5f;&#122;&#97;&#98;&#98;&#105;&#120;&#64;&#103;&#x6d;&#97;&#105;&#x6c;&#x2e;&#99;&#x6f;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
