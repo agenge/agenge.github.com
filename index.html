@@ -9,11 +9,8 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="系统信息 操作系统: CentOS 6.3 64位
-Erlang: 5.8.5 64位
-RabbitMQ: 3.1.5 安装依赖包 启用并安装EPEL(Extra Packeages for Enterprise Linux) 1
-2
-wget http://mirror.neu.edu.cn/ &hellip;">
+  <meta name="description" content="Redmine安装与配置 介绍 redmine是一个开源的项目管理套件。而且能运行绝大部分平台：Linux、Uinx、Windows等平台。 安装Redmine 安装依赖包 安装redmine之前，必须安装ruby和gem，下载地址： redmine 2.4.0
+ruby 1.8.7 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,6 +80,401 @@ wget http://mirror.neu.edu.cn/ &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/18/redmine-install-for-centos/">Redmine-install-for-centos</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-18T00:04:00+08:00" pubdate data-updated="true">Nov 18<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Redmine安装与配置</p>
+
+<h2>介绍</h2>
+
+<p>redmine是一个开源的项目管理套件。而且能运行绝大部分平台：Linux、Uinx、Windows等平台。</p>
+
+<h2>安装Redmine</h2>
+
+<h3>安装依赖包</h3>
+
+<p>安装redmine之前，必须安装ruby和gem，下载地址：</p>
+
+<ul>
+<li><a href="http://rubyforge.org/frs/?group_id=1850">redmine 2.4.0</a></li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/1.8/">ruby 1.8.7</a></li>
+<li><a href="https://rubyforge.org/frs/?group_id=126&amp;release_id=46730">rubygems 1.8.24</a></li>
+<li>Mysql、Apache httpd</li>
+</ul>
+
+
+<p>CentOS 6.3 默认安装的ruby已经是1.8.7，所在可以直接yum安装，如果你想源码进行安装，请自行Google：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://rubyforge.org/frs/download.php/77242/redmine-2.4.0.tar.gz --no-check-certificate
+</span><span class='line'>wget https://rubyforge.org/frs/download.php/76073/rubygems-1.8.24.tgz --no-check-certificate
+</span><span class='line'>yum install -y ruby-libs ruby rdoc ruby-devel gcc-c++ curl-devel</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装rubygems</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf rubygems-1.8.24.tgz 
+</span><span class='line'>cd rubygems-1.8.24
+</span><span class='line'>ruby setup.rb </span></code></pre></td></tr></table></div></figure>
+
+
+<p>为了与apache结合使用，需要创建apache用户与组；</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd apache
+</span><span class='line'>useradd -g apache -s /sbin/nologin apache</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装 redmine</h3>
+
+<p>安装 redmine</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf redmine-2.4.0.tar.gz 
+</span><span class='line'>chown -R apache:apache redmine-2.4.0
+</span><span class='line'>cd redmine-2.4.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装依赖包(使用淘宝的gem源)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem sources --remove http://rubygems.org/
+</span><span class='line'>gem sources -a http://ruby.taobao.org
+</span><span class='line'>gem install bundler
+</span><span class='line'>bundle install --without development test postgresql sqlite rmagick    </span></code></pre></td></tr></table></div></figure>
+
+
+<p>without 表示后面的模块都不需要安装</p>
+
+<h3>安装Mysql</h3>
+
+<p>本示例为了简便，直接使用的yum安装，需要源码安装的见 <a href="http://agenge.com/blog/2013/08/09/drbd_heartbeat_mysql_ha/">这里</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install mysql-server mysql-devel mysql
+</span><span class='line'>/etc/init.d/mysqld restart
+</span><span class='line'>/usr/bin/mysqladmin -u root password '123456'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建redmine数据库</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@localhost ~]# mysql -uroot -p
+</span><span class='line'>Enter password: 
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 3
+</span><span class='line'>Server version: 5.1.69 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective
+</span><span class='line'>owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create database redmine character set utf8;
+</span><span class='line'>Query OK, 1 row affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create user 'redmine'@'localhost' identified by 'redmine';
+</span><span class='line'>Query OK, 0 rows affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; grant all privileges on redmine.* to 'redmine'@'%';
+</span><span class='line'>Query OK, 0 rows affected (0.00 sec)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>测试是否可以用redmine登录；</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@localhost ~]# mysql -uredmine -p
+</span><span class='line'>Enter password: 
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 5
+</span><span class='line'>Server version: 5.1.69 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective
+</span><span class='line'>owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; use redmine;
+</span><span class='line'>Database changed</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>配置redmine的数据库连接</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd redmine-2.4.0/config
+</span><span class='line'>cp database.yml.example database.yml
+</span><span class='line'>vi database.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改后的内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>production:
+</span><span class='line'>  adapter: mysql2
+</span><span class='line'>  database: redmine
+</span><span class='line'>  host: localhost
+</span><span class='line'>  username: redmine
+</span><span class='line'>  password: redmine
+</span><span class='line'>  encoding: utf8
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改redmine的配置文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp configuration.yml.example configuration.yml
+</span><span class='line'>vi configuration.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改default和production的内容如下，其他的值都保持不变或根据你自己的需求而变：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>default:
+</span><span class='line'>  # Outgoing emails configuration (see examples above)
+</span><span class='line'>  email_delivery:
+</span><span class='line'>    delivery_method: :smtp
+</span><span class='line'>    smtp_settings:
+</span><span class='line'>      address: 127.0.0.1
+</span><span class='line'>      port: 25
+</span><span class='line'>      domain: localhost
+</span><span class='line'>      authentication: :login
+</span><span class='line'>      user_name: "redmine@example.net"
+</span><span class='line'>      password: "redmine"
+</span><span class='line'>    
+</span><span class='line'>...
+</span><span class='line'>production:
+</span><span class='line'>  email_delivery:
+</span><span class='line'>    delivery_method: :smtp
+</span><span class='line'>    smtp_settings:
+</span><span class='line'>      address: 127.0.0.1
+</span><span class='line'>      port: 25
+</span><span class='line'>      domain: localhost</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>生成token</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd redmine-2.4.0
+</span><span class='line'>rake generate_secret_token</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>初始化数据库</h3>
+
+<p>这步主要是创建所需要的表：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RAILS_ENV=production rake db:migrate </span></code></pre></td></tr></table></div></figure>
+
+
+<h3>导入数据</h3>
+
+<p>现在开始导入数据到数据库：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RAILS_ENV=production rake redmine:load_default_data
+</span><span class='line'>Select language: ar, az, bg, bs, ca, cs, da, de, el, en, en-GB, es, et, eu, fa, fi, fr, gl, he, hr, hu, id, it, ja, ko, lt, lv, mk, mn, nl, no, pl, pt, pt-BR, ro, ru, sk, sl, sq, sr, sr-YU, sv, th, tr, uk, vi, zh, zh-TW [en] zh
+</span><span class='line'>====================================
+</span><span class='line'>Default configuration data loaded.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回车之后会让你做一个选择，直接输入zh即可。</p>
+
+<h3>修改文件系统权限</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chown -R apache:apache files log tmp public/plugin_assets
+</span><span class='line'>chmod -R 755 files log tmp public/plugin_assets</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>整合apache</h2>
+
+<p>首先安装apache http，如果你已经安装，请忽略此步。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install httpd httpd-devel</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>绑定apache</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem install passenger
+</span><span class='line'>passenger-install-apache2-module </span></code></pre></td></tr></table></div></figure>
+
+
+<p>直接按回车。安装完之后创建redmine.conf：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>touch /etc/httpd/conf.d/redmine.con</span></code></pre></td></tr></table></div></figure>
+
+
+<p>并添加以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-4.0.24/buildout/apache2/mod_passenger.so
+</span><span class='line'>PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-4.0.24
+</span><span class='line'>PassengerRuby /usr/bin/ruby
+</span><span class='line'>
+</span><span class='line'>Listen 8888
+</span><span class='line'>&lt;VirtualHost *:8888&gt;
+</span><span class='line'>   ServerName 192.168.1.108
+</span><span class='line'>   DocumentRoot /var/www/html/redmine-2.4.0/public
+</span><span class='line'>  &lt;Directory /var/www/html/redmine-2.4.0/public &gt;
+</span><span class='line'># This relaxes Apache security settings.
+</span><span class='line'>    AllowOverride all
+</span><span class='line'> # MultiViews must be turned off.
+</span><span class='line'>    Options -MultiViews
+</span><span class='line'>   &lt;/Directory&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面有些内容需要你根据实际情况而修改：passenger路径、DocumentRoot</p>
+
+<h3>　启动Apache</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/httpd start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过浏览器访问：<a href="http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin">http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin</a>
+以下是登录后的主页：
+<img src="/images/2013/11/redmine-main.jpg"></p>
+
+<p>至于redmine的详细使用，期待下次吧。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1694,98 +2086,6 @@ chmod +x /root/realserver.sh</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-12T22:18:00+08:00" pubdate data-updated="true">Sep 12<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>前言</h1>
-
-<h2>为啥写篇文章</h2>
-
-<ol>
-<li><p>熟悉WordPress的或许都明白，为了写作，你要学习很多东西，例如Linux、Apache/Nginx、Mysql以及各种中间件；</p></li>
-<li><p>你要花钱买VPS/虚拟主机，你要自己优化Web Server和Mysql，你要定期备份Mysql；</p></li>
-<li><p>WordPress官方已经被墙（对于合格的IT屌丝，这点不是问题）；</p></li>
-</ol>
-
-
-<p>你可能已经在心理产生疑问：“你说这么多费话，无非就是想让我放弃WP，难道你有解决上述问题的完美方案？”
-虽不敢说完美解决，但至少有这么一个blog平台：</p>
-
-<ul>
-<li>无须数据库</li>
-<li>无须Web Server</li>
-<li>无须备份且数据永不丢失（相对自己备份而言）</li>
-<li>所有操作均有版本记录</li>
-</ul>
-
-
-<p>看了之后是不是很“鸡动”？没错，这个平台就是Github，结合jekyll/Octopress就完全可以专心写作，
-不过相对WP，功能确实要少些，图片和视频功能实在太弱。</p>
-
-<h2>Jekyll/Octopress是啥</h2>
-
-<p>Jekyll即是一个轻量级Blog系统，而且还是一个强大的静态网站生成系统，具体的介绍请参考以下链接：</p>
-
-<p>1、<a href="http://calefy.org/2012/03/03/my-process-of-building-jekyll-blog.html">Jekyll建站之旅</a></p>
-
-<p>2、<a href="http://www.cnblogs.com/purediy/archive/2013/03/07/2948892.html">通过GitHub Pages建立个人站点（详细步骤）</a></p>
-
-<p>3、<a href="http://ztpala.com/2011/09/12/jekyll-and-github-pages/">Jekyll介绍</a></p>
-
-<p>Octopress其实就是一个基于Jekyll实现的静态网站系统，具体介绍如下（引用）：</p>
-
-<ul>
-<li><p>使用 Markdown 标记语言书写源文件， 通过 Markdown 解析器转换为 HTML 文件</p></li>
-<li><p>通过 Octopress 提供的站点模板提供所需的 Web 资产文件 （Javascript、CSS、image 等）</p></li>
-<li><p>只包含静态网页，无需数据库支持，对系统要求低且迁移方便</p></li>
-<li><p>以编写程序的方式编制网站，便于实现版本控制</p></li>
-<li><p>Octopress / Jekyll 使用简洁的Ruby框架实现。</p>
-
-<ul>
-<li><p>Octopress 以 rake 任务的形式实现静态站点页面生成, 操作十分简单</p></li>
-<li><p>Octopress 以 rake 任务的形式实现到普通网站和 Github 的发布</p></li>
-<li><p>Octopress 与 Github 完美结合，你无需学习过多的 git 命令语法，使非专业人士的使用成为可能</p></li>
-</ul>
-</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/09/12/write-blog-octopress-with-github/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1799,6 +2099,10 @@ chmod +x /root/realserver.sh</p>
     <section>
   <h1>最新文章</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/18/redmine-install-for-centos/">Redmine-install-for-centos</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/11/17/centos-install-rabbitmq/">CentOS 6 安装RabbitMQ</a>
@@ -1816,16 +2120,12 @@ chmod +x /root/realserver.sh</p>
         <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
-      </li>
-    
   </ul>
 </section>
 <section> 
   <h1>文章分类</h1> 
   <ul id="categories"> 
-    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li><li><a href='/blog/categories/xiang-mu-guan-li'>项目管理</a></li> 
   </ul> 
 </section>
 

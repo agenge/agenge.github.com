@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[文章分类: 项目管理 | TaurusHome]]></title>
+  <link href="http://agenge.github.io/blog/categories/xiang-mu-guan-li/atom.xml" rel="self"/>
+  <link href="http://agenge.github.io/"/>
+  <updated>2013-11-18T00:06:36+08:00</updated>
+  <id>http://agenge.github.io/</id>
+  <author>
+    <name><![CDATA[agenge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[redmine-install-for-centos]]></title>
+    <link href="http://agenge.github.io/blog/2013/11/18/redmine-install-for-centos/"/>
+    <updated>2013-11-18T00:04:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/11/18/redmine-install-for-centos</id>
+    <content type="html"><![CDATA[<p>Redmine安装与配置</p>
+
+<h2>介绍</h2>
+
+<p>redmine是一个开源的项目管理套件。而且能运行绝大部分平台：Linux、Uinx、Windows等平台。</p>
+
+<h2>安装Redmine</h2>
+
+<h3>安装依赖包</h3>
+
+<p>安装redmine之前，必须安装ruby和gem，下载地址：</p>
+
+<ul>
+<li><a href="http://rubyforge.org/frs/?group_id=1850">redmine 2.4.0</a></li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/1.8/">ruby 1.8.7</a></li>
+<li><a href="https://rubyforge.org/frs/?group_id=126&amp;release_id=46730">rubygems 1.8.24</a></li>
+<li>Mysql、Apache httpd</li>
+</ul>
+
+
+<p>CentOS 6.3 默认安装的ruby已经是1.8.7，所在可以直接yum安装，如果你想源码进行安装，请自行Google：
+<code>
+wget https://rubyforge.org/frs/download.php/77242/redmine-2.4.0.tar.gz --no-check-certificate
+wget https://rubyforge.org/frs/download.php/76073/rubygems-1.8.24.tgz --no-check-certificate
+yum install -y ruby-libs ruby rdoc ruby-devel gcc-c++ curl-devel
+</code></p>
+
+<h3>安装rubygems</h3>
+
+<p><code>
+tar zxvf rubygems-1.8.24.tgz
+cd rubygems-1.8.24
+ruby setup.rb
+</code></p>
+
+<p>为了与apache结合使用，需要创建apache用户与组；
+<code>
+groupadd apache
+useradd -g apache -s /sbin/nologin apache
+</code></p>
+
+<h3>安装 redmine</h3>
+
+<p>安装 redmine
+<code>
+tar zxvf redmine-2.4.0.tar.gz
+chown -R apache:apache redmine-2.4.0
+cd redmine-2.4.0
+</code></p>
+
+<p>安装依赖包(使用淘宝的gem源)
+<code>
+gem sources --remove http://rubygems.org/
+gem sources -a http://ruby.taobao.org
+gem install bundler
+bundle install --without development test postgresql sqlite rmagick    
+</code>
+without 表示后面的模块都不需要安装</p>
+
+<h3>安装Mysql</h3>
+
+<p>本示例为了简便，直接使用的yum安装，需要源码安装的见 <a href="http://agenge.com/blog/2013/08/09/drbd_heartbeat_mysql_ha/">这里</a>
+<code>
+yum -y install mysql-server mysql-devel mysql
+/etc/init.d/mysqld restart
+/usr/bin/mysqladmin -u root password '123456'
+</code></p>
+
+<p>创建redmine数据库
+```
+[root@localhost ~]# mysql -uroot -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 3
+Server version: 5.1.69 Source distribution</p>
+
+<p>Copyright &copy; 2000, 2013, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>mysql> create database redmine character set utf8;
+Query OK, 1 row affected (0.00 sec)</p>
+
+<p>mysql> create user &lsquo;redmine&rsquo;@&lsquo;localhost&rsquo; identified by &lsquo;redmine&rsquo;;
+Query OK, 0 rows affected (0.00 sec)</p>
+
+<p>mysql> grant all privileges on redmine.* to &lsquo;redmine&rsquo;@&lsquo;%&rsquo;;
+Query OK, 0 rows affected (0.00 sec)
+```</p>
+
+<p>测试是否可以用redmine登录；
+```
+[root@localhost ~]# mysql -uredmine -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 5
+Server version: 5.1.69 Source distribution</p>
+
+<p>Copyright &copy; 2000, 2013, Oracle and/or its affiliates. All rights reserved.</p>
+
+<p>Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.</p>
+
+<p>Type &lsquo;help;&rsquo; or &lsquo;\h&rsquo; for help. Type &lsquo;\c&rsquo; to clear the current input statement.</p>
+
+<p>mysql> use redmine;
+Database changed
+```</p>
+
+<h3>配置redmine的数据库连接</h3>
+
+<p><code>
+cd redmine-2.4.0/config
+cp database.yml.example database.yml
+vi database.yml
+</code></p>
+
+<p>修改后的内容如下：</p>
+
+<p>```
+production:
+  adapter: mysql2
+  database: redmine
+  host: localhost
+  username: redmine
+  password: redmine
+  encoding: utf8</p>
+
+<p>```</p>
+
+<p>修改redmine的配置文件：
+<code>
+cp configuration.yml.example configuration.yml
+vi configuration.yml
+</code>
+修改default和production的内容如下，其他的值都保持不变或根据你自己的需求而变：</p>
+
+<p>```
+default:
+  # Outgoing emails configuration (see examples above)
+  email_delivery:</p>
+
+<pre><code>delivery_method: :smtp
+smtp_settings:
+  address: 127.0.0.1
+  port: 25
+  domain: localhost
+  authentication: :login
+  user_name: "redmine@example.net"
+  password: "redmine"
+</code></pre>
+
+<p>&hellip;
+production:
+  email_delivery:</p>
+
+<pre><code>delivery_method: :smtp
+smtp_settings:
+  address: 127.0.0.1
+  port: 25
+  domain: localhost
+</code></pre>
+
+<p>```</p>
+
+<h3>生成token</h3>
+
+<p><code>
+cd redmine-2.4.0
+rake generate_secret_token
+</code></p>
+
+<h3>初始化数据库</h3>
+
+<p>这步主要是创建所需要的表：
+<code>
+RAILS_ENV=production rake db:migrate
+</code></p>
+
+<h3>导入数据</h3>
+
+<p>现在开始导入数据到数据库：
+```
+RAILS_ENV=production rake redmine:load_default_data</p>
+
+<h1>Select language: ar, az, bg, bs, ca, cs, da, de, el, en, en-GB, es, et, eu, fa, fi, fr, gl, he, hr, hu, id, it, ja, ko, lt, lv, mk, mn, nl, no, pl, pt, pt-BR, ro, ru, sk, sl, sq, sr, sr-YU, sv, th, tr, uk, vi, zh, zh-TW [en] zh</h1>
+
+<p>Default configuration data loaded.
+```
+回车之后会让你做一个选择，直接输入zh即可。</p>
+
+<h3>修改文件系统权限</h3>
+
+<p><code>
+chown -R apache:apache files log tmp public/plugin_assets
+chmod -R 755 files log tmp public/plugin_assets
+</code></p>
+
+<h2>整合apache</h2>
+
+<p>首先安装apache http，如果你已经安装，请忽略此步。
+<code>
+yum -y install httpd httpd-devel
+</code></p>
+
+<h3>绑定apache</h3>
+
+<p><code>
+gem install passenger
+passenger-install-apache2-module
+</code>
+直接按回车。安装完之后创建redmine.conf：
+<code>
+touch /etc/httpd/conf.d/redmine.con
+</code>
+并添加以下内容：
+```
+LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-4.0.24/buildout/apache2/mod_passenger.so
+PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-4.0.24
+PassengerRuby /usr/bin/ruby</p>
+
+<p>Listen 8888
+<VirtualHost *:8888>
+   ServerName 192.168.1.108
+   DocumentRoot /var/www/html/redmine-2.4.0/public
+  <Directory /var/www/html/redmine-2.4.0/public ></p>
+
+<h1>This relaxes Apache security settings.</h1>
+
+<pre><code>AllowOverride all
+</code></pre>
+
+<p> # MultiViews must be turned off.</p>
+
+<pre><code>Options -MultiViews
+</code></pre>
+
+<p>   </Directory>
+</VirtualHost>
+```
+上面有些内容需要你根据实际情况而修改：passenger路径、DocumentRoot</p>
+
+<h3>　启动Apache</h3>
+
+<p><code>
+/etc/init.d/httpd start
+</code>
+通过浏览器访问：<a href="http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin">http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin</a>
+以下是登录后的主页：
+<img src="/images/2013/11/redmine-main.jpg"></p>
+
+<p>至于redmine的详细使用，期待下次吧。</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-17T23:10:12+08:00</updated>
+  <updated>2013-11-18T00:06:36+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,374 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[redmine-install-for-centos]]></title>
+    <link href="http://agenge.github.io/blog/2013/11/18/redmine-install-for-centos/"/>
+    <updated>2013-11-18T00:04:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/11/18/redmine-install-for-centos</id>
+    <content type="html"><![CDATA[<p>Redmine安装与配置</p>
+
+<h2>介绍</h2>
+
+<p>redmine是一个开源的项目管理套件。而且能运行绝大部分平台：Linux、Uinx、Windows等平台。</p>
+
+<h2>安装Redmine</h2>
+
+<h3>安装依赖包</h3>
+
+<p>安装redmine之前，必须安装ruby和gem，下载地址：</p>
+
+<ul>
+<li><a href="http://rubyforge.org/frs/?group_id=1850">redmine 2.4.0</a></li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/1.8/">ruby 1.8.7</a></li>
+<li><a href="https://rubyforge.org/frs/?group_id=126&amp;release_id=46730">rubygems 1.8.24</a></li>
+<li>Mysql、Apache httpd</li>
+</ul>
+
+
+<p>CentOS 6.3 默认安装的ruby已经是1.8.7，所在可以直接yum安装，如果你想源码进行安装，请自行Google：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://rubyforge.org/frs/download.php/77242/redmine-2.4.0.tar.gz --no-check-certificate
+</span><span class='line'>wget https://rubyforge.org/frs/download.php/76073/rubygems-1.8.24.tgz --no-check-certificate
+</span><span class='line'>yum install -y ruby-libs ruby rdoc ruby-devel gcc-c++ curl-devel</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装rubygems</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf rubygems-1.8.24.tgz 
+</span><span class='line'>cd rubygems-1.8.24
+</span><span class='line'>ruby setup.rb </span></code></pre></td></tr></table></div></figure>
+
+
+<p>为了与apache结合使用，需要创建apache用户与组；</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd apache
+</span><span class='line'>useradd -g apache -s /sbin/nologin apache</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装 redmine</h3>
+
+<p>安装 redmine</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf redmine-2.4.0.tar.gz 
+</span><span class='line'>chown -R apache:apache redmine-2.4.0
+</span><span class='line'>cd redmine-2.4.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装依赖包(使用淘宝的gem源)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem sources --remove http://rubygems.org/
+</span><span class='line'>gem sources -a http://ruby.taobao.org
+</span><span class='line'>gem install bundler
+</span><span class='line'>bundle install --without development test postgresql sqlite rmagick    </span></code></pre></td></tr></table></div></figure>
+
+
+<p>without 表示后面的模块都不需要安装</p>
+
+<h3>安装Mysql</h3>
+
+<p>本示例为了简便，直接使用的yum安装，需要源码安装的见 <a href="http://agenge.com/blog/2013/08/09/drbd_heartbeat_mysql_ha/">这里</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install mysql-server mysql-devel mysql
+</span><span class='line'>/etc/init.d/mysqld restart
+</span><span class='line'>/usr/bin/mysqladmin -u root password '123456'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建redmine数据库</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@localhost ~]# mysql -uroot -p
+</span><span class='line'>Enter password: 
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 3
+</span><span class='line'>Server version: 5.1.69 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective
+</span><span class='line'>owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create database redmine character set utf8;
+</span><span class='line'>Query OK, 1 row affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create user 'redmine'@'localhost' identified by 'redmine';
+</span><span class='line'>Query OK, 0 rows affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; grant all privileges on redmine.* to 'redmine'@'%';
+</span><span class='line'>Query OK, 0 rows affected (0.00 sec)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>测试是否可以用redmine登录；</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@localhost ~]# mysql -uredmine -p
+</span><span class='line'>Enter password: 
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 5
+</span><span class='line'>Server version: 5.1.69 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective
+</span><span class='line'>owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; use redmine;
+</span><span class='line'>Database changed</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>配置redmine的数据库连接</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd redmine-2.4.0/config
+</span><span class='line'>cp database.yml.example database.yml
+</span><span class='line'>vi database.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改后的内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>production:
+</span><span class='line'>  adapter: mysql2
+</span><span class='line'>  database: redmine
+</span><span class='line'>  host: localhost
+</span><span class='line'>  username: redmine
+</span><span class='line'>  password: redmine
+</span><span class='line'>  encoding: utf8
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改redmine的配置文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp configuration.yml.example configuration.yml
+</span><span class='line'>vi configuration.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改default和production的内容如下，其他的值都保持不变或根据你自己的需求而变：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>default:
+</span><span class='line'>  # Outgoing emails configuration (see examples above)
+</span><span class='line'>  email_delivery:
+</span><span class='line'>    delivery_method: :smtp
+</span><span class='line'>    smtp_settings:
+</span><span class='line'>      address: 127.0.0.1
+</span><span class='line'>      port: 25
+</span><span class='line'>      domain: localhost
+</span><span class='line'>      authentication: :login
+</span><span class='line'>      user_name: "redmine@example.net"
+</span><span class='line'>      password: "redmine"
+</span><span class='line'>    
+</span><span class='line'>...
+</span><span class='line'>production:
+</span><span class='line'>  email_delivery:
+</span><span class='line'>    delivery_method: :smtp
+</span><span class='line'>    smtp_settings:
+</span><span class='line'>      address: 127.0.0.1
+</span><span class='line'>      port: 25
+</span><span class='line'>      domain: localhost</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>生成token</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd redmine-2.4.0
+</span><span class='line'>rake generate_secret_token</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>初始化数据库</h3>
+
+<p>这步主要是创建所需要的表：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RAILS_ENV=production rake db:migrate </span></code></pre></td></tr></table></div></figure>
+
+
+<h3>导入数据</h3>
+
+<p>现在开始导入数据到数据库：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>RAILS_ENV=production rake redmine:load_default_data
+</span><span class='line'>Select language: ar, az, bg, bs, ca, cs, da, de, el, en, en-GB, es, et, eu, fa, fi, fr, gl, he, hr, hu, id, it, ja, ko, lt, lv, mk, mn, nl, no, pl, pt, pt-BR, ro, ru, sk, sl, sq, sr, sr-YU, sv, th, tr, uk, vi, zh, zh-TW [en] zh
+</span><span class='line'>====================================
+</span><span class='line'>Default configuration data loaded.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回车之后会让你做一个选择，直接输入zh即可。</p>
+
+<h3>修改文件系统权限</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chown -R apache:apache files log tmp public/plugin_assets
+</span><span class='line'>chmod -R 755 files log tmp public/plugin_assets</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>整合apache</h2>
+
+<p>首先安装apache http，如果你已经安装，请忽略此步。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install httpd httpd-devel</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>绑定apache</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem install passenger
+</span><span class='line'>passenger-install-apache2-module </span></code></pre></td></tr></table></div></figure>
+
+
+<p>直接按回车。安装完之后创建redmine.conf：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>touch /etc/httpd/conf.d/redmine.con</span></code></pre></td></tr></table></div></figure>
+
+
+<p>并添加以下内容：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-4.0.24/buildout/apache2/mod_passenger.so
+</span><span class='line'>PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-4.0.24
+</span><span class='line'>PassengerRuby /usr/bin/ruby
+</span><span class='line'>
+</span><span class='line'>Listen 8888
+</span><span class='line'>&lt;VirtualHost *:8888&gt;
+</span><span class='line'>   ServerName 192.168.1.108
+</span><span class='line'>   DocumentRoot /var/www/html/redmine-2.4.0/public
+</span><span class='line'>  &lt;Directory /var/www/html/redmine-2.4.0/public &gt;
+</span><span class='line'># This relaxes Apache security settings.
+</span><span class='line'>    AllowOverride all
+</span><span class='line'> # MultiViews must be turned off.
+</span><span class='line'>    Options -MultiViews
+</span><span class='line'>   &lt;/Directory&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面有些内容需要你根据实际情况而修改：passenger路径、DocumentRoot</p>
+
+<h3>　启动Apache</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/httpd start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过浏览器访问：<a href="http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin">http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin</a>
+以下是登录后的主页：
+<img src="http://agenge.github.io/images/2013/11/redmine-main.jpg"></p>
+
+<p>至于redmine的详细使用，期待下次吧。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CentOS 6 安装RabbitMQ]]></title>
@@ -105,7 +473,7 @@
 </span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
 
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#58;&#114;&#97;&#x62;&#98;&#105;&#x74;&#64;&#x6c;&#111;&#99;&#97;&#108;&#104;&#x6f;&#115;&#x74;&#x2e;&#108;&#x6f;&#x67;">&#x72;&#97;&#98;&#x62;&#x69;&#116;&#x40;&#x6c;&#111;&#99;&#97;&#108;&#104;&#111;&#x73;&#x74;&#x2e;&#108;&#x6f;&#x67;</a></p>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#114;&#x61;&#98;&#x62;&#105;&#x74;&#64;&#108;&#x6f;&#99;&#97;&#x6c;&#x68;&#x6f;&#115;&#116;&#46;&#x6c;&#111;&#x67;">&#114;&#x61;&#98;&#98;&#x69;&#116;&#64;&#108;&#111;&#x63;&#97;&#108;&#104;&#x6f;&#x73;&#116;&#x2e;&#108;&#x6f;&#103;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -7790,7 +8158,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#116;&#x65;&#x73;&#x74;&#95;&#122;&#x61;&#x62;&#x62;&#105;&#120;&#x40;&#x67;&#x6d;&#x61;&#105;&#108;&#x2e;&#x63;&#x6f;&#109;">&#x74;&#x65;&#x73;&#x74;&#x5f;&#122;&#97;&#98;&#x62;&#105;&#120;&#x40;&#103;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#111;&#109;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#116;&#101;&#115;&#116;&#x5f;&#122;&#x61;&#98;&#98;&#105;&#120;&#64;&#x67;&#109;&#x61;&#105;&#x6c;&#46;&#x63;&#111;&#109;">&#116;&#x65;&#115;&#x74;&#x5f;&#x7a;&#x61;&#98;&#98;&#105;&#x78;&#64;&#103;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -8800,555 +9168,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <p>2013/09/27 Update:</p>
 
 <p>如果只想写文章，而不想关心Mysql 及Http Server，甚至担心VPS被黑，偶强烈推荐使用 Octopress + Github，具体介绍及安装请见这里<a href="http://agenge.com/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Puppet Dashboard配置及apache和Nginx整合]]></title>
-    <link href="http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server/"/>
-    <updated>2013-04-12T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server</id>
-    <content type="html"><![CDATA[<p>Dashboard一个基于Ruby on Rails设计的Web控制台，便于管理Puppet Master和Agent，整个安装过程比较简单，以下是具体的安装步骤。</p>
-
-<h2>安装前提条件</h2>
-
-<ol>
-<li>ruby版本>1.8.6，如果你是CentOS 5或是RHEL 5，可能你需要升级Ruby，官方下载地址请</li>
-</ol>
-
-
-<p> 点击<a href="ftp://ftp.ruby-lang.org/pub/ruby">这里</a>。具体的升级步骤由于下载的安装包已经包含，故不再介绍，本文示例基于Ruby 1.8.7。</p>
-
-<p> <code>
- # ruby -v
- ruby 1.8.7 (2011-06-30 patchlevel 352) [x86_64-linux]
-</code></p>
-
-<ol>
-<li>安装相关依赖包</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> # yum install -y mysql mysql-devel mysql-server \
-</span><span class='line'>     ruby ruby-devel ruby-irb ruby-mysql \
-</span><span class='line'>     ruby-rdoc ruby-ri</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 如果你已经有Mysql，此处不需要安装mysql-server包。安装后加入开机自启动并启动mysql 。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># chkconfig mysqld on
-</span><span class='line'># /etc/init.d/mysqld start
-</span><span class='line'>Starting mysqld:                                           [  OK  ]</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>升级GEM软件包安装器</li>
-</ol>
-
-
-<p> 首先检查gem版本，如果已经是1.3.5，就不需要升级：
- &#8220;`</p>
-
-<pre><code># gem -v
-1.3.5
-</code></pre>
-
-<p> &#8220;`
-如果是1.3.1，意味着你要升级gem：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.5.tgz
-</span><span class='line'># tar zxvf rubygems-1.3.5.tgz
-</span><span class='line'># cd rubygems-1.3.5
-</span><span class='line'># ruby setup.rb</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>安装rake</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># gem install rake</span></code></pre></td></tr></table></div></figure>
-
-
-<!--more-->
-
-
-<h2>数据库配置</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># mysql -uroot -p
-</span><span class='line'>Enter password:
-</span><span class='line'>
-</span><span class='line'>mysql&gt; use dashboard
-</span><span class='line'>Database changed
-</span><span class='line'>mysql&gt; grant all on dashboard.* to dashboard@localhost identified by 'dashboard';
-</span><span class='line'>Query OK, 0 rows affected (0.00 sec)
-</span><span class='line'>mysql&gt; flush privileges;
-</span><span class='line'>Query OK, 0 rows affected (0.00 sec)
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>安装Puppet Dashboard</h2>
-
-<ul>
-<li>下载Dashboard</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/
-</span><span class='line'># wget http://downloads.puppetlabs.com/dashboard/puppet-dashboard-1.2.20.tar.gz
-</span><span class='line'># tar -zxvf puppet-dashboard-1.2.20.tar.gz
-</span><span class='line'># cd puppet-dashboard-1.2.20</span></code></pre></td></tr></table></div></figure>
-
-
-<p>创建数据库用户,此处我们使用源码方式进行安装,你可以通过yum或apt-get安装。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cp config/database.yml.example config/database.yml</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>修改数据库配置：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># vim config/database.yml
-</span><span class='line'>production:
-</span><span class='line'>database: dashboard
-</span><span class='line'>username: dashboard
-</span><span class='line'>password: dashboard
-</span><span class='line'>encoding: utf8
-</span><span class='line'>adapter: mysql</span></code></pre></td></tr></table></div></figure>
-
-
-<p>production代表生产环境，如果你是开发环境(development)或测试环境(test)，请修改相应的配置。</p>
-
-<ul>
-<li>初始化数据库</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production db:create
-</span><span class='line'># gem install mysql
-</span><span class='line'># rake RAILS_ENV=production db:migrate</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>修改时区
-默认是UTC时间，如果你在控制台看到的时区不对，那需要修改时区：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># vim config/environment.rb</span></code></pre></td></tr></table></div></figure>
-
-
-<p>将config.time_zone = &lsquo;UTC&#8217;  修改为 config.time_zone = &#8216;Chongqing&rsquo;</p>
-
-<ul>
-<li>启动Webrick Web服务器</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard-1.2.20
-</span><span class='line'># script/server -p 3000 -e production  -d</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面即代表启动dashboard，端口3000，以及后台(-d)运行,通过浏览器输入： <a href="http://dashboard_server:3000%C2%A0%C2%A0">http://dashboard_server:3000%C2%A0%C2%A0</a> 即可访问。</p>
-
-<h3>Puppet Dashboard配置</h3>
-
-<h4>服务器配置</h4>
-
-<p>在Puppet 服务器端/etc/puppet/puppet.conf中的[main]节加入：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>reports = http, store
-</span><span class='line'>reporturl = http://192.168.30.226:3000/reports/upload</span></code></pre></td></tr></table></div></figure>
-
-
-<p>部署lib文件：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cp /usr/local/puppet-dashboard/ext/puppet/puppet_dashboard.rb /usr/lib/ruby/site_ruby/1.8/puppet/reports/</span></code></pre></td></tr></table></div></figure>
-
-
-<p>保存之后，重启puppetmaster即可。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppetmaster restart</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>客户端配置</h4>
-
-<p>在Puppet Agent（客户端）/etc/puppet/puppet.conf中的[main]节加入：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>report = true</span></code></pre></td></tr></table></div></figure>
-
-
-<p>保存之后，重启puppet即可。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># /etc/init.d/puppet restart</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>控制台配置</h4>
-
-<p>登录Dashboard后，需要自己添加： group和node</p>
-
-<h2>Puppet Dashboard常用操作</h2>
-
-<p><strong> 导入日志 </strong></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard
-</span><span class='line'># rake RAILS_ENV=production reports:import</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong> 优化数据库 </strong>
-当数据量过大时，需要优化mysql数据库：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard
-</span><span class='line'># rake RAILS_ENV=production db:raw:optimize</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong> 删除日志 </strong>
-删除1个月之前的数据：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># cd /usr/local/puppet-dashboard
-</span><span class='line'># rake RAILS_ENV=production reports:prune upto=1 unit=mon</span></code></pre></td></tr></table></div></figure>
-
-
-<p>删除15天前的日志：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production reports:prune upto=15 unit=day</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong> 备份数据库 </strong></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production db:raw:dump
-</span><span class='line'>mysqldump --add-locks --create-options --disable-keys --extended-insert --quick --set-charset --user=dashboard --password=dashboard dashboard &gt; production.sql.tmp
-</span><span class='line'>mv production.sql.tmp production.sql
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>恢复数据库 </strong></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># rake RAILS_ENV=production FILE=production.sql db:raw:restore</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong> Dashboard 启停脚本 </strong></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/bash
-</span><span class='line'># Description: Puppet Dashboard init.d script
-</span><span class='line'>
-</span><span class='line'># Get function from functions library
-</span><span class='line'>. /etc/init.d/functions
-</span><span class='line'>
-</span><span class='line'># Start the service Puppet Dashboard
-</span><span class='line'>start() {
-</span><span class='line'>    echo -n "Starting Puppet Dashboard: "
-</span><span class='line'>    /usr/bin/ruby /usr/local/puppet-dashboard/script/server -e production -b 192.168.30.226 -d
-</span><span class='line'>    ### Create the lock file ###
-</span><span class='line'>    touch /var/lock/subsys/puppetdb
-</span><span class='line'>    success $"Puppet Dashboard startup"
-</span><span class='line'>    echo
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'># Restart the service Puppet Dashboard
-</span><span class='line'>stop() {
-</span><span class='line'>    echo -n "Stopping Puppet Dashboard: "
-</span><span class='line'>    kill -9 `ps ax | grep "/usr/bin/ruby /usr/local/puppet-dashboard/script/server" | grep -v grep | awk '{ print $1 }' `
-</span><span class='line'>    ### Now, delete the lock file ###
-</span><span class='line'>    rm -f /var/lock/subsys/puppetdb
-</span><span class='line'>    success $"Puppet Dashboard shutdown"
-</span><span class='line'>    echo
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>### main logic ###
-</span><span class='line'>case "$1" in
-</span><span class='line'>    start)
-</span><span class='line'>        start
-</span><span class='line'>    ;;
-</span><span class='line'>    stop)
-</span><span class='line'>        stop
-</span><span class='line'>    ;;
-</span><span class='line'>    status)
-</span><span class='line'>        status Puppet DB
-</span><span class='line'>    ;;
-</span><span class='line'>    restart|reload|condrestart)
-</span><span class='line'>        stop
-</span><span class='line'>        start
-</span><span class='line'>    ;;
-</span><span class='line'>    *)
-</span><span class='line'>    echo $"Usage: $0 {start|stop|restart|reload|status}"
-</span><span class='line'>    exit 1
-</span><span class='line'>esac
-</span><span class='line'>
-</span><span class='line'>exit 0
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>使用Passenger运行Puppet Dashboard</h2>
-
-<p>相信用过Dashboard的人都知道在访问时控制台时比较缓慢，这正是由于内置的Webrick服务器导致，不过Puppet支持与其他第三方Web Server整合，以下分别介绍整合过程。</p>
-
-<h3>Apache整合Puppet Dashboard</h3>
-
-<ol>
-<li>安装依赖包</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># yum install ruby ruby-libs ruby-devel  http httpd</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>安装Passenger</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># gem install passenger</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>安装Apache的passenger模块</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># passenger-install-apache2-module</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果安装没问题的话，就会有以下类似信息输出：</p>
-
-<p> &#8220;`
- The Apache 2 module was successfully installed.</p>
-
-<p> Please edit your Apache configuration file, and add these lines:</p>
-
-<pre><code>LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
-PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
-PassengerRuby /usr/bin/ruby
-</code></pre>
-
-<p> After you restart Apache, you are ready to deploy any number of Ruby on Rails
- applications on Apache, without any further Ruby on Rails-specific
- configuration!</p>
-
-<p> Press ENTER to continue.</p>
-
-<p> &#8220;`
-直接输入回车即可。</p>
-
-<ol>
-<li>配置Apache虚拟主机</li>
-</ol>
-
-
-<p> &#8220;`
- # cd /usr/local/puppet-dashboard
- # cp ext/passenger/dashboard-vhost.conf /etc/httpd/conf.d/
- # vi /etc/httpd/conf.d/dashboard-vhost.conf
- # UPDATE THESE PATHS TO SUIT YOUR ENVIRONMENT
- LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
- PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
- PassengerRuby /usr/bin/ruby</p>
-
-<p> # you may want to tune these settings
- PassengerHighPerformance on
- PassengerMaxPoolSize 12
- PassengerPoolIdleTime 1500
- # PassengerMaxRequests 1000
- PassengerStatThrottleRate 120
- RailsAutoDetect On</p>
-
-<p> <VirtualHost *:80></p>
-
-<pre><code>     ServerName pmaster.i.12582.com
-     DocumentRoot /usr/local/puppet-dashboard/public/
-     &lt;Directory /usr/local/puppet-dashboard/public/&gt;
-             Options None
-             Order allow,deny
-             allow from all
-     &lt;/Directory&gt;
-</code></pre>
-
-<p>   ErrorLog /var/log/httpd/dashboard.example.com_error.log
-   LogLevel warn
-   CustomLog /var/log/httpd/dashboard.example.com_access.log combined
-   ServerSignature On
- </VirtualHost></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>5. 重启httpd</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>/etc/init.d/httpd restart</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> 此时再访问 http://pmaster.i.12582.com 发现速度较之前快太多。
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>###Nginx整合Puppet Dashboard
-</span><span class='line'>1. 安装依赖包</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>yum install ruby ruby-libs ruby-devel  http httpd</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>2. 安装Passenger</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>gem install passenger</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>3. 安装Nginx及passenger模块</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>passenger-install-nginx-module</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>回车后，会有两个选择：
-</span><span class='line'> * 表示下载nginx，编译且安装，推荐这种方式安装.
-</span><span class='line'> * 表示自定义安装Nginx,安装之后，nginx默认存放在/opt目录.
-</span><span class='line'>
-</span><span class='line'> 修改/opt/nginx/conf/nginx.conf，在最后一个}之前添加以下内容：
-</span><span class='line'>
-</span><span class='line'> ```
-</span><span class='line'>    server {
-</span><span class='line'>      listen 80;
-</span><span class='line'>      server_name pmaster.i.12582.com;
-</span><span class='line'>      root /usr/local/puppet-dashboard/public;
-</span><span class='line'>      passenger_enabled on;
-</span><span class='line'>    }
-</span><span class='line'> ```
-</span><span class='line'>
-</span><span class='line'>4. 重启Nginx</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>killall nginx</h1>
-
-<h1>/opt/nginx/sbin/nginx</h1>
-
-<p>&#8220;`</p>
-
-<p>最后，你要是有任何疑问，请留言。</p>
 ]]></content>
   </entry>
   

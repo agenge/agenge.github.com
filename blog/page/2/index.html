@@ -9,7 +9,9 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="介绍 DRBD全称Distributed Replicated Block （分布式的复制块设备），属于Device公司，但是完全开源。它是一款基于块设备的文件复制解决方案，速度比文件级别的软件如NFS，samba快很多，是很多中小企业的共享存储首选解决方案。 &hellip;">
+  <meta name="description" content="前言 为啥写篇文章 熟悉WordPress的或许都明白，为了写作，你要学习很多东西，例如Linux、Apache/Nginx、Mysql以及各种中间件；
+你要花钱买VPS/虚拟主机，你要自己优化Web Server和Mysql，你要定期备份Mysql；
+WordPress官方已经被墙（ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +81,98 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-12T22:18:00+08:00" pubdate data-updated="true">Sep 12<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>前言</h1>
+
+<h2>为啥写篇文章</h2>
+
+<ol>
+<li><p>熟悉WordPress的或许都明白，为了写作，你要学习很多东西，例如Linux、Apache/Nginx、Mysql以及各种中间件；</p></li>
+<li><p>你要花钱买VPS/虚拟主机，你要自己优化Web Server和Mysql，你要定期备份Mysql；</p></li>
+<li><p>WordPress官方已经被墙（对于合格的IT屌丝，这点不是问题）；</p></li>
+</ol>
+
+
+<p>你可能已经在心理产生疑问：“你说这么多费话，无非就是想让我放弃WP，难道你有解决上述问题的完美方案？”
+虽不敢说完美解决，但至少有这么一个blog平台：</p>
+
+<ul>
+<li>无须数据库</li>
+<li>无须Web Server</li>
+<li>无须备份且数据永不丢失（相对自己备份而言）</li>
+<li>所有操作均有版本记录</li>
+</ul>
+
+
+<p>看了之后是不是很“鸡动”？没错，这个平台就是Github，结合jekyll/Octopress就完全可以专心写作，
+不过相对WP，功能确实要少些，图片和视频功能实在太弱。</p>
+
+<h2>Jekyll/Octopress是啥</h2>
+
+<p>Jekyll即是一个轻量级Blog系统，而且还是一个强大的静态网站生成系统，具体的介绍请参考以下链接：</p>
+
+<p>1、<a href="http://calefy.org/2012/03/03/my-process-of-building-jekyll-blog.html">Jekyll建站之旅</a></p>
+
+<p>2、<a href="http://www.cnblogs.com/purediy/archive/2013/03/07/2948892.html">通过GitHub Pages建立个人站点（详细步骤）</a></p>
+
+<p>3、<a href="http://ztpala.com/2011/09/12/jekyll-and-github-pages/">Jekyll介绍</a></p>
+
+<p>Octopress其实就是一个基于Jekyll实现的静态网站系统，具体介绍如下（引用）：</p>
+
+<ul>
+<li><p>使用 Markdown 标记语言书写源文件， 通过 Markdown 解析器转换为 HTML 文件</p></li>
+<li><p>通过 Octopress 提供的站点模板提供所需的 Web 资产文件 （Javascript、CSS、image 等）</p></li>
+<li><p>只包含静态网页，无需数据库支持，对系统要求低且迁移方便</p></li>
+<li><p>以编写程序的方式编制网站，便于实现版本控制</p></li>
+<li><p>Octopress / Jekyll 使用简洁的Ruby框架实现。</p>
+
+<ul>
+<li><p>Octopress 以 rake 任务的形式实现静态站点页面生成, 操作十分简单</p></li>
+<li><p>Octopress 以 rake 任务的形式实现到普通网站和 Github 的发布</p></li>
+<li><p>Octopress 与 Github 完美结合，你无需学习过多的 git 命令语法，使非专业人士的使用成为可能</p></li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/09/12/write-blog-octopress-with-github/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1125,118 +1219,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/04/12/puppet-dashboard-conf-with-web-server/">Puppet Dashboard配置及apache和Nginx整合</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-12T00:00:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Dashboard一个基于Ruby on Rails设计的Web控制台，便于管理Puppet Master和Agent，整个安装过程比较简单，以下是具体的安装步骤。</p>
-
-<h2>安装前提条件</h2>
-
-<ol>
-<li>ruby版本>1.8.6，如果你是CentOS 5或是RHEL 5，可能你需要升级Ruby，官方下载地址请</li>
-</ol>
-
-
-<p> 点击<a href="ftp://ftp.ruby-lang.org/pub/ruby">这里</a>。具体的升级步骤由于下载的安装包已经包含，故不再介绍，本文示例基于Ruby 1.8.7。</p>
-
-<p> <code>
- # ruby -v
- ruby 1.8.7 (2011-06-30 patchlevel 352) [x86_64-linux]
-</code></p>
-
-<ol>
-<li>安装相关依赖包</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> # yum install -y mysql mysql-devel mysql-server \
-</span><span class='line'>     ruby ruby-devel ruby-irb ruby-mysql \
-</span><span class='line'>     ruby-rdoc ruby-ri</span></code></pre></td></tr></table></div></figure>
-
-
-<p> 如果你已经有Mysql，此处不需要安装mysql-server包。安装后加入开机自启动并启动mysql 。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># chkconfig mysqld on
-</span><span class='line'># /etc/init.d/mysqld start
-</span><span class='line'>Starting mysqld:                                           [  OK  ]</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>升级GEM软件包安装器</li>
-</ol>
-
-
-<p> 首先检查gem版本，如果已经是1.3.5，就不需要升级：
- &#8220;`</p>
-
-<pre><code># gem -v
-1.3.5
-</code></pre>
-
-<p> &#8220;`
-如果是1.3.1，意味着你要升级gem：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.5.tgz
-</span><span class='line'># tar zxvf rubygems-1.3.5.tgz
-</span><span class='line'># cd rubygems-1.3.5
-</span><span class='line'># ruby setup.rb</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>安装rake</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># gem install rake</span></code></pre></td></tr></table></div></figure>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/04/12/puppet-dashboard-conf-with-web-server/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1254,6 +1236,10 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/18/redmine-install-for-centos/">Redmine-install-for-centos</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/11/17/centos-install-rabbitmq/">CentOS 6 安装RabbitMQ</a>
       </li>
     
@@ -1269,16 +1255,12 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
         <a href="/blog/2013/10/24/the-keystone-with-source-installation-and-conf/">Keystone 源码安装与配置</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a>
-      </li>
-    
   </ul>
 </section>
 <section> 
   <h1>文章分类</h1> 
   <ul id="categories"> 
-    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li> 
+    <li><a href='/blog/categories/blog'>Blog</a></li><li><a href='/blog/categories/database'>Database</a></li><li><a href='/blog/categories/github'>Github</a></li><li><a href='/blog/categories/nosql'>NoSQL</a></li><li><a href='/blog/categories/openstack'>OpenStack</a></li><li><a href='/blog/categories/yun-ji-suan'>云计算</a></li><li><a href='/blog/categories/xin-xi-an-quan'>信息安全</a></li><li><a href='/blog/categories/xing-neng-ce-shi'>性能测试</a></li><li><a href='/blog/categories/shu-ju-ku'>数据库</a></li><li><a href='/blog/categories/ri-zhi-fen-xi'>日志分析</a></li><li><a href='/blog/categories/liu-mei-ti'>流媒体</a></li><li><a href='/blog/categories/sheng-huo'>生活</a></li><li><a href='/blog/categories/jian-kong'>监控</a></li><li><a href='/blog/categories/xu-ni-hua'>虚拟化</a></li><li><a href='/blog/categories/yun-wei'>运维</a></li><li><a href='/blog/categories/xiang-mu-guan-li'>项目管理</a></li> 
   </ul> 
 </section>
 
