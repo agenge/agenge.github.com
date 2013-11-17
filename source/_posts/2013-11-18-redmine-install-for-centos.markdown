@@ -231,8 +231,8 @@ Listen 8888
 ```
 /etc/init.d/httpd start
 ```
-通过浏览器访问：http://ip:8888，默认的用户名和密码为：admin
-以下是登录后的主页：
+通过浏览器访问：http://ip:8888
+默认的用户名和密码为：admin     以下是登录后的主页：
 {% img /images/2013/11/redmine-main.jpg %}
 
 至于redmine的详细使用，期待下次吧。
