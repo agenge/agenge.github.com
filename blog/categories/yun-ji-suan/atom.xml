@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-18T00:09:57+08:00</updated>
+  <updated>2013-11-18T00:13:29+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -1325,7 +1325,7 @@ signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
 <p>```
 keystone user-create \
   &mdash;name=ceilometer &mdash;pass=ceilometer \
-  &mdash;email=<a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#111;&#x3a;&#99;&#101;&#x69;&#108;&#111;&#109;&#x65;&#x74;&#101;&#x72;&#x40;&#x64;&#111;&#109;&#97;&#x69;&#110;&#x2e;&#99;&#111;&#x6d;">&#99;&#x65;&#105;&#x6c;&#111;&#x6d;&#x65;&#x74;&#101;&#114;&#x40;&#100;&#x6f;&#x6d;&#97;&#105;&#x6e;&#x2e;&#x63;&#x6f;&#x6d;</a></p>
+  &mdash;email=<a href="&#109;&#97;&#105;&#108;&#x74;&#x6f;&#x3a;&#x63;&#101;&#x69;&#x6c;&#x6f;&#x6d;&#x65;&#x74;&#101;&#114;&#64;&#100;&#x6f;&#109;&#97;&#105;&#110;&#46;&#x63;&#111;&#x6d;">&#x63;&#101;&#105;&#x6c;&#x6f;&#109;&#101;&#x74;&#x65;&#x72;&#x40;&#x64;&#111;&#x6d;&#x61;&#x69;&#110;&#46;&#x63;&#x6f;&#x6d;</a></p>
 
 <p>keystone user-role-add &mdash;user=ceilometer &mdash;tenant=service &mdash;role=admin<br/>
 ```</p>
