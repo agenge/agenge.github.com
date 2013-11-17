@@ -39,7 +39,7 @@ tar zxvf rubygems-1.8.24.tgz
 cd rubygems-1.8.24
 ruby setup.rb 
 ```
-
+<!-- more -->
 为了与apache结合使用，需要创建apache用户与组；
 ```
 groupadd apache
