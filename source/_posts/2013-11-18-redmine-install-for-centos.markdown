@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "redmine-install-for-centos"
+title: "CentOS安装redmine"
 date: 2013-11-18 00:04
 comments: true
 categories: 
