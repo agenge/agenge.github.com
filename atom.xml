@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-18T00:13:29+08:00</updated>
+  <updated>2013-11-18T00:15:57+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -376,8 +376,8 @@
 </pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/httpd start</span></code></pre></td></tr></table></div></figure>
 
 
-<p>通过浏览器访问：<a href="http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin">http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin</a>
-以下是登录后的主页：
+<p>通过浏览器访问：<a href="http://ip:8888">http://ip:8888</a>
+默认的用户名和密码为：admin     以下是登录后的主页：
 <img src="http://agenge.github.io/images/2013/11/redmine-main.jpg"></p>
 
 <p>至于redmine的详细使用，期待下次吧。</p>
@@ -476,7 +476,7 @@
 </span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
 
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#111;&#58;&#114;&#97;&#x62;&#98;&#x69;&#x74;&#x40;&#x6c;&#x6f;&#x63;&#97;&#108;&#104;&#111;&#x73;&#116;&#46;&#108;&#111;&#103;">&#x72;&#97;&#x62;&#x62;&#x69;&#x74;&#x40;&#x6c;&#x6f;&#99;&#97;&#108;&#x68;&#x6f;&#x73;&#x74;&#x2e;&#108;&#x6f;&#x67;</a></p>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#97;&#105;&#108;&#x74;&#111;&#x3a;&#114;&#x61;&#98;&#98;&#105;&#116;&#64;&#x6c;&#x6f;&#x63;&#x61;&#108;&#x68;&#x6f;&#115;&#116;&#46;&#x6c;&#111;&#103;">&#x72;&#x61;&#98;&#x62;&#105;&#x74;&#x40;&#x6c;&#x6f;&#x63;&#x61;&#108;&#104;&#x6f;&#x73;&#x74;&#x2e;&#108;&#x6f;&#x67;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -8161,7 +8161,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#111;&#x3a;&#116;&#x65;&#115;&#116;&#95;&#122;&#x61;&#98;&#x62;&#105;&#x78;&#x40;&#x67;&#x6d;&#97;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x74;&#x65;&#x73;&#x74;&#x5f;&#122;&#x61;&#98;&#98;&#105;&#x78;&#64;&#x67;&#109;&#x61;&#105;&#108;&#46;&#x63;&#111;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#58;&#116;&#101;&#x73;&#116;&#95;&#x7a;&#x61;&#x62;&#x62;&#105;&#x78;&#64;&#x67;&#x6d;&#x61;&#105;&#x6c;&#46;&#x63;&#x6f;&#x6d;">&#x74;&#x65;&#115;&#x74;&#x5f;&#x7a;&#x61;&#x62;&#x62;&#105;&#x78;&#x40;&#103;&#x6d;&#x61;&#x69;&#108;&#46;&#x63;&#x6f;&#109;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 项目管理 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/xiang-mu-guan-li/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-18T00:13:29+08:00</updated>
+  <updated>2013-11-18T00:15:57+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -273,8 +273,8 @@ PassengerRuby /usr/bin/ruby</p>
 <p><code>
 /etc/init.d/httpd start
 </code>
-通过浏览器访问：<a href="http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin">http://ip:8888%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E4%B8%BA%EF%BC%9Aadmin</a>
-以下是登录后的主页：
+通过浏览器访问：<a href="http://ip:8888">http://ip:8888</a>
+默认的用户名和密码为：admin     以下是登录后的主页：
 <img src="/images/2013/11/redmine-main.jpg"></p>
 
 <p>至于redmine的详细使用，期待下次吧。</p>
