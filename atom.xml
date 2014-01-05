@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-28T21:15:02+08:00</updated>
+  <updated>2014-01-05T23:26:08+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,179 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ubuntu 12.04 安装Docker]]></title>
+    <link href="http://agenge.github.io/blog/2014/01/05/docker-install-for-ubuntu/"/>
+    <updated>2014-01-05T23:11:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2014/01/05/docker-install-for-ubuntu</id>
+    <content type="html"><![CDATA[<h2>了解Docker</h2>
+
+<p>Docker可谓是2013年的非主流词语，本篇文章为初学者提供入门参考，不涉及介绍，更多的介绍请参见国内资深人士写的文章：</p>
+
+<p><a href="http://tiewei.github.io/cloud/Docker-Getting-Start/">Docker-Getting-Start</a></p>
+
+<p>由于需要在Linux Kernel 3.8及以上才可以很好的工作，官方更是推荐Ubuntu系统，这里有两种选择：Ubuntu 12.04 LTS或最新的Ubuntu 13.10
+而本文比较喜欢倾向LTS，幸好有办法解决Kernel版本问题。</p>
+
+<p>提示：以下操作中，绝大部分都是走的goagent代理，关于goagent代理请自行Google。</p>
+
+<h2>安装Docker</h2>
+
+<h3>更新系统</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update 
+</span><span class='line'>sudo apt-get install linux-image-generic-lts-raring linux-headers-generic-lts-raring
+</span><span class='line'>sudo reboot</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>安装Docker</h3>
+
+<p>先解决GFW的问题，所以要设置wget proxy：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt; ~/.wgetrc &lt;EOF
+</span><span class='line'>#You can set the default proxies for Wget to use for http, https, and ftp.
+</span><span class='line'># They will override the value in the environment.
+</span><span class='line'>https_proxy = http://127.0.0.1:8087/
+</span><span class='line'>http_proxy = http://127.0.0.1:8087/
+</span><span class='line'>ftp_proxy = http://127.0.0.1:8087/
+</span><span class='line'>
+</span><span class='line'># If you do not want to use proxy at all, set this to off.
+</span><span class='line'>use_proxy = on
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同样，docker.io也被墙了，设置下hosts即可；</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt;&gt; /etc/hosts &lt;&lt;EOF
+</span><span class='line'>54.234.135.251  get.docker.io
+</span><span class='line'>54.234.135.251  cdn-registry-1.docker.io
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面才开始安装Docker:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo sh -c "wget -qO- https://get.docker.io/gpg | apt-key add -"
+</span><span class='line'>sudo sh -c "echo deb http://get.docker.io/ubuntu docker main \
+</span><span class='line'> /etc/apt/sources.list.d/docker.list"
+</span><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update 
+</span><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" install lxc-docker</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<h3>测试Docker功能</h3>
+
+<p>在Hosts第一次运行Container，时间会比较长，因为它需要去官网下载对应的镜像文件。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker run ubuntu /bin/echo hello</span></code></pre></td></tr></table></div></figure>
+
+
+<p>运行一个交互式Container:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker run -i -t ubuntu /bin/bash
+</span><span class='line'>root@3765e92ae239:/# 
+</span><span class='line'>root@3765e92ae239:/# ps
+</span><span class='line'>  PID TTY          TIME CMD
+</span><span class='line'>    1 ?        00:00:00 bash
+</span><span class='line'>    9 ?        00:00:00 ps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果要退出此Container，直接输入exit, 退出之后再次进入Container会发现之前如果有创建新文件或安装新软件都已消失。要解决这个问题，就需要保存刚才的镜像状态：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker run -i -t ubuntu /bin/bash
+</span><span class='line'>root@f2d122c6d1b0:/# cd /root/
+</span><span class='line'>root@f2d122c6d1b0:/root# touch t.txt
+</span><span class='line'>root@f2d122c6d1b0:/root# ll
+</span><span class='line'>bash: ll: command not found
+</span><span class='line'>root@f2d122c6d1b0:/root# ls -l
+</span><span class='line'>total 0
+</span><span class='line'>-rw-r--r-- 1 root root 0 Jan  5 15:03 t.txt
+</span><span class='line'>root@f2d122c6d1b0:/root# exit
+</span><span class='line'>exit</span></code></pre></td></tr></table></div></figure>
+
+
+<p>退出之后马上提交：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -l
+</span><span class='line'>CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES
+</span><span class='line'>f2d122c6d1b0        ubuntu:12.04        /bin/bash           About a minute ago   Exit 0                                  compassionate_heisenberg </span></code></pre></td></tr></table></div></figure>
+
+
+<p>ps -l 是打印最后一个Container，包括停止的Container。查找到Container ID 就要对它提交：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker commit f2d122c6d1b0 ubuntu
+</span><span class='line'>ac2f8a958c9ec376d371857f3e82858e67da95572823ae545d79f00ef66bf84f</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再次验证：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker run -i -t ubuntu /bin/bash
+</span><span class='line'>root@a1d254851cd4:/# cd /root
+</span><span class='line'>root@a1d254851cd4:/root# ls
+</span><span class='line'>t.txt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>从结果可看出刚才所创建的文件依然存在。以上仅是Docker的安装与入门教程，也是偶自己学习的记录过程，后期准备再写4个教程：</p>
+
+<ul>
+<li>搭建Docker内部仓库</li>
+<li>基于Dockerfile快速部署应用</li>
+<li>Docker管理</li>
+<li>Docker Web管制台</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CentOS安装redmine]]></title>
@@ -476,7 +649,7 @@
 </span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
 
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#x61;&#105;&#108;&#116;&#x6f;&#58;&#114;&#97;&#98;&#x62;&#105;&#x74;&#x40;&#108;&#x6f;&#99;&#97;&#x6c;&#x68;&#x6f;&#115;&#x74;&#46;&#x6c;&#111;&#x67;">&#114;&#x61;&#98;&#x62;&#105;&#x74;&#64;&#108;&#111;&#99;&#x61;&#x6c;&#x68;&#x6f;&#115;&#116;&#46;&#x6c;&#111;&#103;</a></p>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#114;&#97;&#98;&#98;&#105;&#116;&#x40;&#108;&#111;&#x63;&#x61;&#x6c;&#x68;&#111;&#115;&#x74;&#46;&#x6c;&#111;&#103;">&#114;&#97;&#98;&#98;&#x69;&#116;&#x40;&#108;&#x6f;&#x63;&#97;&#108;&#x68;&#111;&#x73;&#x74;&#46;&#x6c;&#111;&#103;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -8161,7 +8334,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#x3a;&#x74;&#x65;&#115;&#116;&#x5f;&#122;&#97;&#98;&#98;&#x69;&#120;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#46;&#x63;&#x6f;&#109;">&#x74;&#101;&#x73;&#x74;&#95;&#x7a;&#x61;&#98;&#98;&#105;&#120;&#x40;&#x67;&#109;&#x61;&#105;&#108;&#46;&#x63;&#x6f;&#109;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#116;&#101;&#x73;&#x74;&#95;&#x7a;&#97;&#98;&#98;&#x69;&#120;&#x40;&#103;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#116;&#101;&#115;&#116;&#x5f;&#x7a;&#97;&#98;&#x62;&#x69;&#x78;&#64;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -9079,98 +9252,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 
 
 <p>如果返回1表示正常。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[要体现在行动上之Blog恢复]]></title>
-    <link href="http://agenge.github.io/blog/2013/04/14/blog-recovery/"/>
-    <updated>2013-04-14T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/04/14/blog-recovery</id>
-    <content type="html"><![CDATA[<p>前几天偶打开自己<a title="agenge" href="http://agenge.com">blog</a>时，突然发现无法打开，具体点说是显示数据库连接错误，第一反应是“被黑”，故而排查的第一步就是查看系统log，然而并没有看到相关错误信息，为尽快恢复，偶先尝试重启mysql，提示没有剩余空间，难道数据库数据文件太多导致？通过du后，发现果然如此，通过将过旧的数据文件（即Mysql bin log）删除即可。以下是整个恢复过程，仅供参考。</p>
-
-<p><strong> 1. 查看磁盘空间： </strong></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# df -h
-</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
-</span><span class='line'>/dev/sda1 7.9G 7.9G 0M 100% /</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong> 2. 查看Mysql binlog 大小 </strong></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# pwd
-</span><span class='line'>/usr/local/mysql/var
-</span><span class='line'>[root@centos var]# ll | wc -l
-</span><span class='line'>1582
-</span><span class='line'>[root@centos var]# du -sh .
-</span><span class='line'>4.1G .</span></code></pre></td></tr></table></div></figure>
-
-
-<p>VPS的磁盘大小总共才8G，还包括操作系统所占空间，bin log占用足足4.1G。删除吧！</p>
-
-<p><strong> 3. 删除旧数据 </strong></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>[root@centos var]# mysql -uroot -p
-</span><span class='line'>Enter password:
-</span><span class='line'>Welcome to the MySQL monitor. Commands end with ; or \g.
-</span><span class='line'>Your MySQL connection id is 45959
-</span><span class='line'>Server version: 5.1.54-log Source distribution
-</span><span class='line'>
-</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
-</span><span class='line'>
-</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
-</span><span class='line'>affiliates. Other names may be trademarks of their respective
-</span><span class='line'>owners.
-</span><span class='line'>
-</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-</span><span class='line'>
-</span><span class='line'>mysql&gt; purge binary logs before '2013-01-01 00:00:00';
-</span><span class='line'>Query OK, 0 rows affected (10.39 sec)
-</span><span class='line'>mysql&gt; quit
-</span><span class='line'>Bye
-</span><span class='line'>[root@centos var]# df -h
-</span><span class='line'>Filesystem Size Used Avail Use% Mounted on
-</span><span class='line'>/dev/sda1 7.9G 4.3G 3.3G 57% /</span></code></pre></td></tr></table></div></figure>
-
-
-<p>删除2013年1月1日之前的所有数据，剩余可用空间还有3.3G。</p>
-
-<p><strong> 4. 后记 </strong>
-如果以上操作就算完结，那无疑是在等待下一次磁盘被爆，为防止问题再次发生，必须主动监控来达到提前预防，所以偶部署了个小脚本，一旦磁盘达到90%，会mail通知偶。也许是对blog的不重视，之前一直未采取行动，或许惰性控制了我，最后问大家一个问题：如果某个东西对你非常重要，在危机来之前，各位都准备好迎接了吗？理想或想法体现到行动上了吗？</p>
-
-<p>2013/09/27 Update:</p>
-
-<p>如果只想写文章，而不想关心Mysql 及Http Server，甚至担心VPS被黑，偶强烈推荐使用 Octopress + Github，具体介绍及安装请见这里<a href="http://agenge.com/blog/2013/09/12/write-blog-octopress-with-github/">利用GitHub搭建免费的个人blog</a></p>
 ]]></content>
   </entry>
   

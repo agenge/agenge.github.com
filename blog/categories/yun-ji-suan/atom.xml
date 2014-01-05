@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-28T21:15:02+08:00</updated>
+  <updated>2014-01-05T23:26:08+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,137 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ubuntu 12.04 安装Docker]]></title>
+    <link href="http://agenge.github.io/blog/2014/01/05/docker-install-for-ubuntu/"/>
+    <updated>2014-01-05T23:11:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2014/01/05/docker-install-for-ubuntu</id>
+    <content type="html"><![CDATA[<h2>了解Docker</h2>
+
+<p>Docker可谓是2013年的非主流词语，本篇文章为初学者提供入门参考，不涉及介绍，更多的介绍请参见国内资深人士写的文章：</p>
+
+<p><a href="http://tiewei.github.io/cloud/Docker-Getting-Start/">Docker-Getting-Start</a></p>
+
+<p>由于需要在Linux Kernel 3.8及以上才可以很好的工作，官方更是推荐Ubuntu系统，这里有两种选择：Ubuntu 12.04 LTS或最新的Ubuntu 13.10
+而本文比较喜欢倾向LTS，幸好有办法解决Kernel版本问题。</p>
+
+<p>提示：以下操作中，绝大部分都是走的goagent代理，关于goagent代理请自行Google。</p>
+
+<h2>安装Docker</h2>
+
+<h3>更新系统</h3>
+
+<p><code>
+sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update
+sudo apt-get install linux-image-generic-lts-raring linux-headers-generic-lts-raring
+sudo reboot
+</code></p>
+
+<h3>安装Docker</h3>
+
+<p>先解决GFW的问题，所以要设置wget proxy：
+```
+cat > ~/.wgetrc &lt;EOF</p>
+
+<h1>You can set the default proxies for Wget to use for http, https, and ftp.</h1>
+
+<h1>They will override the value in the environment.</h1>
+
+<p>https_proxy = <a href="http://127.0.0.1:8087/">http://127.0.0.1:8087/</a>
+http_proxy = <a href="http://127.0.0.1:8087/">http://127.0.0.1:8087/</a>
+ftp_proxy = <a href="http://127.0.0.1:8087/">http://127.0.0.1:8087/</a></p>
+
+<h1>If you do not want to use proxy at all, set this to off.</h1>
+
+<p>use_proxy = on
+EOF
+```</p>
+
+<p>同样，docker.io也被墙了，设置下hosts即可；
+<code>
+cat &gt;&gt; /etc/hosts &lt;&lt;EOF
+54.234.135.251  get.docker.io
+54.234.135.251  cdn-registry-1.docker.io
+EOF
+</code></p>
+
+<p>下面才开始安装Docker:
+<code>
+sudo sh -c "wget -qO- https://get.docker.io/gpg | apt-key add -"
+sudo sh -c "echo deb http://get.docker.io/ubuntu docker main \
+ /etc/apt/sources.list.d/docker.list"
+sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update
+sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" install lxc-docker
+</code></p>
+
+<!-- more -->
+
+
+<h3>测试Docker功能</h3>
+
+<p>在Hosts第一次运行Container，时间会比较长，因为它需要去官网下载对应的镜像文件。
+<code>
+docker run ubuntu /bin/echo hello
+</code>
+运行一个交互式Container:
+```
+sudo docker run -i -t ubuntu /bin/bash
+root@3765e92ae239:/#
+root@3765e92ae239:/# ps
+  PID TTY          TIME CMD</p>
+
+<pre><code>1 ?        00:00:00 bash
+9 ?        00:00:00 ps
+</code></pre>
+
+<p>```</p>
+
+<p>如果要退出此Container，直接输入exit, 退出之后再次进入Container会发现之前如果有创建新文件或安装新软件都已消失。要解决这个问题，就需要保存刚才的镜像状态：
+<code>
+sudo docker run -i -t ubuntu /bin/bash
+root@f2d122c6d1b0:/# cd /root/
+root@f2d122c6d1b0:/root# touch t.txt
+root@f2d122c6d1b0:/root# ll
+bash: ll: command not found
+root@f2d122c6d1b0:/root# ls -l
+total 0
+-rw-r--r-- 1 root root 0 Jan  5 15:03 t.txt
+root@f2d122c6d1b0:/root# exit
+exit
+</code></p>
+
+<p>退出之后马上提交：
+<code>
+docker ps -l
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES
+f2d122c6d1b0        ubuntu:12.04        /bin/bash           About a minute ago   Exit 0                                  compassionate_heisenberg
+</code></p>
+
+<p>ps -l 是打印最后一个Container，包括停止的Container。查找到Container ID 就要对它提交：
+<code>
+docker commit f2d122c6d1b0 ubuntu
+ac2f8a958c9ec376d371857f3e82858e67da95572823ae545d79f00ef66bf84f
+</code></p>
+
+<p>再次验证：
+<code>
+sudo docker run -i -t ubuntu /bin/bash
+root@a1d254851cd4:/# cd /root
+root@a1d254851cd4:/root# ls
+t.txt
+</code>
+从结果可看出刚才所创建的文件依然存在。以上仅是Docker的安装与入门教程，也是偶自己学习的记录过程，后期准备再写4个教程：</p>
+
+<ul>
+<li>搭建Docker内部仓库</li>
+<li>基于Dockerfile快速部署应用</li>
+<li>Docker管理</li>
+<li>Docker Web管制台</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Centos 6.X 安装KVM与安装实例]]></title>
@@ -1325,7 +1456,7 @@ signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
 <p>```
 keystone user-create \
   &mdash;name=ceilometer &mdash;pass=ceilometer \
-  &mdash;email=<a href="&#109;&#x61;&#x69;&#x6c;&#116;&#x6f;&#x3a;&#99;&#x65;&#105;&#108;&#111;&#109;&#101;&#116;&#101;&#114;&#64;&#x64;&#111;&#109;&#97;&#x69;&#x6e;&#x2e;&#99;&#111;&#109;">&#99;&#x65;&#x69;&#x6c;&#x6f;&#x6d;&#x65;&#116;&#101;&#x72;&#64;&#100;&#111;&#x6d;&#97;&#x69;&#x6e;&#x2e;&#99;&#x6f;&#109;</a></p>
+  &mdash;email=<a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#x63;&#101;&#x69;&#108;&#111;&#109;&#101;&#116;&#x65;&#114;&#64;&#x64;&#111;&#x6d;&#x61;&#105;&#x6e;&#46;&#x63;&#x6f;&#x6d;">&#x63;&#x65;&#105;&#108;&#x6f;&#109;&#x65;&#116;&#101;&#x72;&#x40;&#100;&#111;&#109;&#x61;&#105;&#x6e;&#x2e;&#99;&#111;&#x6d;</a></p>
 
 <p>keystone user-role-add &mdash;user=ceilometer &mdash;tenant=service &mdash;role=admin<br/>
 ```</p>
@@ -2176,542 +2307,6 @@ X-Timestamp: 1381816448.74507
 Content-Type: application/x-tar
 Date: Tue, 15 Oct 2013 05:55:53 GMT
 </code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[OpenStack Swift安装与配置]]></title>
-    <link href="http://agenge.github.io/blog/2013/10/15/openstack-swift-install/"/>
-    <updated>2013-10-15T14:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/10/15/openstack-swift-install</id>
-    <content type="html"><![CDATA[<h2>准备环境</h2>
-
-<p><code>
-192.168.30.150  proxy server
-192.168.30.151  storage server
-192.168.30.152  storage server
-</code></p>
-
-<h2>网络配置</h2>
-
-<p><strong> Proxy 代理节点网络(单网卡)  </strong></p>
-
-<p>```
-auto lo
-iface lo inet loopback</p>
-
-<h1>The primary network interface</h1>
-
-<p>auto eth0
-iface eth0 inet static
-address 192.168.30.150
-netmask 255.255.255.0
-gateway 192.168.30.1
-network 192.168.30.0
-broadcast 192.168.30.255
-dns-nameservers 218.201.4.3
-```</p>
-
-<p><strong> 存储节点网络(单网卡)  </strong>
-存储节点1：</p>
-
-<p>```
-auto lo
-iface lo inet loopback</p>
-
-<h1>The primary network interface</h1>
-
-<p>auto eth0
-iface eth0 inet static
-address 192.168.30.151
-netmask 255.255.255.0
-gateway 192.168.30.1
-network 192.168.30.0
-broadcast 192.168.30.255
-dns-nameservers 218.201.4.3
-```</p>
-
-<p>存储节点2：</p>
-
-<p>```
-auto lo
-iface lo inet loopback</p>
-
-<h1>The primary network interface</h1>
-
-<p>auto eth0
-iface eth0 inet static
-address 192.168.30.152
-netmask 255.255.255.0
-gateway 192.168.30.1
-network 192.168.30.0
-broadcast 192.168.30.255
-dns-nameservers 218.201.4.3
-```</p>
-
-<h2>安装公共组件</h2>
-
-<p>以下操作在所有节点全部安装：</p>
-
-<h3>添加源</h3>
-
-<p><code>
-cat &gt; /etc/apt/sources.list.d/grizzly.list &lt;&lt; _END_
-deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-deb  http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
-_END_
-</code></p>
-
-<p>更新源</p>
-
-<p><code>
-sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 5EDB1B62EC4926EA
-apt-get update
-apt-get upgrade
-apt-get install ubuntu-cloud-keyring
-</code></p>
-
-<!-- more -->
-
-
-<h2>安装 Swift</h2>
-
-<p><code>
-os_swift="python-swift swift swift-proxy swift-account swift-container swift-object python-memcache xfsprogs"
-os_keystone="python-keystone python-keystoneclient"
-apt-get install -y $os_swift $os_keystone
-</code></p>
-
-<p>安装之后需要手工创建 swift相关配置文件:</p>
-
-<p><code>
-mkdir /etc/swift
-touch /etc/swift/swift.conf
-touch /etc/swift/proxy-server.conf
-chown -R swift:swift /etc/swift
-</code></p>
-
-<p>添加 swift.conf内容：</p>
-
-<p>```
-cat > /etc/swift/swift.conf &lt;&lt; <em>END</em>
-[swift-hash]</p>
-
-<h1>od -t x8 -N 8 -A n &lt; /dev/random</h1>
-
-<h1>The above command can be used to generate random a string.</h1>
-
-<p>swift_hash_path_suffix = 50ea1ddb6e88b991
-<em>END</em>
-```</p>
-
-<p>将以下内容添加到 /etc/swift/proxy-server.conf内容：</p>
-
-<p>```
-[DEFAULT]
-bind_port = 8080
-bind_ip = 0.0.0.0
-user = swift
-swift_dir = /etc/swift</p>
-
-<p>log_facility = LOG_LOCAL0
-log_level = DEBUG</p>
-
-<p>[pipeline:main]
-pipeline = catch_errors healthcheck cache authtoken keystoneauth container-quotas account-quotas proxy-server</p>
-
-<p>[app:proxy-server]
-use = egg:swift#proxy
-allow_account_management = true
-account_autocreate = true</p>
-
-<p>[filter:keystoneauth]
-use = egg:swift#keystoneauth
-operator_roles = Member,admin</p>
-
-<p>[filter:authtoken]
-paste.filter_factory = keystone.middleware.auth_token:filter_factory
-service_protocol = http
-service_port = 5000
-service_host = 192.168.30.150
-auth_port = 35357
-auth_host = 192.168.30.150
-auth_protocol = http
-admin_tenant_name = service
-admin_user = swift
-admin_password = password
-signing_dir = /etc/swift</p>
-
-<p>[filter:cache]
-use = egg:swift#memcache
-set log_name = cache
-memcache_servers = 192.168.30.150:11211</p>
-
-<p>[filter:catch_errors]
-use = egg:swift#catch_errors</p>
-
-<p>[filter:healthcheck]
-use = egg:swift#healthcheck</p>
-
-<p>[filter:proxy-logging]
-use = egg:swift#proxy_logging</p>
-
-<p>[filter:ratelimit]
-use = egg:swift#ratelimit
-[filter:container-quotas]
-use = egg:swift#container_quotas</p>
-
-<p>[filter:account-quotas]
-use = egg:swift#account_quotas
-```</p>
-
-<p>如果不使用 Keystone 认证，请使用以下的配置文件：</p>
-
-<p>```
-[DEFAULT]
-bind_port = 8080
-bind_ip = 192.168.30.150
-user = swift</p>
-
-<p>[pipeline:main]
-pipeline = healthcheck cache tempauth proxy-server</p>
-
-<p>[app:proxy-server]
-use = egg:swift#proxy
-allow_account_management = true
-account_autocreate = true</p>
-
-<p>[filter:tempauth]
-use = egg:swift#tempauth
-user_admin_admin = admin .admin .reseller_admin
-user_test_tester = testing .admin
-user_test2_tester2 = testing2 .admin
-user_test_tester3 = testing3</p>
-
-<p>[filter:healthcheck]
-use = egg:swift#healthcheck</p>
-
-<p>[filter:cache]
-use = egg:swift#memcache
-memcache_servers = 192.168.30.150:11211
-```</p>
-
-<p>格式： user<em><login1></em><login2> = <password> <privileges>
-登录的时候就是：</p>
-
-<p><code>
-login = admin:admin
-password = admin
-privileges = .admin .reseller_admin
-</code></p>
-
-<p>配置rsyslog</p>
-
-<p><code>
-echo "local0.*    /var/log/swift/proxy-server.log" &gt;&gt; /etc/rsyslog.conf
-mkdir /var/log/swift
-</code></p>
-
-<p>配置 环 Ring</p>
-
-<p><code>
-cd /etc/swift
-sudo swift-ring-builder account.builder create 6 2 1
-sudo swift-ring-builder container.builder create 6 2 1
-sudo swift-ring-builder object.builder create 6 2 1
-</code>
-说明</p>
-
-<ul>
-<li>第一个数字：6表示分区(环)将被处理为2<sup>6th</sup>，即使用2的6次方个分区，创建完之后应有 64个分区</li>
-<li>第二个数字：每个存储对象保存2份，即创建2个副本；由于偶只有两台storage，故只写2</li>
-<li>第三个数字：1表示限制分区数据转移的时间，此处表示1小时，即分区被连续移动两次之间的最小时间间隔</li>
-</ul>
-
-
-<p>添加设备
-添加新设备到Ring上，但add操作不会分配partitions到新的设备上，只有运行“rebalance”命令后才会进行分区的分配，所以这种方式可以有这种优势： 允许一次添加多个设备，只执行一次rebalance就可以了，以下操作步骤：</p>
-
-<p>```
-sudo swift-ring-builder account.builder add z1-192.168.30.151:6002/sdb1 100
-sudo swift-ring-builder account.builder add z2-192.168.30.152:6002/sdb1 100</p>
-
-<p>sudo swift-ring-builder container.builder add z1-192.168.30.151:6001/sdb1 100
-sudo swift-ring-builder container.builder add z2-192.168.30.152:6001/sdb1 100</p>
-
-<p>sudo swift-ring-builder object.builder add z1-192.168.30.151:6000/sdb1 100
-sudo swift-ring-builder object.builder add z2-192.168.30.152:6000/sdb1 100
-```</p>
-
-<p>查看 Ring信息
-可通过以下命令查到到Ring和Ring中的设备信息：
-* 查询account信息：</p>
-
-<pre><code>    swift-ring-builder account.builder
-</code></pre>
-
-<ul>
-<li><p>查询container信息：</p>
-
-<pre><code>  swift-ring-builder container.builder
-</code></pre></li>
-<li><p>查询object信息</p>
-
-<pre><code>  swift-ring-builder object.builder
-</code></pre></li>
-<li><p>生成 Ring
-如果确认一切之后，最终还要生成Ring，来进行分区的分配，即之前提到的rebalance：</p></li>
-</ul>
-
-
-<p><code>
-sudo swift-ring-builder account.builder rebalance
-sudo swift-ring-builder container.builder rebalance
-sudo swift-ring-builder object.builder rebalance
-</code></p>
-
-<p>设置权限</p>
-
-<p><code>
-chown -R swift:swift /etc/swift
-chown -R swift:swift /var/cache/swift
-</code></p>
-
-<hr />
-
-<h2>存储节点安装与配置</h2>
-
-<p>添加设备：
-先创建分区，另外一定要是 XFS文件系统</p>
-
-<p><code>
-mkdir -p /srv/node/sdb1
-chown -R swift:swift /srv/node/
-mkfs.xfs -i size=1024 /dev/sdb1 -f
-echo "/dev/sdb1 /srv/node/sdb1 xfs noatime,nodiratime,nobarrier,logbufs=8 0 0" &gt;&gt; /etc/fstab
-mount /srv/node/sdb1  
-</code></p>
-
-<p>设置 rsyncd.conf</p>
-
-<p>```
-uid = swift
-gid = swift</p>
-
-<p>log file = /var/log/rsyncd.log
-pid file = /var/run/rsyncd.pid
-address = 192.168.30.151</p>
-
-<p>[account]
-max_connections = 2
-path = /srv/node/
-read only = false
-lock file = /var/lock/account.lock</p>
-
-<p>[container]
-max_connections = 2
-path = /srv/node/
-read only = false
-lock file = /var/lock/container.lock</p>
-
-<p>[object]
-max_connections = 2
-path = /srv/node/
-read only = false
-lock file = /var/lock/object.lock
-```</p>
-
-<p>设置 rsync开机自启动</p>
-
-<pre><code>sudo sed -i 's/RSYNC_ENABLE=false/RSYNC_ENABLE=true/g' /etc/default/rsync
-</code></pre>
-
-<p>启动 rsync服务</p>
-
-<pre><code>sudo service rsync start
-</code></pre>
-
-<p>创建/etc/account-server.conf：</p>
-
-<p>```
-[DEFAULT]
-bind_ip = 0.0.0.0
-bind_port = 6002
-workers = 1
-user = swift
-swift_dir = /etc/swift
-devices = /srv/node</p>
-
-<p>[pipeline:main]
-pipeline = account-server</p>
-
-<p>[app:account-server]
-use = egg:swift#account</p>
-
-<p>[account-replicator]</p>
-
-<p>[account-auditor]</p>
-
-<p>[account-reaper]</p>
-
-<p>```</p>
-
-<p>创建/etc/container-server.conf</p>
-
-<p>```
-[DEFAULT]
-bind_ip = 0.0.0.0
-bind_port = 6001
-workers = 1
-user = swift
-swift_dir = /etc/swift
-devices = /srv/node</p>
-
-<p>[pipeline:main]
-pipeline = container-server</p>
-
-<p>[app:container-server]
-use = egg:swift#container</p>
-
-<p>[container-replicator]</p>
-
-<p>[container-updater]</p>
-
-<p>[container-auditor]</p>
-
-<p>[container-sync]
-```</p>
-
-<p>创建/etc/object-server.conf</p>
-
-<p>```
-[DEFAULT]
-bind_ip = 0.0.0.0
-bind_port = 6000
-workers = 1
-user = swift
-swift_dir = /etc/swift
-devices = /srv/node</p>
-
-<p>[pipeline:main]
-pipeline = recon object-server</p>
-
-<p>[app:object-server]
-use = egg:swift#object</p>
-
-<p>[filter:recon]
-use = egg:swift#recon
-recon_cache_path = /var/cache/swift</p>
-
-<p>[object-replicator]</p>
-
-<p>[object-updater]</p>
-
-<p>[object-auditor]
-```</p>
-
-<h3>重启服务</h3>
-
-<p>在所有存储节点重启以下服务：</p>
-
-<p><code>
-sudo swift-init object-server start
-sudo swift-init object-replicator start
-sudo swift-init object-updater start
-sudo swift-init object-auditor start
-sudo swift-init container-server start
-sudo swift-init container-replicator start
-sudo swift-init container-updater start
-sudo swift-init container-auditor start
-sudo swift-init account-server start
-sudo swift-init account-replicator start
-sudo swift-init account-auditor start
-</code></p>
-
-<p>在代理节点启动以下服务：</p>
-
-<p><code>
-sudo swift-init all restart
-</code></p>
-
-<h2>Swift操作</h2>
-
-<p>获得 X-Storage-Url 和 X-Auth-Token:</p>
-
-<pre><code>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0
-</code></pre>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-* About to connect() to 192.168.30.150 port 8080 (#0)
-*   Trying 192.168.30.150&hellip; connected</p>
-
-<blockquote><p>GET /auth/v1.0 HTTP/1.1
-User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
-Host: 192.168.30.150:8080
-Accept: <em>/</em>
-X-Storage-User: admin:admin
-X-Storage-Pass: admin</p>
-
-<p>&lt; HTTP/1.1 200 OK
-&lt; X-Storage-Url: <a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a>
-&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Type: text/html; charset=UTF-8
-&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Length: 0
-&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
-&lt;
-* Connection #0 to host 192.168.30.150 left intact
-* Closing connection #0
-```</p></blockquote>
-
-<p>检查账号</p>
-
-<pre><code>    curl -k -v -H 'X-Auth-Token: &lt;token-from-x-auth-token-above&gt;' &lt;url-from-xstorage-url-above&gt;  
-</code></pre>
-
-<p>这里的token-from-x-auth-token-above 就是上面输出的 AUTH_tk8a85916d63b14c568a4633b7920623c5，url-from-xstorage-url-above对应：<a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a></p>
-
-<p>检测 swift 命令是否工作正常</p>
-
-<pre><code>    swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin stat
-</code></pre>
-
-<p>正常输出类似以下信息：</p>
-
-<p>```
-   Account: AUTH_admin
-Containers: 0
-   Objects: 0</p>
-
-<pre><code> Bytes: 0
-</code></pre>
-
-<p>Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-Content-Type: text/plain; charset=utf-8
-```</p>
-
-<p>上传</p>
-
-<pre><code>swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin upload test apache-tomcat-6.0.36.tar.gz
-</code></pre>
-
-<p>删除</p>
-
-<pre><code>swift -A http://192.168.30.150:8080/auth/v1.0 -U admin:admin -K admin delete test apache-tomcat-6.0.36.tar.gz
-</code></pre>
-
-<h2>排错思路</h2>
-
-<ol>
-<li>直接看控制台打印的日志</li>
-<li>检查配置文件是否正确</li>
-<li>通过观察日志，例如/var/log/syslog</li>
-<li>修改配置文件之后，需要重启对应的服务</li>
-</ol>
-
 ]]></content>
   </entry>
   

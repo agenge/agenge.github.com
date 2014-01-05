@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: OpenStack | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/openstack/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-28T21:15:02+08:00</updated>
+  <updated>2014-01-05T23:26:08+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,137 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ubuntu 12.04 安装Docker]]></title>
+    <link href="http://agenge.github.io/blog/2014/01/05/docker-install-for-ubuntu/"/>
+    <updated>2014-01-05T23:11:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2014/01/05/docker-install-for-ubuntu</id>
+    <content type="html"><![CDATA[<h2>了解Docker</h2>
+
+<p>Docker可谓是2013年的非主流词语，本篇文章为初学者提供入门参考，不涉及介绍，更多的介绍请参见国内资深人士写的文章：</p>
+
+<p><a href="http://tiewei.github.io/cloud/Docker-Getting-Start/">Docker-Getting-Start</a></p>
+
+<p>由于需要在Linux Kernel 3.8及以上才可以很好的工作，官方更是推荐Ubuntu系统，这里有两种选择：Ubuntu 12.04 LTS或最新的Ubuntu 13.10
+而本文比较喜欢倾向LTS，幸好有办法解决Kernel版本问题。</p>
+
+<p>提示：以下操作中，绝大部分都是走的goagent代理，关于goagent代理请自行Google。</p>
+
+<h2>安装Docker</h2>
+
+<h3>更新系统</h3>
+
+<p><code>
+sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update
+sudo apt-get install linux-image-generic-lts-raring linux-headers-generic-lts-raring
+sudo reboot
+</code></p>
+
+<h3>安装Docker</h3>
+
+<p>先解决GFW的问题，所以要设置wget proxy：
+```
+cat > ~/.wgetrc &lt;EOF</p>
+
+<h1>You can set the default proxies for Wget to use for http, https, and ftp.</h1>
+
+<h1>They will override the value in the environment.</h1>
+
+<p>https_proxy = <a href="http://127.0.0.1:8087/">http://127.0.0.1:8087/</a>
+http_proxy = <a href="http://127.0.0.1:8087/">http://127.0.0.1:8087/</a>
+ftp_proxy = <a href="http://127.0.0.1:8087/">http://127.0.0.1:8087/</a></p>
+
+<h1>If you do not want to use proxy at all, set this to off.</h1>
+
+<p>use_proxy = on
+EOF
+```</p>
+
+<p>同样，docker.io也被墙了，设置下hosts即可；
+<code>
+cat &gt;&gt; /etc/hosts &lt;&lt;EOF
+54.234.135.251  get.docker.io
+54.234.135.251  cdn-registry-1.docker.io
+EOF
+</code></p>
+
+<p>下面才开始安装Docker:
+<code>
+sudo sh -c "wget -qO- https://get.docker.io/gpg | apt-key add -"
+sudo sh -c "echo deb http://get.docker.io/ubuntu docker main \
+ /etc/apt/sources.list.d/docker.list"
+sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update
+sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" install lxc-docker
+</code></p>
+
+<!-- more -->
+
+
+<h3>测试Docker功能</h3>
+
+<p>在Hosts第一次运行Container，时间会比较长，因为它需要去官网下载对应的镜像文件。
+<code>
+docker run ubuntu /bin/echo hello
+</code>
+运行一个交互式Container:
+```
+sudo docker run -i -t ubuntu /bin/bash
+root@3765e92ae239:/#
+root@3765e92ae239:/# ps
+  PID TTY          TIME CMD</p>
+
+<pre><code>1 ?        00:00:00 bash
+9 ?        00:00:00 ps
+</code></pre>
+
+<p>```</p>
+
+<p>如果要退出此Container，直接输入exit, 退出之后再次进入Container会发现之前如果有创建新文件或安装新软件都已消失。要解决这个问题，就需要保存刚才的镜像状态：
+<code>
+sudo docker run -i -t ubuntu /bin/bash
+root@f2d122c6d1b0:/# cd /root/
+root@f2d122c6d1b0:/root# touch t.txt
+root@f2d122c6d1b0:/root# ll
+bash: ll: command not found
+root@f2d122c6d1b0:/root# ls -l
+total 0
+-rw-r--r-- 1 root root 0 Jan  5 15:03 t.txt
+root@f2d122c6d1b0:/root# exit
+exit
+</code></p>
+
+<p>退出之后马上提交：
+<code>
+docker ps -l
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES
+f2d122c6d1b0        ubuntu:12.04        /bin/bash           About a minute ago   Exit 0                                  compassionate_heisenberg
+</code></p>
+
+<p>ps -l 是打印最后一个Container，包括停止的Container。查找到Container ID 就要对它提交：
+<code>
+docker commit f2d122c6d1b0 ubuntu
+ac2f8a958c9ec376d371857f3e82858e67da95572823ae545d79f00ef66bf84f
+</code></p>
+
+<p>再次验证：
+<code>
+sudo docker run -i -t ubuntu /bin/bash
+root@a1d254851cd4:/# cd /root
+root@a1d254851cd4:/root# ls
+t.txt
+</code>
+从结果可看出刚才所创建的文件依然存在。以上仅是Docker的安装与入门教程，也是偶自己学习的记录过程，后期准备再写4个教程：</p>
+
+<ul>
+<li>搭建Docker内部仓库</li>
+<li>基于Dockerfile快速部署应用</li>
+<li>Docker管理</li>
+<li>Docker Web管制台</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CentOS 6 安装RabbitMQ]]></title>
@@ -86,7 +217,7 @@ Starting rabbitmq-server: SUCCESS
 rabbitmq-server.
 </code></p>
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#114;&#x61;&#98;&#98;&#x69;&#116;&#64;&#x6c;&#111;&#x63;&#97;&#108;&#x68;&#111;&#x73;&#116;&#46;&#108;&#x6f;&#103;">&#x72;&#97;&#x62;&#98;&#x69;&#116;&#64;&#x6c;&#x6f;&#x63;&#97;&#x6c;&#104;&#x6f;&#x73;&#x74;&#x2e;&#108;&#111;&#x67;</a>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#114;&#97;&#x62;&#x62;&#105;&#x74;&#x40;&#x6c;&#x6f;&#99;&#97;&#108;&#x68;&#111;&#115;&#116;&#x2e;&#108;&#111;&#103;">&#x72;&#x61;&#98;&#x62;&#105;&#116;&#x40;&#108;&#111;&#x63;&#97;&#108;&#104;&#111;&#115;&#116;&#x2e;&#x6c;&#111;&#x67;</a>
 ```
 =INFO REPORT==== 17-Nov-2013::20:44:29 ===
 Starting RabbitMQ 3.1.5 on Erlang R14B04
@@ -98,8 +229,8 @@ node           : rabbit@localhost
 home dir       : /var/lib/rabbitmq
 config file(s) : (none)
 cookie hash    : GA+C2KHxoRs776SK+Ki+qg==
-log            : /var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#x3a;&#114;&#x61;&#98;&#98;&#x69;&#x74;&#64;&#108;&#111;&#x63;&#x61;&#x6c;&#x68;&#x6f;&#x73;&#116;&#46;&#x6c;&#111;&#x67;">&#114;&#x61;&#98;&#98;&#x69;&#116;&#x40;&#x6c;&#111;&#99;&#x61;&#108;&#104;&#111;&#x73;&#116;&#46;&#108;&#x6f;&#x67;</a>
-sasl log       : /var/log/rabbitmq/<a href="&#x6d;&#x61;&#105;&#x6c;&#x74;&#111;&#x3a;&#x72;&#97;&#98;&#98;&#x69;&#116;&#x40;&#x6c;&#111;&#x63;&#x61;&#x6c;&#104;&#x6f;&#115;&#x74;&#x2d;&#x73;&#x61;&#115;&#108;&#x2e;&#108;&#x6f;&#103;">&#x72;&#97;&#x62;&#98;&#x69;&#x74;&#x40;&#x6c;&#111;&#99;&#x61;&#x6c;&#104;&#x6f;&#115;&#x74;&#x2d;&#x73;&#x61;&#x73;&#x6c;&#x2e;&#108;&#111;&#103;</a>
+log            : /var/log/rabbitmq/<a href="&#x6d;&#97;&#105;&#108;&#x74;&#111;&#x3a;&#x72;&#97;&#x62;&#98;&#105;&#x74;&#x40;&#x6c;&#111;&#x63;&#97;&#x6c;&#104;&#x6f;&#115;&#x74;&#x2e;&#x6c;&#111;&#x67;">&#114;&#97;&#98;&#98;&#x69;&#116;&#x40;&#x6c;&#x6f;&#99;&#97;&#108;&#104;&#x6f;&#x73;&#116;&#x2e;&#108;&#111;&#x67;</a>
+sasl log       : /var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#x6f;&#58;&#114;&#97;&#98;&#x62;&#105;&#x74;&#64;&#x6c;&#x6f;&#99;&#x61;&#x6c;&#x68;&#x6f;&#115;&#x74;&#x2d;&#x73;&#x61;&#115;&#108;&#46;&#x6c;&#111;&#x67;">&#114;&#x61;&#98;&#x62;&#x69;&#116;&#64;&#x6c;&#x6f;&#99;&#97;&#108;&#x68;&#x6f;&#x73;&#116;&#45;&#x73;&#97;&#x73;&#x6c;&#46;&#108;&#x6f;&#103;</a>
 database dir   : /var/lib/rabbitmq/mnesia/rabbit@localhost</p>
 
 <p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
@@ -128,8 +259,8 @@ Server startup complete; 0 plugins started.
 ```
 tree /var/log/rabbitmq/
 /var/log/rabbitmq/
-├── <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#58;&#114;&#x61;&#x62;&#98;&#105;&#x74;&#x40;&#108;&#111;&#99;&#97;&#x6c;&#x68;&#x6f;&#115;&#116;&#46;&#108;&#x6f;&#x67;">&#114;&#97;&#98;&#x62;&#x69;&#116;&#64;&#108;&#x6f;&#x63;&#97;&#x6c;&#x68;&#x6f;&#x73;&#116;&#46;&#108;&#111;&#103;</a>
-├── <a href="&#109;&#x61;&#105;&#x6c;&#116;&#111;&#x3a;&#114;&#97;&#x62;&#98;&#105;&#116;&#64;&#x6c;&#111;&#99;&#97;&#x6c;&#104;&#x6f;&#115;&#x74;&#x2d;&#x73;&#x61;&#115;&#108;&#x2e;&#x6c;&#x6f;&#x67;">&#x72;&#97;&#98;&#x62;&#105;&#x74;&#x40;&#108;&#111;&#99;&#x61;&#x6c;&#104;&#111;&#x73;&#x74;&#x2d;&#115;&#x61;&#115;&#x6c;&#46;&#108;&#x6f;&#103;</a>
+├── <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#114;&#x61;&#x62;&#98;&#x69;&#116;&#x40;&#108;&#111;&#99;&#x61;&#x6c;&#x68;&#111;&#115;&#x74;&#x2e;&#x6c;&#111;&#x67;">&#x72;&#97;&#98;&#98;&#x69;&#116;&#64;&#x6c;&#x6f;&#x63;&#97;&#x6c;&#104;&#111;&#115;&#116;&#46;&#108;&#111;&#103;</a>
+├── <a href="&#109;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#114;&#97;&#98;&#x62;&#x69;&#x74;&#64;&#x6c;&#x6f;&#x63;&#x61;&#x6c;&#104;&#111;&#115;&#116;&#45;&#x73;&#97;&#115;&#x6c;&#46;&#108;&#x6f;&#x67;">&#114;&#x61;&#98;&#x62;&#x69;&#x74;&#64;&#108;&#x6f;&#99;&#x61;&#x6c;&#104;&#111;&#x73;&#x74;&#x2d;&#x73;&#97;&#115;&#x6c;&#x2e;&#108;&#111;&#103;</a>
 ├── shutdown_err
 ├── shutdown_log
 ├── startup_err
@@ -1563,7 +1694,7 @@ signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
 <p>```
 keystone user-create \
   &mdash;name=ceilometer &mdash;pass=ceilometer \
-  &mdash;email=<a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x63;&#x65;&#x69;&#x6c;&#111;&#x6d;&#x65;&#116;&#101;&#114;&#x40;&#100;&#111;&#x6d;&#97;&#x69;&#110;&#x2e;&#99;&#111;&#x6d;">&#99;&#x65;&#x69;&#108;&#111;&#109;&#x65;&#116;&#x65;&#114;&#64;&#100;&#x6f;&#x6d;&#x61;&#105;&#110;&#46;&#x63;&#111;&#109;</a></p>
+  &mdash;email=<a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#x3a;&#99;&#x65;&#105;&#108;&#111;&#x6d;&#x65;&#x74;&#101;&#114;&#64;&#x64;&#111;&#x6d;&#x61;&#105;&#x6e;&#x2e;&#x63;&#x6f;&#109;">&#99;&#101;&#105;&#108;&#x6f;&#x6d;&#101;&#116;&#101;&#x72;&#64;&#100;&#111;&#109;&#x61;&#x69;&#x6e;&#46;&#99;&#x6f;&#109;</a></p>
 
 <p>keystone user-role-add &mdash;user=ceilometer &mdash;tenant=service &mdash;role=admin<br/>
 ```</p>
@@ -1990,429 +2121,6 @@ python ez_setup.py
 
 <p><code>
 sudo python ./ez_setup.py -U setuptools
-</code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用Curl操作OpenStack Swift]]></title>
-    <link href="http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift/"/>
-    <updated>2013-10-17T09:51:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift</id>
-    <content type="html"><![CDATA[<p>提示：以下操作均是使用的 swift tempauth认证机制。</p>
-
-<ul>
-<li>获取 Token</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-* About to connect() to 192.168.30.150 port 8080 (#0)
-*   Trying 192.168.30.150&hellip; connected</p>
-
-<blockquote><p>GET /auth/v1.0 HTTP/1.1
-User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
-Host: 192.168.30.150:8080
-Accept: <em>/</em>
-X-Storage-User: admin:admin
-X-Storage-Pass: admin</p>
-
-<p>&lt; HTTP/1.1 200 OK
-&lt; X-Storage-Url: <a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a>
-&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Type: text/html; charset=UTF-8
-&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Length: 0
-&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
-&lt;
-* Connection #0 to host 192.168.30.150 left intact
-* Closing connection #0
-```</p></blockquote>
-
-<ul>
-<li>Account操作</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -v -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-* About to connect() to 192.168.30.150 port 8080 (#0)
-*   Trying 192.168.30.150&hellip; connected</p>
-
-<blockquote><p>HEAD /v1/AUTH_admin HTTP/1.1
-User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
-Host: 192.168.30.150:8080
-Accept: <em>/</em>
-X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5</p>
-
-<p>&lt; HTTP/1.1 204 No Content
-&lt; Content-Length: 0
-&lt; Accept-Ranges: bytes
-&lt; X-Timestamp: 1381806617.24083
-&lt; X-Account-Bytes-Used: 0
-&lt; X-Account-Container-Count: 1
-&lt; Content-Type: text/plain; charset=utf-8
-&lt; X-Account-Object-Count: 0
-&lt; Date: Tue, 15 Oct 2013 05:17:23 GMT
-&lt;
-* Connection #0 to host 192.168.30.150 left intact
-* Closing connection #0
-```</p></blockquote>
-
-<ul>
-<li><p>Container操作</p>
-
-<ul>
-<li>列出 Contailner</li>
-</ul>
-</li>
-</ul>
-
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
-</code>
- 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 5
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 1
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:20:11 GMT</p>
-
-<p>test
-```
- 最后一行的test就是查询出来的内容。</p>
-
-<ul>
-<li>创建 Container</li>
-</ul>
-
-
-<p><code>
-curl -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile
-</code></p>
-
-<p>   如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 201 Created
-Content-Length: 0
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:22:01 GMT
-</code></p>
-
-<p>  我们再来查询一次看是否成功：</p>
-
-<p>  <!-- more --></p>
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
-</code></p>
-
-<p>  如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 12
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:23:18 GMT</p>
-
-<p>myfile
-test
-```</p>
-
-<ul>
-<li> 只列出部分 Container</li>
-</ul>
-
-
-<p>  很多时候 Container 会有很多个，Swift 默认会列出前10000个，但如果我们只看最前面几个，该怎么办？ 以下示例只显示最前面一个 Container</p>
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?limit=1
-</code></p>
-
-<p> 结果：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 7
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:24:36 GMT</p>
-
-<p>myfile
-```</p>
-
-<p>  那如果要列出最后几个 Container 又怎么办呢？ 加一个 marker即可，以下示例列出 myfile之后的一个Container</p>
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?marker=myfile\&amp;limit=1
-</code></p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 5
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:28:53 GMT</p>
-
-<p>test
-```</p>
-
-<ul>
-<li>格式化输出 Container</li>
-</ul>
-
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?format=json
-</code></p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 86
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: application/json; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:29:58 GMT</p>
-
-<p>[{&ldquo;count&rdquo;: 0, &ldquo;bytes&rdquo;: 0, &ldquo;name&rdquo;: &ldquo;myfile&rdquo;}, {&ldquo;count&rdquo;: 0, &ldquo;bytes&rdquo;: 0, &ldquo;name&rdquo;: &ldquo;test&rdquo;}]
-```</p>
-
-<p>  除了JSON格式，还可以格式化XML，只需要将json改成xml 即可。</p>
-
-<ul>
-<li>查看 Container metadata</li>
-</ul>
-
-
-<p><code>
-curl -i -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test
-</code></p>
-
-<p>  如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 204 No Content
-Content-Length: 0
-X-Container-Object-Count: 0
-Accept-Ranges: bytes
-X-Timestamp: 1381806903.70007
-X-Container-Bytes-Used: 0
-Content-Type: text/plain; charset=utf-8
-Date: Tue, 15 Oct 2013 05:32:06 GMT
-</code></p>
-
-<ul>
-<li>删除 Container</li>
-</ul>
-
-
-<p><code>
-curl -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/mytest
-</code></p>
-
-<ul>
-<li><p>Object操作</p>
-
-<ul>
-<li>创建 Object</li>
-</ul>
-</li>
-</ul>
-
-
-<p><code>
-curl -k -i -X PUT -T "apache-tomcat-6.0.36.tgz" -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz
-</code></p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 100 Continue</p>
-
-<p>HTTP/1.1 201 Created
-Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
-Content-Length: 0
-Etag: 3dde098fd0b3a08d3f2867e4a95591ba
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:39:08 GMT
-```</p>
-
-<ul>
-<li>列出  Object</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile
-</code></pre>
-
-<p>```</p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 25
-X-Container-Object-Count: 1
-Accept-Ranges: bytes
-X-Timestamp: 1381814521.71796
-X-Container-Bytes-Used: 6780936
-Content-Type: text/plain; charset=utf-8
-Date: Tue, 15 Oct 2013 05:40:43 GMT</p>
-
-<p>apache-tomcat-6.0.36.tgz
-```</p>
-
-<p>另外 Object和 Container一样可以通过加参数来限制查询，具体示例可参考 Container操作。</p>
-
-<ul>
-<li>下载 Object</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz &gt; apache-tomcat-6.0.36.tgz
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</p>
-
-<pre><code>                             Dload  Upload   Total   Spent    Left  Speed
-</code></pre>
-
-<p>100 6622k  100 6622k    0     0  32.8M      0 &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; 33.1M
-```</p>
-
-<ul>
-<li>Copy Object</li>
-</ul>
-
-
-<p><code>
-curl -k -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
- -H 'X-Copy-From: /myfile/apache-tomcat-6.0.36.tgz' \
- -H 'Content-Length:0' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz
-</code></p>
-
-<p>将/myfile/apache-tomcat-6.0.36.tgz 拷贝到 /test/apache-tomcat-6.0.36.tgz,如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 201 Created
-Content-Length: 0
-X-Copied-From-Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
-X-Copied-From: myfile/apache-tomcat-6.0.36.tgz
-Last-Modified: Tue, 15 Oct 2013 05:47:52 GMT
-Etag: 3dde098fd0b3a08d3f2867e4a95591ba
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:47:52 GMT
-</code></p>
-
-<ul>
-<li>删除 Object</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 204 No Content
-Content-Length: 0
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:50:49 GMT
-</code>
- 通过之前的GET就能验证是否成功删除，此处略过。</p>
-
-<ul>
-<li>设置 Object Metadata</li>
-</ul>
-
-
-<p><code>
-curl -k -i -X POST -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
--H 'X-Object-Meta-Breed: apache tomcat 6.0.36' \
- http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz
-</code></p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 202 Accepted
-Content-Length: 76
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:54:09 GMT
-</code></p>
-
-<p>通过之前的HEAD，就能查看到刚才添加的元数据</p>
-
-<p><code>
-HTTP/1.1 200 OK
-Content-Length: 6780936
-X-Object-Meta-Breed: apache tomcat 6.0.36
-Accept-Ranges: bytes
-Last-Modified: Tue, 15 Oct 2013 05:54:08 GMT
-Etag: 3dde098fd0b3a08d3f2867e4a95591ba
-X-Timestamp: 1381816448.74507
-Content-Type: application/x-tar
-Date: Tue, 15 Oct 2013 05:55:53 GMT
 </code></p>
 ]]></content>
   </entry>

@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Centos 6.X 安装KVM与安装实例 - TaurusHome</title>
+  <title>Ubuntu 12.04 安装Docker - TaurusHome</title>
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前言 虚拟化已经不是一个新鲜话题，不过仍然看到很多新手连KVM都没有入门，甚至是先接触OpenStack才遇到KVM，所以今天给各位新手提供一个安装教程。 安装KVM依赖包 目前绝大部分的CPU都支持Intel VT或AMD-V ，此处检查步骤略过。 1
-yum install -y bridge &hellip;">
+  <meta name="description" content="了解Docker Docker可谓是2013年的非主流词语，本篇文章为初学者提供入门参考，不涉及介绍，更多的介绍请参见国内资深人士写的文章： Docker-Getting-Start 由于需要在Linux Kernel 3.8及以上才可以很好的工作，官方更是推荐Ubuntu系统，这里有两种选择： &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@ yum install -y bridge &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://agenge.github.io/blog/2013/11/15/centos-install-kvm-and-install-vm">
+  <link rel="canonical" href="http://agenge.github.io/blog/2014/01/05/docker-install-for-ubuntu">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="TaurusHome" type="application/atom+xml">
@@ -83,7 +82,7 @@ yum install -y bridge &hellip;">
   
   <header>
     
-      <h1 class="entry-title">Centos 6.X 安装KVM与安装实例</h1>
+      <h1 class="entry-title">Ubuntu 12.04 安装Docker</h1>
     
     
       <p class="meta">
@@ -99,73 +98,39 @@ yum install -y bridge &hellip;">
   
 
 
-<time datetime="2013-11-15T21:58:00+08:00" pubdate data-updated="true">Nov 15<span>th</span>, 2013</time>
+<time datetime="2014-01-05T23:11:00+08:00" pubdate data-updated="true">Jan 5<span>th</span>, 2014</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2>前言</h2>
+<div class="entry-content"><h2>了解Docker</h2>
 
-<p>虚拟化已经不是一个新鲜话题，不过仍然看到很多新手连KVM都没有入门，甚至是先接触OpenStack才遇到KVM，所以今天给各位新手提供一个安装教程。</p>
+<p>Docker可谓是2013年的非主流词语，本篇文章为初学者提供入门参考，不涉及介绍，更多的介绍请参见国内资深人士写的文章：</p>
 
-<h2>安装KVM依赖包</h2>
+<p><a href="http://tiewei.github.io/cloud/Docker-Getting-Start/">Docker-Getting-Start</a></p>
 
-<p>目前绝大部分的CPU都支持Intel VT或AMD-V ，此处检查步骤略过。</p>
+<p>由于需要在Linux Kernel 3.8及以上才可以很好的工作，官方更是推荐Ubuntu系统，这里有两种选择：Ubuntu 12.04 LTS或最新的Ubuntu 13.10
+而本文比较喜欢倾向LTS，幸好有办法解决Kernel版本问题。</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>yum install -y bridge-utils kvm kmod-kvm qemu kvm-qemu-img virt-viewer virt-manager libvirt libvirt-python python-virtinst</span></code></pre></td></tr></table></div></figure>
+<p>提示：以下操作中，绝大部分都是走的goagent代理，关于goagent代理请自行Google。</p>
 
+<h2>安装Docker</h2>
 
-<p>创建一个叫 br0 的网桥：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cd /etc/sysconfig/network-scripts/
-</span><span class='line'>cp ifcfg-eth0 ifcfg-br0
-</span><span class='line'>vi ifcfg-eth0 </span></code></pre></td></tr></table></div></figure>
-
-
-<p>增加：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>BRIDGE=br0</span></code></pre></td></tr></table></div></figure>
-
-
-<p>将ifcfg-br0 修改为：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>DEVICE="br0"
-</span><span class='line'>TYPE="Bridge"</span></code></pre></td></tr></table></div></figure>
-
-
-<p>然后重启网络：</p>
+<h3>更新系统</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/network restart
-</span><span class='line'>ifconfig br0
-</span><span class='line'>/etc/init.d/libvirtd restart</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update 
+</span><span class='line'>sudo apt-get install linux-image-generic-lts-raring linux-headers-generic-lts-raring
+</span><span class='line'>sudo reboot</span></code></pre></td></tr></table></div></figure>
 
 
-<p>经过上面的简单安装与设置之后，KVM就已经安装完成，但怎么通过命令行创建虚拟机呢？</p>
+<h3>安装Docker</h3>
 
-<h2>创建虚拟机</h2>
-
-<!-- more -->
-
-
-<p>创建一个磁盘文件</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>qemu-img create -f qcow2 /data/kvm_data/centos5.img 8g</span></code></pre></td></tr></table></div></figure>
-
-
-<p>创建一个新的虚拟机</p>
+<p>先解决GFW的问题，所以要设置wget proxy：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -177,28 +142,72 @@ yum install -y bridge &hellip;">
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># -n 虚拟机名称  
-</span><span class='line'># --vcpus 分配虚拟机CPU个数
-</span><span class='line'># -r 分配内存大小 默认为MB
-</span><span class='line'># -f 指定虚拟机的磁盘文件路径
-</span><span class='line'># -s 磁盘文件固定大小，例如-s 10 立即扩展到10G
-</span><span class='line'># -c 镜像文件位置
-</span><span class='line'># --vnc --vncport=590X --vnclisten=0.0.0.0  通过VNC连接安装操作系统
-</span><span class='line'># --os-type linux 安装一个linux虚拟机
-</span><span class='line'># --network=bridge:br0  网络连接方式：使用一个叫br0的网桥 
-</span><span class='line'>virt-install --connect qemu:///system -n test01 --vcpus=1 \
-</span><span class='line'>  -r 1024 --virt-type=kvm -f /data/kvm_data/centos5.img -s 10 \
-</span><span class='line'>  -c /data/iso/CentOS-5.5-x86_64-bin-DVD-1of2.iso \
-</span><span class='line'>  --vnc --vncport=5903 --vnclisten=0.0.0.0 --os-type linux --accelerate \
-</span><span class='line'>  --network=bridge:br0 </span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt; ~/.wgetrc &lt;EOF
+</span><span class='line'>#You can set the default proxies for Wget to use for http, https, and ftp.
+</span><span class='line'># They will override the value in the environment.
+</span><span class='line'>https_proxy = http://127.0.0.1:8087/
+</span><span class='line'>http_proxy = http://127.0.0.1:8087/
+</span><span class='line'>ftp_proxy = http://127.0.0.1:8087/
+</span><span class='line'>
+</span><span class='line'># If you do not want to use proxy at all, set this to off.
+</span><span class='line'>use_proxy = on
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
 
 
-<p>自动安装CentOS 6.3
-由于我在公司内部搭建了个无人值守服务，所幸可以直接安装使用：</p>
+<p>同样，docker.io也被墙了，设置下hosts即可；</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt;&gt; /etc/hosts &lt;&lt;EOF
+</span><span class='line'>54.234.135.251  get.docker.io
+</span><span class='line'>54.234.135.251  cdn-registry-1.docker.io
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面才开始安装Docker:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo sh -c "wget -qO- https://get.docker.io/gpg | apt-key add -"
+</span><span class='line'>sudo sh -c "echo deb http://get.docker.io/ubuntu docker main \
+</span><span class='line'> /etc/apt/sources.list.d/docker.list"
+</span><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" update 
+</span><span class='line'>sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/" install lxc-docker</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<h3>测试Docker功能</h3>
+
+<p>在Hosts第一次运行Container，时间会比较长，因为它需要去官网下载对应的镜像文件。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker run ubuntu /bin/echo hello</span></code></pre></td></tr></table></div></figure>
+
+
+<p>运行一个交互式Container:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker run -i -t ubuntu /bin/bash
+</span><span class='line'>root@3765e92ae239:/# 
+</span><span class='line'>root@3765e92ae239:/# ps
+</span><span class='line'>  PID TTY          TIME CMD
+</span><span class='line'>    1 ?        00:00:00 bash
+</span><span class='line'>    9 ?        00:00:00 ps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果要退出此Container，直接输入exit, 退出之后再次进入Container会发现之前如果有创建新文件或安装新软件都已消失。要解决这个问题，就需要保存刚才的镜像状态：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -207,71 +216,60 @@ yum install -y bridge &hellip;">
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>virt-install --connect qemu:///system -n test03 --vcpus=1 \
-</span><span class='line'>  -r 2048 --virt-type=kvm -f /data/kvm_data/test03.img -s 20 \
-</span><span class='line'>  --vnc --vncport=5902 --vnclisten=0.0.0.0 \
-</span><span class='line'>  --os-type linux --accelerate \
-</span><span class='line'>  --network=bridge:br0 \
-</span><span class='line'>  -x ks=ftp://192.168.30.33/pub/ks/64/centos6.3/ks.cfg \
-</span><span class='line'>  --location ftp://192.168.30.33/pub/centos/6.3/x86_64/</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker run -i -t ubuntu /bin/bash
+</span><span class='line'>root@f2d122c6d1b0:/# cd /root/
+</span><span class='line'>root@f2d122c6d1b0:/root# touch t.txt
+</span><span class='line'>root@f2d122c6d1b0:/root# ll
+</span><span class='line'>bash: ll: command not found
+</span><span class='line'>root@f2d122c6d1b0:/root# ls -l
+</span><span class='line'>total 0
+</span><span class='line'>-rw-r--r-- 1 root root 0 Jan  5 15:03 t.txt
+</span><span class='line'>root@f2d122c6d1b0:/root# exit
+</span><span class='line'>exit</span></code></pre></td></tr></table></div></figure>
 
 
-<p></p>
+<p>退出之后马上提交：</p>
 
-<p>查看所有虚拟机(包括已经关闭的虚拟机)</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -l
+</span><span class='line'>CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES
+</span><span class='line'>f2d122c6d1b0        ubuntu:12.04        /bin/bash           About a minute ago   Exit 0                                  compassionate_heisenberg </span></code></pre></td></tr></table></div></figure>
+
+
+<p>ps -l 是打印最后一个Container，包括停止的Container。查找到Container ID 就要对它提交：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker commit f2d122c6d1b0 ubuntu
+</span><span class='line'>ac2f8a958c9ec376d371857f3e82858e67da95572823ae545d79f00ef66bf84f</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再次验证：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>virsh list --all
-</span><span class='line'>virsh destroy ID/NAME  关闭虚拟机
-</span><span class='line'>virsh start NAME   启动虚拟机
-</span><span class='line'>virsh console ID/NAME  控制台连接虚拟机</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker run -i -t ubuntu /bin/bash
+</span><span class='line'>root@a1d254851cd4:/# cd /root
+</span><span class='line'>root@a1d254851cd4:/root# ls
+</span><span class='line'>t.txt</span></code></pre></td></tr></table></div></figure>
 
 
-<p>安装虚拟机之后如何连接呢？ 有两种选择：VNC和Console，由于偶工作时不太喜欢图形界面，还是命令行吧
-实现控制台连接需要在虚拟机做一些配置，如下：</p>
-
-<ul>
-<li>修改etc/grub.conf 添加“console=ttyS0</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>title CentOS (2.6.18-128.1.10.el5)
-</span><span class='line'>    root (hd0,0)
-</span><span class='line'>    kernel /boot/vmlinuz-2.6.18-128.1.10.el5 ro root=LABEL=/ console=ttyS0
-</span><span class='line'>    initrd /boot/initrd-2.6.18-128.1.10.el5.img</span></code></pre></td></tr></table></div></figure>
-
-
-<p>添加ttyS0到/etc/securetty</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>echo ttyS0 &gt;&gt; /etc/securetty</span></code></pre></td></tr></table></div></figure>
-
+<p>从结果可看出刚才所创建的文件依然存在。以上仅是Docker的安装与入门教程，也是偶自己学习的记录过程，后期准备再写4个教程：</p>
 
 <ul>
-<li>修改/etc/inittab添加下面这行：</li>
+<li>搭建Docker内部仓库</li>
+<li>基于Dockerfile快速部署应用</li>
+<li>Docker管理</li>
+<li>Docker Web管制台</li>
 </ul>
 
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>S0:12345:respawn:/sbin/agetty ttyS0 115200</span></code></pre></td></tr></table></div></figure>
-
-
-<p>重启系统之后，使用语法为：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>virsh console vm_name</span></code></pre></td></tr></table></div></figure>
-
-
-<p>你还可以任何时刻退出控制台，快捷键为：ctrl+]</p>
-
-<p>今天就暂时分享这些内容，下次有机会将分享一个关于Xen相关的教程。</p>
 </div>
 
 
@@ -294,12 +292,12 @@ yum install -y bridge &hellip;">
   
 
 
-<time datetime="2013-11-15T21:58:00+08:00" pubdate data-updated="true">Nov 15<span>th</span>, 2013</time>
+<time datetime="2014-01-05T23:11:00+08:00" pubdate data-updated="true">Jan 5<span>th</span>, 2014</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/openstack/'>OpenStack</a>, <a class='category' href='/blog/categories/yun-ji-suan/'>云计算</a>, <a class='category' href='/blog/categories/xu-ni-hua/'>虚拟化</a>
+    <a class='category' href='/blog/categories/openstack/'>OpenStack</a>, <a class='category' href='/blog/categories/yun-ji-suan/'>云计算</a>
   
 </span>
 
@@ -345,10 +343,8 @@ yum install -y bridge &hellip;">
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/" title="Previous Post: Openstack安装与部署(Havana)">&laquo; Openstack安装与部署(Havana)</a>
+        <a class="basic-alignment left" href="/blog/2013/11/18/redmine-install-for-centos/" title="Previous Post: CentOS安装redmine">&laquo; CentOS安装redmine</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2013/11/17/centos-install-rabbitmq/" title="Next Post: CentOS 6 安装RabbitMQ">CentOS 6 安装RabbitMQ &raquo;</a>
       
     </p>
   </footer>

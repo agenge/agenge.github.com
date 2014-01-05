@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 运维 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-wei/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2013-11-28T21:15:02+08:00</updated>
+  <updated>2014-01-05T23:26:08+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -86,7 +86,7 @@ Starting rabbitmq-server: SUCCESS
 rabbitmq-server.
 </code></p>
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#97;&#105;&#x6c;&#116;&#111;&#58;&#114;&#x61;&#x62;&#98;&#105;&#x74;&#x40;&#x6c;&#x6f;&#99;&#x61;&#x6c;&#104;&#x6f;&#x73;&#x74;&#46;&#x6c;&#111;&#103;">&#x72;&#x61;&#98;&#98;&#x69;&#116;&#64;&#x6c;&#111;&#99;&#97;&#108;&#104;&#111;&#x73;&#x74;&#x2e;&#x6c;&#111;&#x67;</a>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#x61;&#x69;&#x6c;&#116;&#111;&#x3a;&#114;&#x61;&#x62;&#98;&#x69;&#x74;&#x40;&#x6c;&#x6f;&#x63;&#97;&#x6c;&#x68;&#x6f;&#x73;&#116;&#46;&#108;&#x6f;&#x67;">&#114;&#97;&#98;&#x62;&#x69;&#x74;&#64;&#x6c;&#x6f;&#99;&#x61;&#108;&#104;&#x6f;&#x73;&#116;&#46;&#108;&#x6f;&#103;</a>
 ```
 =INFO REPORT==== 17-Nov-2013::20:44:29 ===
 Starting RabbitMQ 3.1.5 on Erlang R14B04
@@ -98,8 +98,8 @@ node           : rabbit@localhost
 home dir       : /var/lib/rabbitmq
 config file(s) : (none)
 cookie hash    : GA+C2KHxoRs776SK+Ki+qg==
-log            : /var/log/rabbitmq/<a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#58;&#114;&#97;&#98;&#98;&#x69;&#x74;&#64;&#108;&#x6f;&#x63;&#97;&#x6c;&#x68;&#111;&#115;&#x74;&#x2e;&#x6c;&#x6f;&#x67;">&#114;&#97;&#98;&#98;&#x69;&#116;&#x40;&#108;&#x6f;&#x63;&#x61;&#x6c;&#x68;&#111;&#x73;&#x74;&#46;&#108;&#x6f;&#103;</a>
-sasl log       : /var/log/rabbitmq/<a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#x72;&#x61;&#x62;&#98;&#105;&#x74;&#x40;&#108;&#111;&#99;&#x61;&#108;&#104;&#111;&#115;&#116;&#45;&#115;&#x61;&#115;&#x6c;&#46;&#108;&#111;&#103;">&#x72;&#97;&#x62;&#98;&#105;&#x74;&#64;&#108;&#111;&#x63;&#x61;&#108;&#104;&#x6f;&#x73;&#x74;&#x2d;&#x73;&#97;&#115;&#108;&#x2e;&#x6c;&#111;&#103;</a>
+log            : /var/log/rabbitmq/<a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#x72;&#x61;&#x62;&#98;&#105;&#x74;&#64;&#108;&#x6f;&#x63;&#x61;&#x6c;&#x68;&#x6f;&#115;&#x74;&#x2e;&#x6c;&#x6f;&#103;">&#x72;&#x61;&#x62;&#98;&#x69;&#x74;&#64;&#x6c;&#111;&#99;&#x61;&#108;&#104;&#x6f;&#x73;&#116;&#46;&#x6c;&#111;&#x67;</a>
+sasl log       : /var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#x72;&#x61;&#98;&#98;&#105;&#116;&#x40;&#108;&#x6f;&#x63;&#x61;&#x6c;&#x68;&#x6f;&#x73;&#116;&#45;&#115;&#97;&#x73;&#108;&#46;&#x6c;&#111;&#x67;">&#x72;&#97;&#x62;&#x62;&#x69;&#x74;&#x40;&#108;&#x6f;&#99;&#97;&#x6c;&#104;&#111;&#x73;&#x74;&#45;&#115;&#x61;&#x73;&#108;&#46;&#108;&#x6f;&#x67;</a>
 database dir   : /var/lib/rabbitmq/mnesia/rabbit@localhost</p>
 
 <p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
@@ -128,8 +128,8 @@ Server startup complete; 0 plugins started.
 ```
 tree /var/log/rabbitmq/
 /var/log/rabbitmq/
-├── <a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#58;&#x72;&#x61;&#x62;&#x62;&#x69;&#116;&#64;&#x6c;&#x6f;&#99;&#97;&#x6c;&#104;&#x6f;&#115;&#x74;&#x2e;&#108;&#x6f;&#103;">&#x72;&#x61;&#98;&#x62;&#x69;&#116;&#64;&#x6c;&#111;&#x63;&#97;&#108;&#104;&#111;&#x73;&#116;&#x2e;&#108;&#x6f;&#103;</a>
-├── <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#114;&#x61;&#x62;&#98;&#105;&#116;&#64;&#108;&#x6f;&#99;&#x61;&#108;&#104;&#x6f;&#115;&#116;&#45;&#x73;&#97;&#x73;&#108;&#46;&#x6c;&#x6f;&#x67;">&#114;&#97;&#98;&#x62;&#105;&#x74;&#x40;&#108;&#x6f;&#x63;&#x61;&#108;&#104;&#x6f;&#x73;&#116;&#x2d;&#x73;&#x61;&#x73;&#108;&#46;&#x6c;&#111;&#x67;</a>
+├── <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#111;&#x3a;&#x72;&#x61;&#x62;&#x62;&#x69;&#x74;&#x40;&#x6c;&#111;&#99;&#x61;&#108;&#104;&#111;&#115;&#x74;&#46;&#x6c;&#111;&#x67;">&#114;&#97;&#x62;&#98;&#105;&#x74;&#x40;&#x6c;&#111;&#x63;&#x61;&#x6c;&#104;&#111;&#x73;&#116;&#x2e;&#x6c;&#111;&#103;</a>
+├── <a href="&#109;&#97;&#x69;&#x6c;&#116;&#111;&#x3a;&#114;&#x61;&#x62;&#98;&#x69;&#116;&#x40;&#x6c;&#x6f;&#99;&#x61;&#x6c;&#x68;&#111;&#x73;&#x74;&#45;&#115;&#97;&#x73;&#x6c;&#x2e;&#x6c;&#111;&#x67;">&#114;&#97;&#98;&#98;&#x69;&#x74;&#x40;&#x6c;&#x6f;&#x63;&#x61;&#108;&#x68;&#111;&#115;&#116;&#45;&#115;&#x61;&#x73;&#108;&#x2e;&#x6c;&#111;&#103;</a>
 ├── shutdown_err
 ├── shutdown_log
 ├── startup_err
@@ -1068,6 +1068,240 @@ cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[Zabbix配置与报警设置]]></title>
+    <link href="http://agenge.github.io/blog/2013/05/29/zabbix-config-emailalert/"/>
+    <updated>2013-05-29T00:00:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2013/05/29/zabbix-config-emailalert</id>
+    <content type="html"><![CDATA[<p>上次偶写了一篇<a href="http://agenge.com/blog/2013/05/02/zabbix-source-install-conf">Zabbix 源码安装与配置</a> ，安装之后默认是无法监控客户端主机滴，所以偶今天专门写篇文章来介绍Zabbix配置，主要涉及到：添加主机、邮件报警及一些常见的操作流程，希望对初学者有所帮助。</p>
+
+<h2>监控机</h2>
+
+<p>通在安装Zabbix之后，还需要在Web管理控制台添加需要监控的主机，下列是以添加一台监控主机为例进行演示。</p>
+
+<ol>
+<li>“Configuration” &ndash;> “Hosts”，点击添加一台主机“Host”:</li>
+</ol>
+
+
+<p> <img src="/images/2013/05/01.jpg" title="" ></p>
+
+<ol>
+<li>需要填写的内容主要为：“主机(Host)”、“模板(Templates)”，详细操作请见下列图中所示：主机的设置如下：</li>
+</ol>
+
+
+<p> <img src="/images/2013/05/02.jpg" title="" >
+ 模板的设置如下：</p>
+
+<p> <img src="/images/2013/05/03.jpg" title="" ></p>
+
+<p> 点击“添加(Add)”之后，从弹出的子页面选择需要的模板，Zabbix默认已自带非常多的模板，</p>
+
+<p> 例如Mysql、Zabbix Server、Zabbix Agentd、OS Linux等。</p>
+
+<p>  <img src="/images/2013/05/04.jpg" title="" ></p>
+
+<p> 勾选所需要的监控模板后，点击最下边的“选择(Select)”，回到之前的模板标签页，最后一定要记得保存(Save)。</p>
+
+<p>  <img src="/images/2013/05/05.jpg" title="" ></p>
+
+<ol>
+<li>如果一切正常，默认在1分钟之后就会变成可用状态：
+<img src="/images/2013/05/06.jpg" title="" ></li>
+</ol>
+
+
+<!-- more -->
+
+
+<h2>报警设置</h2>
+
+<p>在添加监控主机之后，还需要邮件报警设置，否则监控人员无法及时掌握系统状态，报警一般是邮件报警与短信报警，甚至相两者结合。 其中邮件报警又可分为自定义脚本警报和自己搭建邮件服务器进行报警，短信报警暂时不涉及，后面会有专门章节进行介绍，本章只涉及到自定义邮件报警的设置，使用一个Msmtp（兼容SendMail接口的SMTP客户端. 工具，关于它的原理介绍，请自行搜索。下面是详细的安装步骤：</p>
+
+<h3>邮件报警设置</h3>
+
+<ol>
+<li>安装
+<code>
+tar jxvf msmtp-1.4.31.tar.bz2
+cd msmtp-1.4.31
+./configure --prefix=/usr/local/msmtp
+make &amp;&amp; make install
+mkdir /usr/local/msmtp/etc
+touch /usr/local/msmtp/etc/msmtprc
+</code></li>
+<li>配置
+```
+vim /usr/local/msmtp/etc/msmtprc
+
+<h6>#</h6>
+
+defaults
+account default
+host smtp.139.com
+port 25
+from <a href="&#109;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#116;&#x61;&#117;&#114;&#117;&#x73;&#53;&#x32;&#x40;&#x31;&#x33;&#57;&#46;&#99;&#111;&#109;">&#x74;&#97;&#117;&#x72;&#117;&#115;&#53;&#x32;&#x40;&#49;&#x33;&#x39;&#46;&#x63;&#111;&#109;</a>
+auth login
+tls off
+user <a href="&#x6d;&#97;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x74;&#x61;&#x75;&#x72;&#x75;&#115;&#x35;&#x32;&#x40;&#49;&#51;&#57;&#46;&#x63;&#x6f;&#109;">&#116;&#97;&#x75;&#114;&#x75;&#115;&#x35;&#50;&#x40;&#x31;&#51;&#57;&#46;&#99;&#111;&#x6d;</a>
+password 123456
+logfile /var/log/mmlog
+
+<h6>#</h6>
+
+<p>```
+host/from/user/password这三个字段，请根据具体情况修改。</p></li>
+</ol>
+
+
+<p> 安装Mutt，Mutt是一个邮件用户代理工作，其本身不发送和接收邮件，需要调用邮件传输代码(例如Msmtp或sendmail) 来发送和接收邮件.</p>
+
+<pre><code>```
+yum -y install mutt
+vim /etc/Muttrc
+set sendmail="/usr/local/msmtp/bin/msmtp"
+set use_from=yes
+set realname="taurus52@163.com"
+set editor="vi"
+</code></pre>
+
+<p>```
+  * /etc/Muttrc为全局设置，如果只是对某个用户设置，可以在~/muttrc中设置。
+  * sendmail设置为msmtp的绝对路径
+  * realname 设置你的email地址
+  * editor 设置为你的编辑器，如果你中emacs忠实用户，也是可以滴。</p>
+
+<p> 测试是否能够发送邮件：
+<code>
+echo "this is a test mail" &gt;&gt; /tmp/files
+echo "testmail" | mutt -s "test" -a /tmp/files  test_zabbix@gmail.com
+</code>
+  * -a 代表添加附件
+  * “testmail” 邮件正文
+  * -s “test” 邮件标题
+  * <a href="&#x6d;&#97;&#105;&#x6c;&#116;&#111;&#x3a;&#116;&#x65;&#115;&#x74;&#95;&#122;&#x61;&#98;&#x62;&#x69;&#120;&#x40;&#103;&#109;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#116;&#x65;&#115;&#x74;&#x5f;&#x7a;&#x61;&#98;&#98;&#105;&#x78;&#x40;&#x67;&#x6d;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#109;</a> 为接收的邮件人。</p>
+
+<p> 登录邮件客户端察看确认收到邮件：</p>
+
+<p> <img src="/images/2013/05/07.jpg" title="" ></p>
+
+<p> 修改zabbix_server.conf以下内容：
+<code>
+ mkdir -p /data/zabbix/alertscripts
+ vim zabbix_server.conf
+ AlertScriptsPath=${datadir}/alertscripts
+</code>
+ 创建一个监控脚本：
+<code>
+ vim /data/zabbix/alertscripts/zabbix_monitor
+ #!/bin/bash
+ $1 to mail address
+ $2 mail subject
+ $3 mail content
+ echo "$3" | mutt -s "$2" $1
+</code>
+ 修改权限：
+<code>
+ chown zabbix:zabbix /data/zabbix/alertscripts
+</code>
+ 到目前为止，已经手动测试通过邮件报警的功能，接下来需要将它集成到zabbix监控系统中。</p>
+
+<ol>
+<li><p>点击“管理(Administration)”->“媒体类型(Media types)”，点击页面最右边的“添加媒体类型(Cretae media type)”:
+<img src="/images/2013/05/08.jpg" title="" ></p></li>
+<li><p>Description： 此为描述，可随意填写。</p></li>
+<li>Type： 选择 “Script’。</li>
+<li>Script name：填写刚才创建的shell脚本(当然，也可以是其他脚本)名称，例如zabbix_monitor。</li>
+<li>Enabled： 启用此脚本。</li>
+</ol>
+
+
+<p> 最后记得“Save”哦。</p>
+
+<h4>添加用户和组</h4>
+
+<ol>
+<li>添加用户组</li>
+</ol>
+
+
+<p> 点击“管理(Administration)”->“用户(Users)”，点击最右边的“创建用户组(Create user group)”:</p>
+
+<p> <img src="/images/2013/05/09.jpg" title="" ></p>
+
+<p> 用户组(User group)只需要填写“Group name”，其他默认即可。</p>
+
+<p> <img src="/images/2013/05/10.jpg" title="" ></p>
+
+<p> 权限(Permissions)需要添加之前新增的主机，点击“Read-write”下的“添加(Add)”，并在的子页面选择对应的主机组，例如选择“Puppet”：</p>
+
+<p> <img src="/images/2013/05/11.jpg" title="" ></p>
+
+<p> 点击“Select”确认。最后“保存(Save)”，即添加一个用户组(puppet)。</p>
+
+<ol>
+<li>添加用户</li>
+</ol>
+
+
+<p> 添加一个用户组之后，此用户组中并没有任何一个用户，必须在此用户组中增加用户才行，在用户组列表页面，点击用户组“Puppet”之后的“Users(0)”：</p>
+
+<p>  <img src="/images/2013/05/12.jpg" title="" ></p>
+
+<p>  在跳转后的“Users”页面最右边，点击“创建用户(Create user)”：</p>
+
+<p>  <img src="/images/2013/05/13.jpg" title="" ></p>
+
+<p>  之后有三个标签需要设置</p>
+
+<ul>
+<li>用户标签：</li>
+</ul>
+
+
+<p>  <img src="/images/2013/05/14.jpg" title="" ></p>
+
+<ul>
+<li>媒体标签：</li>
+</ul>
+
+
+<p>  <img src="/images/2013/05/15.jpg" title="" ></p>
+
+<ul>
+<li>权限标签(Permissions)：</li>
+</ul>
+
+
+<p>  <img src="/images/2013/05/16.jpg" title="" ></p>
+
+<p>  此处就能看到之前在创建用户组时看到的权限，最后点击“保存(Save)”。</p>
+
+<h4>触发器设置</h4>
+
+<p>添加邮件报警设置和用户设置之后，还需要配置触发器，表示当某个触发器达到设置的值后，就会报警。</p>
+
+<p>Action标签：</p>
+
+<p><img src="/images/2013/05/17.jpg" title="" ></p>
+
+<p>条件(Conditions)标签：</p>
+
+<p><img src="/images/2013/05/18.jpg" title="" ></p>
+
+<p><img src="/images/2013/05/19.jpg" title="" ></p>
+
+<p>操作(Operations)标签：</p>
+
+<p><img src="/images/2013/05/20.jpg" title="" ></p>
+
+<p><img src="/images/2013/05/21.jpg" title="" ></p>
+
+<p>以上就是Zabbix的基本操作流程，如果你还有疑问，可回复讨论。</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[批量装机---Linux无人值守之Kickstart]]></title>
     <link href="http://agenge.github.io/blog/2013/05/23/linux-kickstart/"/>
     <updated>2013-05-23T00:00:00+08:00</updated>
@@ -1628,474 +1862,6 @@ zabbix_get -s 192.168.30.226 -p 10050 -k agent.ping
 1
 </code>
 如果返回1表示正常。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Puppet Dashboard配置及apache和Nginx整合]]></title>
-    <link href="http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server/"/>
-    <updated>2013-04-12T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/04/12/puppet-dashboard-conf-with-web-server</id>
-    <content type="html"><![CDATA[<p>Dashboard一个基于Ruby on Rails设计的Web控制台，便于管理Puppet Master和Agent，整个安装过程比较简单，以下是具体的安装步骤。</p>
-
-<h2>安装前提条件</h2>
-
-<ol>
-<li>ruby版本>1.8.6，如果你是CentOS 5或是RHEL 5，可能你需要升级Ruby，官方下载地址请</li>
-</ol>
-
-
-<p> 点击<a href="ftp://ftp.ruby-lang.org/pub/ruby">这里</a>。具体的升级步骤由于下载的安装包已经包含，故不再介绍，本文示例基于Ruby 1.8.7。</p>
-
-<p> <code>
- # ruby -v
- ruby 1.8.7 (2011-06-30 patchlevel 352) [x86_64-linux]
-</code></p>
-
-<ol>
-<li><p>安装相关依赖包
-```</p>
-
-<h1>yum install -y mysql mysql-devel mysql-server \</h1>
-
-  ruby ruby-devel ruby-irb ruby-mysql \
-  ruby-rdoc ruby-ri
-<code>
-如果你已经有Mysql，此处不需要安装mysql-server包。安装后加入开机自启动并启动mysql 。
-</code>
-
-<h1>chkconfig mysqld on</h1>
-
-<h1>/etc/init.d/mysqld start</h1>
-
-<p>Starting mysqld:                                           [  OK  ]
-```</p></li>
-<li><p>升级GEM软件包安装器</p></li>
-</ol>
-
-
-<p> 首先检查gem版本，如果已经是1.3.5，就不需要升级：
- ```</p>
-
-<pre><code># gem -v
-1.3.5
-</code></pre>
-
-<p> <code>
-如果是1.3.1，意味着你要升级gem：
-</code></p>
-
-<h1>wget <a href="http://production.cf.rubygems.org/rubygems/rubygems-1.3.5.tgz">http://production.cf.rubygems.org/rubygems/rubygems-1.3.5.tgz</a></h1>
-
-<h1>tar zxvf rubygems-1.3.5.tgz</h1>
-
-<h1>cd rubygems-1.3.5</h1>
-
-<h1>ruby setup.rb</h1>
-
-<p>```</p>
-
-<ol>
-<li>安装rake
-```
-
-<h1>gem install rake</h1>
-
-<p>```</p></li>
-</ol>
-
-
-<!--more-->
-
-
-<h2>数据库配置</h2>
-
-<p>```</p>
-
-<h1>mysql -uroot -p</h1>
-
-<p>Enter password:</p>
-
-<p>mysql> use dashboard
-Database changed
-mysql> grant all on dashboard.* to dashboard@localhost identified by &lsquo;dashboard&rsquo;;
-Query OK, 0 rows affected (0.00 sec)
-mysql> flush privileges;
-Query OK, 0 rows affected (0.00 sec)</p>
-
-<p>```</p>
-
-<h2>安装Puppet Dashboard</h2>
-
-<ul>
-<li>下载Dashboard
-```
-
-<h1>cd /usr/local/</h1>
-
-<h1>wget <a href="http://downloads.puppetlabs.com/dashboard/puppet-dashboard-1.2.20.tar.gz">http://downloads.puppetlabs.com/dashboard/puppet-dashboard-1.2.20.tar.gz</a></h1>
-
-<h1>tar -zxvf puppet-dashboard-1.2.20.tar.gz</h1>
-
-<h1>cd puppet-dashboard-1.2.20</h1>
-
-<code>
-创建数据库用户,此处我们使用源码方式进行安装,你可以通过yum或apt-get安装。
-</code>
-
-<h1>cp config/database.yml.example config/database.yml</h1>
-
-<p>```</p></li>
-<li><p>修改数据库配置：
-```</p>
-
-<h1>vim config/database.yml</h1>
-
-<p>production:
-database: dashboard
-username: dashboard
-password: dashboard
-encoding: utf8
-adapter: mysql
-```
-production代表生产环境，如果你是开发环境(development)或测试环境(test)，请修改相应的配置。</p></li>
-<li><p>初始化数据库
-```</p>
-
-<h1>rake RAILS_ENV=production db:create</h1>
-
-<h1>gem install mysql</h1>
-
-<h1>rake RAILS_ENV=production db:migrate</h1>
-
-<p>```</p></li>
-<li><p>修改时区
-默认是UTC时间，如果你在控制台看到的时区不对，那需要修改时区：
-```</p>
-
-<h1>vim config/environment.rb</h1>
-
-<p>```
-将config.time_zone = &lsquo;UTC'  修改为 config.time_zone = 'Chongqing&rsquo;</p></li>
-<li><p>启动Webrick Web服务器
-```</p>
-
-<h1>cd /usr/local/puppet-dashboard-1.2.20</h1>
-
-<h1>script/server -p 3000 -e production  -d</h1>
-
-<p>```
-上面即代表启动dashboard，端口3000，以及后台(-d)运行,通过浏览器输入： <a href="http://dashboard_server:3000%C2%A0%C2%A0">http://dashboard_server:3000%C2%A0%C2%A0</a> 即可访问。</p></li>
-</ul>
-
-
-<h3>Puppet Dashboard配置</h3>
-
-<h4>服务器配置</h4>
-
-<p>在Puppet 服务器端/etc/puppet/puppet.conf中的[main]节加入：
-<code>
-reports = http, store
-reporturl = http://192.168.30.226:3000/reports/upload
-</code>
-部署lib文件：
-```</p>
-
-<h1>cp /usr/local/puppet-dashboard/ext/puppet/puppet_dashboard.rb /usr/lib/ruby/site_ruby/1.8/puppet/reports/</h1>
-
-<p><code>
-保存之后，重启puppetmaster即可。
-</code></p>
-
-<h1>/etc/init.d/puppetmaster restart</h1>
-
-<p>```</p>
-
-<h4>客户端配置</h4>
-
-<p>在Puppet Agent（客户端）/etc/puppet/puppet.conf中的[main]节加入：
-<code>
-report = true
-</code>
-保存之后，重启puppet即可。
-```</p>
-
-<h1>/etc/init.d/puppet restart</h1>
-
-<p>```</p>
-
-<h4>控制台配置</h4>
-
-<p>登录Dashboard后，需要自己添加： group和node</p>
-
-<h2>Puppet Dashboard常用操作</h2>
-
-<p><strong> 导入日志 </strong>
-```</p>
-
-<h1>cd /usr/local/puppet-dashboard</h1>
-
-<h1>rake RAILS_ENV=production reports:import</h1>
-
-<p><code>
-** 优化数据库 **
-当数据量过大时，需要优化mysql数据库：
-</code></p>
-
-<h1>cd /usr/local/puppet-dashboard</h1>
-
-<h1>rake RAILS_ENV=production db:raw:optimize</h1>
-
-<p>```</p>
-
-<p><strong> 删除日志 </strong>
-删除1个月之前的数据：
-```</p>
-
-<h1>cd /usr/local/puppet-dashboard</h1>
-
-<h1>rake RAILS_ENV=production reports:prune upto=1 unit=mon</h1>
-
-<p><code>
-删除15天前的日志：
-</code></p>
-
-<h1>rake RAILS_ENV=production reports:prune upto=15 unit=day</h1>
-
-<p>```</p>
-
-<p><strong> 备份数据库 </strong>
-```</p>
-
-<h1>rake RAILS_ENV=production db:raw:dump</h1>
-
-<p>mysqldump &mdash;add-locks &mdash;create-options &mdash;disable-keys &mdash;extended-insert &mdash;quick &mdash;set-charset &mdash;user=dashboard &mdash;password=dashboard dashboard > production.sql.tmp
-mv production.sql.tmp production.sql</p>
-
-<p><code>
-**恢复数据库 **
-</code></p>
-
-<h1>rake RAILS_ENV=production FILE=production.sql db:raw:restore</h1>
-
-<p>```</p>
-
-<p><strong> Dashboard 启停脚本 </strong>
-```</p>
-
-<h1>!/bin/bash</h1>
-
-<h1>Description: Puppet Dashboard init.d script</h1>
-
-<h1>Get function from functions library</h1>
-
-<p>. /etc/init.d/functions</p>
-
-<h1>Start the service Puppet Dashboard</h1>
-
-<p>start() {</p>
-
-<pre><code>echo -n "Starting Puppet Dashboard: "
-/usr/bin/ruby /usr/local/puppet-dashboard/script/server -e production -b 192.168.30.226 -d
-### Create the lock file ###
-touch /var/lock/subsys/puppetdb
-success $"Puppet Dashboard startup"
-echo
-</code></pre>
-
-<p>}</p>
-
-<h1>Restart the service Puppet Dashboard</h1>
-
-<p>stop() {</p>
-
-<pre><code>echo -n "Stopping Puppet Dashboard: "
-kill -9 `ps ax | grep "/usr/bin/ruby /usr/local/puppet-dashboard/script/server" | grep -v grep | awk '{ print $1 }' `
-### Now, delete the lock file ###
-rm -f /var/lock/subsys/puppetdb
-success $"Puppet Dashboard shutdown"
-echo
-</code></pre>
-
-<p>}</p>
-
-<h3>main logic</h3>
-
-<p>case &ldquo;$1&rdquo; in</p>
-
-<pre><code>start)
-    start
-;;
-stop)
-    stop
-;;
-status)
-    status Puppet DB
-;;
-restart|reload|condrestart)
-    stop
-    start
-;;
-*)
-echo $"Usage: $0 {start|stop|restart|reload|status}"
-exit 1
-</code></pre>
-
-<p>esac</p>
-
-<p>exit 0</p>
-
-<p>```</p>
-
-<h2>使用Passenger运行Puppet Dashboard</h2>
-
-<p>相信用过Dashboard的人都知道在访问时控制台时比较缓慢，这正是由于内置的Webrick服务器导致，不过Puppet支持与其他第三方Web Server整合，以下分别介绍整合过程。</p>
-
-<h3>Apache整合Puppet Dashboard</h3>
-
-<ol>
-<li>安装依赖包
-```
-
-<h1>yum install ruby ruby-libs ruby-devel  http httpd</h1>
-
-<p>```</p></li>
-<li>安装Passenger
-```
-
-<h1>gem install passenger</h1>
-
-<p>```</p></li>
-<li>安装Apache的passenger模块
-```
-
-<h1>passenger-install-apache2-module</h1>
-
-<p>```
-如果安装没问题的话，就会有以下类似信息输出：</p></li>
-</ol>
-
-
-<p> ```
- The Apache 2 module was successfully installed.</p>
-
-<p> Please edit your Apache configuration file, and add these lines:</p>
-
-<pre><code>LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
-PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
-PassengerRuby /usr/bin/ruby
-</code></pre>
-
-<p> After you restart Apache, you are ready to deploy any number of Ruby on Rails
- applications on Apache, without any further Ruby on Rails-specific
- configuration!</p>
-
-<p> Press ENTER to continue.</p>
-
-<p> ```
-直接输入回车即可。</p>
-
-<ol>
-<li>配置Apache虚拟主机</li>
-</ol>
-
-
-<p> ```
- # cd /usr/local/puppet-dashboard
- # cp ext/passenger/dashboard-vhost.conf /etc/httpd/conf.d/
- # vi /etc/httpd/conf.d/dashboard-vhost.conf
- # UPDATE THESE PATHS TO SUIT YOUR ENVIRONMENT
- LoadModule passenger_module /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19/ext/apache2/mod_passenger.so
- PassengerRoot /usr/lib64/ruby/gems/1.8/gems/passenger-3.0.19
- PassengerRuby /usr/bin/ruby</p>
-
-<p> # you may want to tune these settings
- PassengerHighPerformance on
- PassengerMaxPoolSize 12
- PassengerPoolIdleTime 1500
- # PassengerMaxRequests 1000
- PassengerStatThrottleRate 120
- RailsAutoDetect On</p>
-
-<p> <VirtualHost *:80></p>
-
-<pre><code>     ServerName pmaster.i.12582.com
-     DocumentRoot /usr/local/puppet-dashboard/public/
-     &lt;Directory /usr/local/puppet-dashboard/public/&gt;
-             Options None
-             Order allow,deny
-             allow from all
-     &lt;/Directory&gt;
-</code></pre>
-
-<p>   ErrorLog /var/log/httpd/dashboard.example.com_error.log
-   LogLevel warn
-   CustomLog /var/log/httpd/dashboard.example.com_access.log combined
-   ServerSignature On
- </VirtualHost>
-<code>
-5. 重启httpd
-</code></p>
-
-<h1>/etc/init.d/httpd restart</h1>
-
-<p>```
- 此时再访问 <a href="http://pmaster.i.12582.com">http://pmaster.i.12582.com</a> 发现速度较之前快太多。</p>
-
-<h3>Nginx整合Puppet Dashboard</h3>
-
-<ol>
-<li>安装依赖包
-```
-
-<h1>yum install ruby ruby-libs ruby-devel  http httpd</h1>
-
-<p>```</p></li>
-<li>安装Passenger
-```
-
-<h1>gem install passenger</h1>
-
-<p>```</p></li>
-<li>安装Nginx及passenger模块
-```
-
-<h1>passenger-install-nginx-module</h1>
-
-<p>```
-回车后，会有两个选择：</p></li>
-<li>表示下载nginx，编译且安装，推荐这种方式安装.</li>
-<li>表示自定义安装Nginx,安装之后，nginx默认存放在/opt目录.</li>
-</ol>
-
-
-<p> 修改/opt/nginx/conf/nginx.conf，在最后一个}之前添加以下内容：</p>
-
-<p> ```</p>
-
-<pre><code>server {
-  listen 80;
-  server_name pmaster.i.12582.com;
-  root /usr/local/puppet-dashboard/public;
-  passenger_enabled on;
-}
-</code></pre>
-
-<p> ```</p>
-
-<ol>
-<li>重启Nginx
-```
-
-<h1>killall nginx</h1>
-
-<h1>/opt/nginx/sbin/nginx</h1>
-
-<p>```</p></li>
-</ol>
-
-
-<p>最后，你要是有任何疑问，请留言。</p>
 ]]></content>
   </entry>
   
