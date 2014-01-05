@@ -3,8 +3,10 @@ layout: post
 title: Hyper-V使用手册之部署与安装
 categories:
 - 云计算
+- 虚拟化
 tags:
 - Hyper-V
+- 虚拟化
 published: true
 comments: true
 ---

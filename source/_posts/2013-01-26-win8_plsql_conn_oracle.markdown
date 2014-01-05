@@ -2,9 +2,10 @@
 layout: post
 title: Win8通过PLSQL连接Oracle
 categories:
-- Database
+- 数据库
 tags:
 - PLSQL
+- Oracle
 published: true
 comments: true
 

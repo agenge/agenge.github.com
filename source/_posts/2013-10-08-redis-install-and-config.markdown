@@ -4,9 +4,9 @@ title: "redis安装与配置"
 date: 2013-10-08 20:05
 comments: true
 categories: 
-- NoSQL
 - 数据库
-
+tags:
+- NoSQL
 ---
 
 ## 安装环境

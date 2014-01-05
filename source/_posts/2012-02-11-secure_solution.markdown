@@ -2,7 +2,7 @@
 layout: post
 title: 安全漏洞整改解决方案
 categories:
-- 信息安全
+- 运维
 tags:
 - OpenSSH
 - SSH
