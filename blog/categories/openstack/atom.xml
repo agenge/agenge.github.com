@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: OpenStack | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/openstack/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2014-01-05T23:26:08+08:00</updated>
+  <updated>2014-01-12T20:01:53+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,191 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ubuntu12.04部署Docker内部仓库]]></title>
+    <link href="http://agenge.github.io/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu/"/>
+    <updated>2014-01-12T19:54:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>从上篇文章中了解到，push/pull 都是针对的index.docker.io的官方仓库，而实际情况告诉我们，企业大部分服务器是不对外开放权限的，Docker.Inc 其实已经考虑到我们这种实际需求，通过在内网直接搭建私有仓库来解决此问题。</p>
+
+<h2>安装Docker-registry</h2>
+
+<p><code>
+git clone https://github.com/dotcloud/docker-registry
+cd docker-registry/
+cp config/config_sample.yml config/config.yml
+</code>
+编辑配置文件，主要是修改镜像的存储路径：
+```
+vim config/config.yml</p>
+
+<p>dev:</p>
+
+<pre><code>storage: local
+storage_path: /home/taurus/registry
+loglevel: debug
+</code></pre>
+
+<p><code>
+保存退出。并创建存储镜像目录：
+</code>
+mkdir -p /you_path/to/registry
+<code>
+安装依赖包：
+</code>
+sudo apt-get install build-essential python-dev libevent-dev python-pip libssl-dev
+sudo pip install -r requirements.txt
+```</p>
+
+<p>启动服务：
+<code>
+cd docker-registry/
+sudo gunicorn --access-logfile - --debug -k gevent -b 0.0.0.0:80 -w 1 wsgi:application &amp;
+</code>
+打开浏览器：<a href="http://IP">http://IP</a>   如果正常会显示："docker-registry server (dev)"</p>
+
+<!-- more -->
+
+
+<h2>镜像管理</h2>
+
+<p>查看本地系统有哪些镜像文件：
+```
+sudo docker images</p>
+
+<p>REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              12.04               8dbd9e392a96        8 months ago        128 MB
+ubuntu              latest              8dbd9e392a96        8 months ago        128 MB
+ubuntu              precise             8dbd9e392a96        8 months ago        128 MB
+ubuntu              12.10               b750fe79269d        9 months ago        175.3 MB
+ubuntu              quantal             b750fe79269d        9 months ago        175.3 MB
+base                latest              b750fe79269d        9 months ago        175.3 MB
+```</p>
+
+<h3>上传镜像到 本地仓库：</h3>
+
+<ol>
+<li>先打个标签
+<code>
+sudo docker tag 8dbd9e392a96 192.168.30.239/ubuntu1204
+</code>
+记录上面输出的ID（你要上传哪个镜像就记录哪个ID），然后开始上传：
+<code>
+docker push 192.168.30.239/ubuntu1204
+</code>
+测试本地仓库是否可用：
+<code>
+docker pull 192.168.30.239/ubuntu1204
+</code>
+如果没问题，会提示下载完成。</li>
+</ol>
+
+
+<p>运行一个Hello
+<code>
+docker run 192.168.30.239/ubuntu1204 /bin/echo hello
+</code>
+这个……用docker来运行打印hello world，真是大材小用。我们来运行一个sshd + tomcat：
+<code>
+docker pull 192.168.30.239/ubuntu1204
+docker run -i -t 192.168.30.239/ubuntu1204 /bin/bash
+</code>
+此时就会进入一个终端：
+<code>
+root@d04d4fdde922:/#
+</code>
+现在开始安装ssh
+<code>
+apt-get update
+apt-get -y install openssh-server
+</code>
+安装后还需要设置ssh，方便其他客户端连接：
+```
+mkdir /var/run/sshd
+root@d04d4fdde922:/# passwd
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully</p>
+
+<p>exit
+<code>
+设置之后还要对这个docker  commit，否则此docker重启后，刚才的设置会消失。
+</code>
+docker ps -l
+<code>
+获取容器ID
+</code>
+root@hgg-pc:~# docker commit d04d4fdde922 192.168.30.239/ubuntu1204
+5acd9899febecd686bd6b8ceb66be487495f30a39657dcc36835fd534057b064
+<code>
+以后台的方式长期运行ssh
+</code>
+docker run -d -p 22 -p 8080:8080 192.168.30.239/ubuntu1204 /usr/sbin/sshd -D
+```</p>
+
+<ul>
+<li>-D  后台运行</li>
+<li>-p  ssh port</li>
+<li>-p  也是端口，后面我们在部署 tomcat 时使用,  8081:8080 映射端口，此容器中的8080端口会被映射到外部的8081端口，即外部使用8081来访问此窗口的8080端口。</li>
+</ul>
+
+
+<p>查看是否运行成功：
+<code>
+docker ps
+CONTAINER ID        IMAGE                              COMMAND             CREATED             STATUS              PORTS                                           NAMES
+36b805df0f4d        192.168.30.239/ubuntu1204:latest   /usr/sbin/sshd -D   3 minutes ago       Up 3 minutes        0.0.0.0:49154-&gt;22/tcp, 0.0.0.0:8080-&gt;8080/tcp   trusting_galileo  
+</code></p>
+
+<p>可以看到我们本地的 49154端口映射到容器的22端口，我们再来登录测试一下：
+```
+root@hgg-pc:~# ssh <a href="&#109;&#x61;&#105;&#108;&#116;&#x6f;&#58;&#114;&#x6f;&#111;&#x74;&#x40;&#x31;&#x32;&#x37;&#x2e;&#x30;&#x2e;&#x30;&#46;&#x31;">&#x72;&#x6f;&#111;&#116;&#64;&#x31;&#x32;&#x37;&#x2e;&#48;&#46;&#48;&#46;&#49;</a> -p 49154
+The authenticity of host &lsquo;[127.0.0.1]:49154 ([127.0.0.1]:49154)&rsquo; can&rsquo;t be established.
+ECDSA key fingerprint is 42:17:df:cb:99:7a:5d:a9:a2:36:f9:0a:64:a9:d8:41.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added &lsquo;[127.0.0.1]:49154&rsquo; (ECDSA) to the list of known hosts.
+<a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#114;&#x6f;&#111;&#116;&#64;&#x31;&#50;&#x37;&#46;&#x30;&#46;&#x30;&#46;&#49;">&#114;&#x6f;&#111;&#x74;&#x40;&#49;&#x32;&#x37;&#46;&#48;&#46;&#48;&#46;&#x31;</a>&rsquo;s password:
+Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.8.0-34-generic x86_64)</p>
+
+<ul>
+<li>Documentation:  <a href="https://help.ubuntu.com/">https://help.ubuntu.com/</a></li>
+</ul>
+
+
+<p>The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.</p>
+
+<p>Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.</p>
+
+<p>root@36b805df0f4d:~#
+<code>
+完美！还差一个tomcat。开始操作：
+</code>
+apt-get install python-software-properties
+add-apt-repository ppa:webupd8team/java
+apt-get update
+apt-get install -y wget
+apt-get install oracle-java7-installer
+javac -version</p>
+
+<p>wget <a href="http://mirror.bit.edu.cn/apache/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.tar.gz">http://mirror.bit.edu.cn/apache/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.tar.gz</a>
+tar xvf apache-tomcat-7.0.47.tar.gz
+cd apache-tomcat-7.0.47
+bin/startup.sh
+```</p>
+
+<p>打开浏览器：<a href="http://IP">http://IP</a>  就能看到tomcat首页。
+如果不想每次都这样搭建，还是再commit一下吧：
+<code>
+docker commit d04d4fdde922 192.168.30.239/ubuntu1204
+</code></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ubuntu 12.04 安装Docker]]></title>
@@ -217,7 +402,7 @@ Starting rabbitmq-server: SUCCESS
 rabbitmq-server.
 </code></p>
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#114;&#97;&#x62;&#x62;&#105;&#x74;&#x40;&#x6c;&#x6f;&#99;&#97;&#108;&#x68;&#111;&#115;&#116;&#x2e;&#108;&#111;&#103;">&#x72;&#x61;&#98;&#x62;&#105;&#116;&#x40;&#108;&#111;&#x63;&#97;&#108;&#104;&#111;&#115;&#116;&#x2e;&#x6c;&#111;&#x67;</a>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#x6f;&#58;&#114;&#x61;&#x62;&#98;&#x69;&#x74;&#64;&#108;&#x6f;&#x63;&#x61;&#108;&#x68;&#111;&#x73;&#x74;&#x2e;&#x6c;&#111;&#x67;">&#x72;&#x61;&#98;&#98;&#x69;&#x74;&#x40;&#108;&#111;&#x63;&#97;&#108;&#104;&#111;&#115;&#116;&#46;&#x6c;&#x6f;&#103;</a>
 ```
 =INFO REPORT==== 17-Nov-2013::20:44:29 ===
 Starting RabbitMQ 3.1.5 on Erlang R14B04
@@ -229,8 +414,8 @@ node           : rabbit@localhost
 home dir       : /var/lib/rabbitmq
 config file(s) : (none)
 cookie hash    : GA+C2KHxoRs776SK+Ki+qg==
-log            : /var/log/rabbitmq/<a href="&#x6d;&#97;&#105;&#108;&#x74;&#111;&#x3a;&#x72;&#97;&#x62;&#98;&#105;&#x74;&#x40;&#x6c;&#111;&#x63;&#97;&#x6c;&#104;&#x6f;&#115;&#x74;&#x2e;&#x6c;&#111;&#x67;">&#114;&#97;&#98;&#98;&#x69;&#116;&#x40;&#x6c;&#x6f;&#99;&#97;&#108;&#104;&#x6f;&#x73;&#116;&#x2e;&#108;&#111;&#x67;</a>
-sasl log       : /var/log/rabbitmq/<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#x6f;&#58;&#114;&#97;&#98;&#x62;&#105;&#x74;&#64;&#x6c;&#x6f;&#99;&#x61;&#x6c;&#x68;&#x6f;&#115;&#x74;&#x2d;&#x73;&#x61;&#115;&#108;&#46;&#x6c;&#111;&#x67;">&#114;&#x61;&#98;&#x62;&#x69;&#116;&#64;&#x6c;&#x6f;&#99;&#97;&#108;&#x68;&#x6f;&#x73;&#116;&#45;&#x73;&#97;&#x73;&#x6c;&#46;&#108;&#x6f;&#103;</a>
+log            : /var/log/rabbitmq/<a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x72;&#97;&#98;&#x62;&#x69;&#116;&#x40;&#108;&#111;&#x63;&#97;&#108;&#x68;&#111;&#115;&#x74;&#x2e;&#108;&#x6f;&#x67;">&#x72;&#97;&#98;&#98;&#x69;&#116;&#x40;&#108;&#x6f;&#99;&#x61;&#x6c;&#104;&#x6f;&#115;&#x74;&#x2e;&#108;&#x6f;&#x67;</a>
+sasl log       : /var/log/rabbitmq/<a href="&#109;&#97;&#105;&#108;&#x74;&#111;&#58;&#x72;&#97;&#x62;&#98;&#105;&#116;&#64;&#x6c;&#111;&#99;&#x61;&#108;&#x68;&#x6f;&#115;&#x74;&#x2d;&#115;&#x61;&#x73;&#108;&#x2e;&#108;&#x6f;&#x67;">&#114;&#x61;&#98;&#x62;&#x69;&#x74;&#64;&#x6c;&#111;&#x63;&#97;&#x6c;&#104;&#x6f;&#x73;&#116;&#45;&#115;&#x61;&#115;&#x6c;&#46;&#108;&#111;&#103;</a>
 database dir   : /var/lib/rabbitmq/mnesia/rabbit@localhost</p>
 
 <p>=INFO REPORT==== 17-Nov-2013::20:44:29 ===
@@ -259,8 +444,8 @@ Server startup complete; 0 plugins started.
 ```
 tree /var/log/rabbitmq/
 /var/log/rabbitmq/
-├── <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#114;&#x61;&#x62;&#98;&#x69;&#116;&#x40;&#108;&#111;&#99;&#x61;&#x6c;&#x68;&#111;&#115;&#x74;&#x2e;&#x6c;&#111;&#x67;">&#x72;&#97;&#98;&#98;&#x69;&#116;&#64;&#x6c;&#x6f;&#x63;&#97;&#x6c;&#104;&#111;&#115;&#116;&#46;&#108;&#111;&#103;</a>
-├── <a href="&#109;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#114;&#97;&#98;&#x62;&#x69;&#x74;&#64;&#x6c;&#x6f;&#x63;&#x61;&#x6c;&#104;&#111;&#115;&#116;&#45;&#x73;&#97;&#115;&#x6c;&#46;&#108;&#x6f;&#x67;">&#114;&#x61;&#98;&#x62;&#x69;&#x74;&#64;&#108;&#x6f;&#99;&#x61;&#x6c;&#104;&#111;&#x73;&#x74;&#x2d;&#x73;&#97;&#115;&#x6c;&#x2e;&#108;&#111;&#103;</a>
+├── <a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#58;&#x72;&#x61;&#98;&#x62;&#105;&#x74;&#x40;&#108;&#111;&#x63;&#x61;&#x6c;&#104;&#111;&#115;&#116;&#46;&#108;&#x6f;&#x67;">&#114;&#x61;&#98;&#x62;&#105;&#x74;&#x40;&#108;&#x6f;&#99;&#97;&#x6c;&#x68;&#111;&#x73;&#x74;&#x2e;&#108;&#x6f;&#x67;</a>
+├── <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#58;&#114;&#x61;&#98;&#98;&#x69;&#x74;&#x40;&#108;&#x6f;&#99;&#97;&#x6c;&#104;&#111;&#115;&#x74;&#45;&#x73;&#97;&#115;&#108;&#46;&#x6c;&#x6f;&#103;">&#x72;&#97;&#x62;&#98;&#x69;&#116;&#x40;&#108;&#111;&#99;&#97;&#x6c;&#x68;&#111;&#115;&#x74;&#45;&#x73;&#97;&#115;&#108;&#46;&#108;&#111;&#103;</a>
 ├── shutdown_err
 ├── shutdown_log
 ├── startup_err
@@ -1694,7 +1879,7 @@ signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
 <p>```
 keystone user-create \
   &mdash;name=ceilometer &mdash;pass=ceilometer \
-  &mdash;email=<a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#x3a;&#99;&#x65;&#105;&#108;&#111;&#x6d;&#x65;&#x74;&#101;&#114;&#64;&#x64;&#111;&#x6d;&#x61;&#105;&#x6e;&#x2e;&#x63;&#x6f;&#109;">&#99;&#101;&#105;&#108;&#x6f;&#x6d;&#101;&#116;&#101;&#x72;&#64;&#100;&#111;&#109;&#x61;&#x69;&#x6e;&#46;&#99;&#x6f;&#109;</a></p>
+  &mdash;email=<a href="&#x6d;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x63;&#101;&#x69;&#x6c;&#111;&#109;&#x65;&#x74;&#101;&#114;&#x40;&#x64;&#x6f;&#x6d;&#97;&#105;&#110;&#x2e;&#x63;&#x6f;&#x6d;">&#99;&#101;&#x69;&#x6c;&#x6f;&#109;&#101;&#x74;&#x65;&#x72;&#64;&#100;&#x6f;&#109;&#97;&#105;&#110;&#x2e;&#x63;&#x6f;&#x6d;</a></p>
 
 <p>keystone user-role-add &mdash;user=ceilometer &mdash;tenant=service &mdash;role=admin<br/>
 ```</p>
@@ -1877,251 +2062,6 @@ keystone role-create &mdash;name=ResellerAdmin</p>
 <p>设置完之后，我们通过Dashboard来查看结果，来张漂亮的图先</p>
 
 <p><img src="/images/2013/11/openstack-resouce-use.png"></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Keystone 源码安装与配置]]></title>
-    <link href="http://agenge.github.io/blog/2013/10/24/the-keystone-with-source-installation-and-conf/"/>
-    <updated>2013-10-24T09:02:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/10/24/the-keystone-with-source-installation-and-conf</id>
-    <content type="html"><![CDATA[<h2>Keystone介绍</h2>
-
-<p>什么是Keystone？
-Keystone 作为OpenStack中身份认证服务，在OpenStack起到非常关键的作用。它主要负责身份认证，服务规则及令牌的作用，且实现了Identity API,供OpenStack其他各组件之间来进行身份验证。</p>
-
-<h3>安装依赖包</h3>
-
-<p><code>
-apt-get install -y git python-dev sqlite3 libxml2-dev libxslt1-dev libsasl2-dev libsqlite3-dev libssl-dev libldap2-dev
-</code></p>
-
-<p><strong> 下载源码 </strong></p>
-
-<p><code>
-git clone https://github.com/openstack/keystone.git
-git clone https://github.com/openstack/python-keystoneclient.git keystone/client
-</code></p>
-
-<p>安装keystone</p>
-
-<p><code>
-cd keystone
-git checkout origin/stable/grizzly
-pip install -r tools/pip-requires
-python setup.py install
-</code></p>
-
-<p>安装客户端</p>
-
-<p>```
-cd client
-git checkout -b origin/feature/keystone-v3
-pip install -r requirements.txt
-python setup.py install</p>
-
-<p>cd ../
-mkdir -p /etc/keystone
-cp etc/keystone.conf.sample /etc/keystone/keystone.conf
-cp etc/logging.conf.sample /etc/keystone/logging.conf
-```</p>
-
-<p><strong> 配置日志存放路径 </strong></p>
-
-<p><code>
-mkdir -p /var/log/keystone
-touch /var/log/keystone/keystone.log
-</code></p>
-
-<p>数据库同步，即创建keystone相关的数据库表</p>
-
-<p><code>
-keystone-manage db_sync
-</code></p>
-
-<p>启动服务</p>
-
-<p><code>
-keystone-all -d &amp;
-</code></p>
-
-<!-- more -->
-
-
-<h2>配置Keytone</h2>
-
-<p>截止到现在，我们已经完成Keystone的安装，但现在还无法使用，因为没有租户、用户、密码、服务等。</p>
-
-<p>为使用方便，先设置两个环境变量</p>
-
-<p><code>
-export OS_SERVICE_TOKEN=ADMIN
-export SERVICE_ENDPOINT=http://192.168.30.150:35357/v2.0
-</code></p>
-
-<p>如果前面安装没问题的话，使用以下命令查看用户列表，默认是没有任何数据返回</p>
-
-<p><code>
-keystone user-list
-</code></p>
-
-<ol>
-<li>创建租户</li>
-</ol>
-
-
-<p><code>
-keystone tenant-create --name adminTenant --description "Admin Tenant" --enabled true
-+-------------+----------------------------------+
-|   Property  |              Value               |
-+-------------+----------------------------------+
-| description |           Admin Tenant           |
-|   enabled   |               True               |
-|      id     | e36e42a5ed264317a7a5119b1f513e32 |
-|     name    |           adminTenant            |
-+-------------+----------------------------------+
-</code>
-需要记录 tenant id，在创建用户时需要关联，即将用户关联到哪个租户。</p>
-
-<ol>
-<li>创建用户</li>
-</ol>
-
-
-<p><code>
-keystone user-create --tenant_id e36e42a5ed264317a7a5119b1f513e32 --name admin --pass openstack --enabled true
-+----------+----------------------------------+
-| Property |              Value               |
-+----------+----------------------------------+
-|  email   |                                  |
-| enabled  |               True               |
-|    id    | 8cc6ddbeab504e2b9e8bf30eff3d92b7 |
-|   name   |              admin               |
-| tenantId | e36e42a5ed264317a7a5119b1f513e32 |
-+----------+----------------------------------+
-</code></p>
-
-<ol>
-<li>创建角色</li>
-</ol>
-
-
-<p>创建一个角色名称为adminRole。请记住该命令生成的Role id，下面的关联用户及租户时需要用到</p>
-
-<p><code>
-keystone role-create --name adminRole
-+----------+----------------------------------+
-| Property |              Value               |
-+----------+----------------------------------+
-|    id    | a00bf7b7fe4e4746bac0fd69778f3dfa |
-|   name   |            adminRole             |
-+----------+----------------------------------+
-</code></p>
-
-<p>截止到目前，已经分别创建 Tenant、User、Role，分别是：</p>
-
-<p>Tenant ID:  e36e42a5ed264317a7a5119b1f513e32
-User ID:    8cc6ddbeab504e2b9e8bf30eff3d92b7
-Role ID:    a00bf7b7fe4e4746bac0fd69778f3dfa</p>
-
-<p>现在将它们三者关联到一起</p>
-
-<p><code>
-keystone user-role-add --user-id 8cc6ddbeab504e2b9e8bf30eff3d92b7 \
- --tenant-id e36e42a5ed264317a7a5119b1f513e32 \
- --role-id a00bf7b7fe4e4746bac0fd69778f3dfa
-</code></p>
-
-<h2>Keytone测试</h2>
-
-<h3>通过 Keystone 获取 Token</h3>
-
-<p>访问Keystone 需要4个参数：TenantName Username Password 申请URL，其中URL可以是：</p>
-
-<pre><code>http://192.168.30.150:35357/v2.0/tokens 或 http://192.168.30.150:5000/v2.0/tokens
-</code></pre>
-
-<p><code>
-curl -d '{"auth": {"tenantName": "adminTenant", "passwordCredentials":{"username": "admin", "password": "openstack"}}}' -H "Content-type: application/json" http://192.168.30.150:35357/v2.0/tokens | python -mjson.tool
-</code>
-将会返回以下类似信息</p>
-
-<p>```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</p>
-
-<pre><code>                             Dload  Upload   Total   Spent    Left  Speed
-</code></pre>
-
-<p>100   676  100   567  100   109   6290   1209 &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash;  6517
-{</p>
-
-<pre><code>"access": {
-    "metadata": {
-        "is_admin": 0, 
-        "roles": [
-            "9fe2ff9ee4384b1894a90878d3e92bab", 
-            "a00bf7b7fe4e4746bac0fd69778f3dfa"
-        ]
-    }, 
-    "serviceCatalog": [], 
-    "token": {
-        "expires": "2013-10-16T09:03:21Z", 
-        "id": "7c76f8315f6e42d6a05b0ed726bc3441", 
-        "issued_at": "2013-10-15T09:03:21.809471", 
-        "tenant": {
-            "description": "Admin Tenant", 
-            "enabled": true, 
-            "id": "e36e42a5ed264317a7a5119b1f513e32", 
-            "name": "adminTenant"
-        }
-    }, 
-    "user": {
-        "id": "8cc6ddbeab504e2b9e8bf30eff3d92b7", 
-        "name": "admin", 
-        "roles": [
-            {
-                "name": "_member_"
-            }, 
-            {
-                "name": "adminRole"
-            }
-        ], 
-        "roles_links": [], 
-        "username": "admin"
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>从上述返回结果能看到正常返回 token。更详细的操作请参考<a href="http://agenge.com/blog/2013/10/17/use-the-curl-operation-swift/">使用Curl操作OpenStack Swift</a></p>
-
-<h2>错误汇总</h2>
-
-<p>```
-Traceback (most recent call last):
-   File &ldquo;/usr/bin/easy_install&rdquo;, line 5, in <module></p>
-
-<pre><code> from pkg_resources import load_entry_point ImportError: No module named pkg_resources raid:/home/linyoujushi# easy_install genshi Traceback (most recent call last):
-</code></pre>
-
-<p>```</p>
-
-<p>解决办法：</p>
-
-<p>这是由于我们没有安装setuptools或者没有装好，我们只需要安装这个软件就行了。安装方法：</p>
-
-<p><code>
-wget http://peak.telecommunity.com/dist/ez_setup.py
-python ez_setup.py
-</code></p>
-
-<p>或者，我们装的setuptools工具太老，我们升级一下：</p>
-
-<p><code>
-sudo python ./ez_setup.py -U setuptools
-</code></p>
 ]]></content>
   </entry>
   

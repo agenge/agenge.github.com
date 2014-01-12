@@ -4,7 +4,7 @@
   <title><![CDATA[文章分类: 云计算 | TaurusHome]]></title>
   <link href="http://agenge.github.io/blog/categories/yun-ji-suan/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2014-01-05T23:26:08+08:00</updated>
+  <updated>2014-01-12T20:01:53+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,191 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ubuntu12.04部署Docker内部仓库]]></title>
+    <link href="http://agenge.github.io/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu/"/>
+    <updated>2014-01-12T19:54:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>从上篇文章中了解到，push/pull 都是针对的index.docker.io的官方仓库，而实际情况告诉我们，企业大部分服务器是不对外开放权限的，Docker.Inc 其实已经考虑到我们这种实际需求，通过在内网直接搭建私有仓库来解决此问题。</p>
+
+<h2>安装Docker-registry</h2>
+
+<p><code>
+git clone https://github.com/dotcloud/docker-registry
+cd docker-registry/
+cp config/config_sample.yml config/config.yml
+</code>
+编辑配置文件，主要是修改镜像的存储路径：
+```
+vim config/config.yml</p>
+
+<p>dev:</p>
+
+<pre><code>storage: local
+storage_path: /home/taurus/registry
+loglevel: debug
+</code></pre>
+
+<p><code>
+保存退出。并创建存储镜像目录：
+</code>
+mkdir -p /you_path/to/registry
+<code>
+安装依赖包：
+</code>
+sudo apt-get install build-essential python-dev libevent-dev python-pip libssl-dev
+sudo pip install -r requirements.txt
+```</p>
+
+<p>启动服务：
+<code>
+cd docker-registry/
+sudo gunicorn --access-logfile - --debug -k gevent -b 0.0.0.0:80 -w 1 wsgi:application &amp;
+</code>
+打开浏览器：<a href="http://IP">http://IP</a>   如果正常会显示："docker-registry server (dev)"</p>
+
+<!-- more -->
+
+
+<h2>镜像管理</h2>
+
+<p>查看本地系统有哪些镜像文件：
+```
+sudo docker images</p>
+
+<p>REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              12.04               8dbd9e392a96        8 months ago        128 MB
+ubuntu              latest              8dbd9e392a96        8 months ago        128 MB
+ubuntu              precise             8dbd9e392a96        8 months ago        128 MB
+ubuntu              12.10               b750fe79269d        9 months ago        175.3 MB
+ubuntu              quantal             b750fe79269d        9 months ago        175.3 MB
+base                latest              b750fe79269d        9 months ago        175.3 MB
+```</p>
+
+<h3>上传镜像到 本地仓库：</h3>
+
+<ol>
+<li>先打个标签
+<code>
+sudo docker tag 8dbd9e392a96 192.168.30.239/ubuntu1204
+</code>
+记录上面输出的ID（你要上传哪个镜像就记录哪个ID），然后开始上传：
+<code>
+docker push 192.168.30.239/ubuntu1204
+</code>
+测试本地仓库是否可用：
+<code>
+docker pull 192.168.30.239/ubuntu1204
+</code>
+如果没问题，会提示下载完成。</li>
+</ol>
+
+
+<p>运行一个Hello
+<code>
+docker run 192.168.30.239/ubuntu1204 /bin/echo hello
+</code>
+这个……用docker来运行打印hello world，真是大材小用。我们来运行一个sshd + tomcat：
+<code>
+docker pull 192.168.30.239/ubuntu1204
+docker run -i -t 192.168.30.239/ubuntu1204 /bin/bash
+</code>
+此时就会进入一个终端：
+<code>
+root@d04d4fdde922:/#
+</code>
+现在开始安装ssh
+<code>
+apt-get update
+apt-get -y install openssh-server
+</code>
+安装后还需要设置ssh，方便其他客户端连接：
+```
+mkdir /var/run/sshd
+root@d04d4fdde922:/# passwd
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully</p>
+
+<p>exit
+<code>
+设置之后还要对这个docker  commit，否则此docker重启后，刚才的设置会消失。
+</code>
+docker ps -l
+<code>
+获取容器ID
+</code>
+root@hgg-pc:~# docker commit d04d4fdde922 192.168.30.239/ubuntu1204
+5acd9899febecd686bd6b8ceb66be487495f30a39657dcc36835fd534057b064
+<code>
+以后台的方式长期运行ssh
+</code>
+docker run -d -p 22 -p 8080:8080 192.168.30.239/ubuntu1204 /usr/sbin/sshd -D
+```</p>
+
+<ul>
+<li>-D  后台运行</li>
+<li>-p  ssh port</li>
+<li>-p  也是端口，后面我们在部署 tomcat 时使用,  8081:8080 映射端口，此容器中的8080端口会被映射到外部的8081端口，即外部使用8081来访问此窗口的8080端口。</li>
+</ul>
+
+
+<p>查看是否运行成功：
+<code>
+docker ps
+CONTAINER ID        IMAGE                              COMMAND             CREATED             STATUS              PORTS                                           NAMES
+36b805df0f4d        192.168.30.239/ubuntu1204:latest   /usr/sbin/sshd -D   3 minutes ago       Up 3 minutes        0.0.0.0:49154-&gt;22/tcp, 0.0.0.0:8080-&gt;8080/tcp   trusting_galileo  
+</code></p>
+
+<p>可以看到我们本地的 49154端口映射到容器的22端口，我们再来登录测试一下：
+```
+root@hgg-pc:~# ssh <a href="&#109;&#97;&#x69;&#x6c;&#116;&#111;&#58;&#114;&#111;&#x6f;&#x74;&#x40;&#49;&#50;&#x37;&#x2e;&#x30;&#46;&#x30;&#46;&#49;">&#x72;&#x6f;&#111;&#116;&#64;&#49;&#50;&#x37;&#x2e;&#48;&#46;&#x30;&#x2e;&#49;</a> -p 49154
+The authenticity of host &lsquo;[127.0.0.1]:49154 ([127.0.0.1]:49154)&rsquo; can&rsquo;t be established.
+ECDSA key fingerprint is 42:17:df:cb:99:7a:5d:a9:a2:36:f9:0a:64:a9:d8:41.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added &lsquo;[127.0.0.1]:49154&rsquo; (ECDSA) to the list of known hosts.
+<a href="&#x6d;&#97;&#x69;&#108;&#116;&#x6f;&#58;&#x72;&#111;&#111;&#x74;&#64;&#49;&#x32;&#x37;&#46;&#x30;&#46;&#x30;&#x2e;&#x31;">&#x72;&#111;&#x6f;&#116;&#x40;&#49;&#x32;&#55;&#46;&#48;&#x2e;&#x30;&#x2e;&#49;</a>&rsquo;s password:
+Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.8.0-34-generic x86_64)</p>
+
+<ul>
+<li>Documentation:  <a href="https://help.ubuntu.com/">https://help.ubuntu.com/</a></li>
+</ul>
+
+
+<p>The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.</p>
+
+<p>Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.</p>
+
+<p>root@36b805df0f4d:~#
+<code>
+完美！还差一个tomcat。开始操作：
+</code>
+apt-get install python-software-properties
+add-apt-repository ppa:webupd8team/java
+apt-get update
+apt-get install -y wget
+apt-get install oracle-java7-installer
+javac -version</p>
+
+<p>wget <a href="http://mirror.bit.edu.cn/apache/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.tar.gz">http://mirror.bit.edu.cn/apache/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.tar.gz</a>
+tar xvf apache-tomcat-7.0.47.tar.gz
+cd apache-tomcat-7.0.47
+bin/startup.sh
+```</p>
+
+<p>打开浏览器：<a href="http://IP">http://IP</a>  就能看到tomcat首页。
+如果不想每次都这样搭建，还是再commit一下吧：
+<code>
+docker commit d04d4fdde922 192.168.30.239/ubuntu1204
+</code></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ubuntu 12.04 安装Docker]]></title>
@@ -1456,7 +1641,7 @@ signing_dir=/var/lib/ceilometer/ceilometer-signing</p>
 <p>```
 keystone user-create \
   &mdash;name=ceilometer &mdash;pass=ceilometer \
-  &mdash;email=<a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#x63;&#101;&#x69;&#108;&#111;&#109;&#101;&#116;&#x65;&#114;&#64;&#x64;&#111;&#x6d;&#x61;&#105;&#x6e;&#46;&#x63;&#x6f;&#x6d;">&#x63;&#x65;&#105;&#108;&#x6f;&#109;&#x65;&#116;&#101;&#x72;&#x40;&#100;&#111;&#109;&#x61;&#105;&#x6e;&#x2e;&#99;&#111;&#x6d;</a></p>
+  &mdash;email=<a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#x63;&#101;&#x69;&#108;&#x6f;&#x6d;&#101;&#x74;&#x65;&#x72;&#64;&#x64;&#111;&#x6d;&#x61;&#105;&#110;&#46;&#x63;&#x6f;&#x6d;">&#99;&#x65;&#105;&#108;&#x6f;&#109;&#101;&#116;&#x65;&#x72;&#64;&#100;&#x6f;&#109;&#97;&#105;&#110;&#x2e;&#x63;&#111;&#x6d;</a></p>
 
 <p>keystone user-role-add &mdash;user=ceilometer &mdash;tenant=service &mdash;role=admin<br/>
 ```</p>
@@ -1883,429 +2068,6 @@ python ez_setup.py
 
 <p><code>
 sudo python ./ez_setup.py -U setuptools
-</code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用Curl操作OpenStack Swift]]></title>
-    <link href="http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift/"/>
-    <updated>2013-10-17T09:51:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/10/17/use-the-curl-operation-swift</id>
-    <content type="html"><![CDATA[<p>提示：以下操作均是使用的 swift tempauth认证机制。</p>
-
-<ul>
-<li>获取 Token</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -v -H 'X-Storage-User: admin:admin' -H 'X-Storage-Pass: admin' http://192.168.30.150:8080/auth/v1.0
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-* About to connect() to 192.168.30.150 port 8080 (#0)
-*   Trying 192.168.30.150&hellip; connected</p>
-
-<blockquote><p>GET /auth/v1.0 HTTP/1.1
-User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
-Host: 192.168.30.150:8080
-Accept: <em>/</em>
-X-Storage-User: admin:admin
-X-Storage-Pass: admin</p>
-
-<p>&lt; HTTP/1.1 200 OK
-&lt; X-Storage-Url: <a href="http://192.168.30.150:8080/v1/AUTH_admin">http://192.168.30.150:8080/v1/AUTH_admin</a>
-&lt; X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Type: text/html; charset=UTF-8
-&lt; X-Storage-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5
-&lt; Content-Length: 0
-&lt; Date: Tue, 15 Oct 2013 01:49:59 GMT
-&lt;
-* Connection #0 to host 192.168.30.150 left intact
-* Closing connection #0
-```</p></blockquote>
-
-<ul>
-<li>Account操作</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -v -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-* About to connect() to 192.168.30.150 port 8080 (#0)
-*   Trying 192.168.30.150&hellip; connected</p>
-
-<blockquote><p>HEAD /v1/AUTH_admin HTTP/1.1
-User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3
-Host: 192.168.30.150:8080
-Accept: <em>/</em>
-X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5</p>
-
-<p>&lt; HTTP/1.1 204 No Content
-&lt; Content-Length: 0
-&lt; Accept-Ranges: bytes
-&lt; X-Timestamp: 1381806617.24083
-&lt; X-Account-Bytes-Used: 0
-&lt; X-Account-Container-Count: 1
-&lt; Content-Type: text/plain; charset=utf-8
-&lt; X-Account-Object-Count: 0
-&lt; Date: Tue, 15 Oct 2013 05:17:23 GMT
-&lt;
-* Connection #0 to host 192.168.30.150 left intact
-* Closing connection #0
-```</p></blockquote>
-
-<ul>
-<li><p>Container操作</p>
-
-<ul>
-<li>列出 Contailner</li>
-</ul>
-</li>
-</ul>
-
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
-</code>
- 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 5
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 1
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:20:11 GMT</p>
-
-<p>test
-```
- 最后一行的test就是查询出来的内容。</p>
-
-<ul>
-<li>创建 Container</li>
-</ul>
-
-
-<p><code>
-curl -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile
-</code></p>
-
-<p>   如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 201 Created
-Content-Length: 0
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:22:01 GMT
-</code></p>
-
-<p>  我们再来查询一次看是否成功：</p>
-
-<p>  <!-- more --></p>
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin
-</code></p>
-
-<p>  如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 12
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:23:18 GMT</p>
-
-<p>myfile
-test
-```</p>
-
-<ul>
-<li> 只列出部分 Container</li>
-</ul>
-
-
-<p>  很多时候 Container 会有很多个，Swift 默认会列出前10000个，但如果我们只看最前面几个，该怎么办？ 以下示例只显示最前面一个 Container</p>
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?limit=1
-</code></p>
-
-<p> 结果：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 7
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:24:36 GMT</p>
-
-<p>myfile
-```</p>
-
-<p>  那如果要列出最后几个 Container 又怎么办呢？ 加一个 marker即可，以下示例列出 myfile之后的一个Container</p>
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?marker=myfile\&amp;limit=1
-</code></p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 5
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: text/plain; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:28:53 GMT</p>
-
-<p>test
-```</p>
-
-<ul>
-<li>格式化输出 Container</li>
-</ul>
-
-
-<p><code>
-curl -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin?format=json
-</code></p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 86
-Accept-Ranges: bytes
-X-Timestamp: 1381806617.24083
-X-Account-Bytes-Used: 0
-X-Account-Container-Count: 2
-Content-Type: application/json; charset=utf-8
-X-Account-Object-Count: 0
-Date: Tue, 15 Oct 2013 05:29:58 GMT</p>
-
-<p>[{&ldquo;count&rdquo;: 0, &ldquo;bytes&rdquo;: 0, &ldquo;name&rdquo;: &ldquo;myfile&rdquo;}, {&ldquo;count&rdquo;: 0, &ldquo;bytes&rdquo;: 0, &ldquo;name&rdquo;: &ldquo;test&rdquo;}]
-```</p>
-
-<p>  除了JSON格式，还可以格式化XML，只需要将json改成xml 即可。</p>
-
-<ul>
-<li>查看 Container metadata</li>
-</ul>
-
-
-<p><code>
-curl -i -X HEAD -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test
-</code></p>
-
-<p>  如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 204 No Content
-Content-Length: 0
-X-Container-Object-Count: 0
-Accept-Ranges: bytes
-X-Timestamp: 1381806903.70007
-X-Container-Bytes-Used: 0
-Content-Type: text/plain; charset=utf-8
-Date: Tue, 15 Oct 2013 05:32:06 GMT
-</code></p>
-
-<ul>
-<li>删除 Container</li>
-</ul>
-
-
-<p><code>
-curl -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/mytest
-</code></p>
-
-<ul>
-<li><p>Object操作</p>
-
-<ul>
-<li>创建 Object</li>
-</ul>
-</li>
-</ul>
-
-
-<p><code>
-curl -k -i -X PUT -T "apache-tomcat-6.0.36.tgz" -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz
-</code></p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 100 Continue</p>
-
-<p>HTTP/1.1 201 Created
-Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
-Content-Length: 0
-Etag: 3dde098fd0b3a08d3f2867e4a95591ba
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:39:08 GMT
-```</p>
-
-<ul>
-<li>列出  Object</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -i -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile
-</code></pre>
-
-<p>```</p>
-
-<p> 如果正确，将会返回以下类似信息：</p>
-
-<p>```
-HTTP/1.1 200 OK
-Content-Length: 25
-X-Container-Object-Count: 1
-Accept-Ranges: bytes
-X-Timestamp: 1381814521.71796
-X-Container-Bytes-Used: 6780936
-Content-Type: text/plain; charset=utf-8
-Date: Tue, 15 Oct 2013 05:40:43 GMT</p>
-
-<p>apache-tomcat-6.0.36.tgz
-```</p>
-
-<p>另外 Object和 Container一样可以通过加参数来限制查询，具体示例可参考 Container操作。</p>
-
-<ul>
-<li>下载 Object</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -X GET -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz &gt; apache-tomcat-6.0.36.tgz
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p>```
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</p>
-
-<pre><code>                             Dload  Upload   Total   Spent    Left  Speed
-</code></pre>
-
-<p>100 6622k  100 6622k    0     0  32.8M      0 &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; &mdash;:&mdash;:&mdash; 33.1M
-```</p>
-
-<ul>
-<li>Copy Object</li>
-</ul>
-
-
-<p><code>
-curl -k -i -X PUT -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
- -H 'X-Copy-From: /myfile/apache-tomcat-6.0.36.tgz' \
- -H 'Content-Length:0' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz
-</code></p>
-
-<p>将/myfile/apache-tomcat-6.0.36.tgz 拷贝到 /test/apache-tomcat-6.0.36.tgz,如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 201 Created
-Content-Length: 0
-X-Copied-From-Last-Modified: Tue, 15 Oct 2013 05:39:07 GMT
-X-Copied-From: myfile/apache-tomcat-6.0.36.tgz
-Last-Modified: Tue, 15 Oct 2013 05:47:52 GMT
-Etag: 3dde098fd0b3a08d3f2867e4a95591ba
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:47:52 GMT
-</code></p>
-
-<ul>
-<li>删除 Object</li>
-</ul>
-
-
-<p>```</p>
-
-<pre><code>curl -k -i -X DELETE -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' http://192.168.30.150:8080/v1/AUTH_admin/test/apache-tomcat-6.0.36.tgz
-</code></pre>
-
-<p>```</p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 204 No Content
-Content-Length: 0
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:50:49 GMT
-</code>
- 通过之前的GET就能验证是否成功删除，此处略过。</p>
-
-<ul>
-<li>设置 Object Metadata</li>
-</ul>
-
-
-<p><code>
-curl -k -i -X POST -H 'X-Auth-Token: AUTH_tk8a85916d63b14c568a4633b7920623c5' \
--H 'X-Object-Meta-Breed: apache tomcat 6.0.36' \
- http://192.168.30.150:8080/v1/AUTH_admin/myfile/apache-tomcat-6.0.36.tgz
-</code></p>
-
-<p>如果正确，将会返回以下类似信息：</p>
-
-<p><code>
-HTTP/1.1 202 Accepted
-Content-Length: 76
-Content-Type: text/html; charset=UTF-8
-Date: Tue, 15 Oct 2013 05:54:09 GMT
-</code></p>
-
-<p>通过之前的HEAD，就能查看到刚才添加的元数据</p>
-
-<p><code>
-HTTP/1.1 200 OK
-Content-Length: 6780936
-X-Object-Meta-Breed: apache tomcat 6.0.36
-Accept-Ranges: bytes
-Last-Modified: Tue, 15 Oct 2013 05:54:08 GMT
-Etag: 3dde098fd0b3a08d3f2867e4a95591ba
-X-Timestamp: 1381816448.74507
-Content-Type: application/x-tar
-Date: Tue, 15 Oct 2013 05:55:53 GMT
 </code></p>
 ]]></content>
   </entry>

@@ -4,7 +4,7 @@
   <title><![CDATA[TaurusHome]]></title>
   <link href="http://agenge.github.io/atom.xml" rel="self"/>
   <link href="http://agenge.github.io/"/>
-  <updated>2014-01-05T23:26:08+08:00</updated>
+  <updated>2014-01-12T20:01:53+08:00</updated>
   <id>http://agenge.github.io/</id>
   <author>
     <name><![CDATA[agenge]]></name>
@@ -12,6 +12,276 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ubuntu12.04部署Docker内部仓库]]></title>
+    <link href="http://agenge.github.io/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu/"/>
+    <updated>2014-01-12T19:54:00+08:00</updated>
+    <id>http://agenge.github.io/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>从上篇文章中了解到，push/pull 都是针对的index.docker.io的官方仓库，而实际情况告诉我们，企业大部分服务器是不对外开放权限的，Docker.Inc 其实已经考虑到我们这种实际需求，通过在内网直接搭建私有仓库来解决此问题。</p>
+
+<h2>安装Docker-registry</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone https://github.com/dotcloud/docker-registry
+</span><span class='line'>cd docker-registry/
+</span><span class='line'>cp config/config_sample.yml config/config.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>编辑配置文件，主要是修改镜像的存储路径：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim config/config.yml
+</span><span class='line'>
+</span><span class='line'>dev:
+</span><span class='line'>    storage: local
+</span><span class='line'>    storage_path: /home/taurus/registry
+</span><span class='line'>    loglevel: debug</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  <br/>
+保存退出。并创建存储镜像目录：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /you_path/to/registry</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装依赖包：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install build-essential python-dev libevent-dev python-pip libssl-dev
+</span><span class='line'>sudo pip install -r requirements.txt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动服务：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd docker-registry/
+</span><span class='line'>sudo gunicorn --access-logfile - --debug -k gevent -b 0.0.0.0:80 -w 1 wsgi:application & </span></code></pre></td></tr></table></div></figure>
+
+
+<p>打开浏览器：<a href="http://IP">http://IP</a>   如果正常会显示：&#8221;docker-registry server (dev)&#8221;</p>
+
+<!-- more -->
+
+
+<h2>镜像管理</h2>
+
+<p>查看本地系统有哪些镜像文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker images
+</span><span class='line'>
+</span><span class='line'>REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+</span><span class='line'>ubuntu              12.04               8dbd9e392a96        8 months ago        128 MB
+</span><span class='line'>ubuntu              latest              8dbd9e392a96        8 months ago        128 MB
+</span><span class='line'>ubuntu              precise             8dbd9e392a96        8 months ago        128 MB
+</span><span class='line'>ubuntu              12.10               b750fe79269d        9 months ago        175.3 MB
+</span><span class='line'>ubuntu              quantal             b750fe79269d        9 months ago        175.3 MB
+</span><span class='line'>base                latest              b750fe79269d        9 months ago        175.3 MB</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>上传镜像到 本地仓库：</h3>
+
+<ol>
+<li>先打个标签</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo docker tag 8dbd9e392a96 192.168.30.239/ubuntu1204</span></code></pre></td></tr></table></div></figure>
+
+
+<p>记录上面输出的ID（你要上传哪个镜像就记录哪个ID），然后开始上传：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker push 192.168.30.239/ubuntu1204</span></code></pre></td></tr></table></div></figure>
+
+
+<p>测试本地仓库是否可用：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker pull 192.168.30.239/ubuntu1204</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果没问题，会提示下载完成。</p>
+
+<p>运行一个Hello</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker run 192.168.30.239/ubuntu1204 /bin/echo hello</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个……用docker来运行打印hello world，真是大材小用。我们来运行一个sshd + tomcat：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker pull 192.168.30.239/ubuntu1204
+</span><span class='line'>docker run -i -t 192.168.30.239/ubuntu1204 /bin/bash</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此时就会进入一个终端：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@d04d4fdde922:/# </span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在开始安装ssh</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get update
+</span><span class='line'>apt-get -y install openssh-server</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装后还需要设置ssh，方便其他客户端连接：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir /var/run/sshd
+</span><span class='line'>root@d04d4fdde922:/# passwd
+</span><span class='line'>Enter new UNIX password: 
+</span><span class='line'>Retype new UNIX password: 
+</span><span class='line'>passwd: password updated successfully
+</span><span class='line'>
+</span><span class='line'>exit</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置之后还要对这个docker  commit，否则此docker重启后，刚才的设置会消失。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -l</span></code></pre></td></tr></table></div></figure>
+
+
+<p>获取容器ID</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@hgg-pc:~# docker commit d04d4fdde922 192.168.30.239/ubuntu1204
+</span><span class='line'>5acd9899febecd686bd6b8ceb66be487495f30a39657dcc36835fd534057b064</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以后台的方式长期运行ssh</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker run -d -p 22 -p 8080:8080 192.168.30.239/ubuntu1204 /usr/sbin/sshd -D</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>-D  后台运行</li>
+<li>-p  ssh port</li>
+<li>-p  也是端口，后面我们在部署 tomcat 时使用,  8081:8080 映射端口，此容器中的8080端口会被映射到外部的8081端口，即外部使用8081来访问此窗口的8080端口。</li>
+</ul>
+
+
+<p>查看是否运行成功：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps
+</span><span class='line'>CONTAINER ID        IMAGE                              COMMAND             CREATED             STATUS              PORTS                                           NAMES
+</span><span class='line'>36b805df0f4d        192.168.30.239/ubuntu1204:latest   /usr/sbin/sshd -D   3 minutes ago       Up 3 minutes        0.0.0.0:49154-&gt;22/tcp, 0.0.0.0:8080-&gt;8080/tcp   trusting_galileo  </span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到我们本地的 49154端口映射到容器的22端口，我们再来登录测试一下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@hgg-pc:~# ssh root@127.0.0.1 -p 49154
+</span><span class='line'>The authenticity of host '[127.0.0.1]:49154 ([127.0.0.1]:49154)' can't be established.
+</span><span class='line'>ECDSA key fingerprint is 42:17:df:cb:99:7a:5d:a9:a2:36:f9:0a:64:a9:d8:41.
+</span><span class='line'>Are you sure you want to continue connecting (yes/no)? yes
+</span><span class='line'>Warning: Permanently added '[127.0.0.1]:49154' (ECDSA) to the list of known hosts.
+</span><span class='line'>root@127.0.0.1's password: 
+</span><span class='line'>Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.8.0-34-generic x86_64)
+</span><span class='line'>
+</span><span class='line'> * Documentation:  https://help.ubuntu.com/
+</span><span class='line'>
+</span><span class='line'>The programs included with the Ubuntu system are free software;
+</span><span class='line'>the exact distribution terms for each program are described in the
+</span><span class='line'>individual files in /usr/share/doc/*/copyright.
+</span><span class='line'>
+</span><span class='line'>Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+</span><span class='line'>applicable law.
+</span><span class='line'>
+</span><span class='line'>root@36b805df0f4d:~# </span></code></pre></td></tr></table></div></figure>
+
+
+<p>完美！还差一个tomcat。开始操作：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install python-software-properties
+</span><span class='line'>add-apt-repository ppa:webupd8team/java
+</span><span class='line'>apt-get update
+</span><span class='line'>apt-get install -y wget
+</span><span class='line'>apt-get install oracle-java7-installer
+</span><span class='line'>javac -version
+</span><span class='line'>
+</span><span class='line'>wget http://mirror.bit.edu.cn/apache/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.tar.gz
+</span><span class='line'>tar xvf apache-tomcat-7.0.47.tar.gz
+</span><span class='line'>cd apache-tomcat-7.0.47
+</span><span class='line'>bin/startup.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>打开浏览器：<a href="http://IP">http://IP</a>  就能看到tomcat首页。
+如果不想每次都这样搭建，还是再commit一下吧：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker commit d04d4fdde922 192.168.30.239/ubuntu1204</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ubuntu 12.04 安装Docker]]></title>
@@ -649,7 +919,7 @@
 </span><span class='line'>rabbitmq-server.</span></code></pre></td></tr></table></div></figure>
 
 
-<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#114;&#97;&#98;&#98;&#105;&#116;&#x40;&#108;&#111;&#x63;&#x61;&#x6c;&#x68;&#111;&#115;&#x74;&#46;&#x6c;&#111;&#103;">&#114;&#97;&#98;&#98;&#x69;&#116;&#x40;&#108;&#x6f;&#x63;&#97;&#108;&#x68;&#111;&#x73;&#x74;&#46;&#x6c;&#111;&#103;</a></p>
+<p>除了在终端输出的信息外，还可以通过日志来查看更详细的信息，默认路径为：/var/log/rabbitmq/<a href="&#109;&#97;&#x69;&#108;&#116;&#111;&#x3a;&#114;&#x61;&#98;&#98;&#105;&#x74;&#x40;&#108;&#x6f;&#99;&#x61;&#108;&#x68;&#111;&#115;&#x74;&#46;&#108;&#x6f;&#x67;">&#114;&#97;&#x62;&#98;&#105;&#x74;&#64;&#108;&#111;&#x63;&#97;&#x6c;&#x68;&#x6f;&#115;&#116;&#46;&#108;&#111;&#x67;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -8334,7 +8604,7 @@ set editor="vi"
 
 
 <p>echo &ldquo;this is a test mail&rdquo; >> /tmp/files
-echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#116;&#101;&#x73;&#x74;&#95;&#x7a;&#97;&#98;&#98;&#x69;&#120;&#x40;&#103;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#116;&#101;&#115;&#116;&#x5f;&#x7a;&#97;&#98;&#x62;&#x69;&#x78;&#64;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;</a></p>
+echo &ldquo;testmail&rdquo; | mutt -s &ldquo;test&rdquo; -a /tmp/files  <a href="&#109;&#97;&#105;&#108;&#x74;&#111;&#58;&#x74;&#x65;&#x73;&#116;&#x5f;&#x7a;&#97;&#x62;&#98;&#x69;&#120;&#x40;&#x67;&#109;&#x61;&#105;&#108;&#x2e;&#x63;&#x6f;&#109;">&#x74;&#101;&#x73;&#x74;&#x5f;&#122;&#97;&#98;&#x62;&#x69;&#x78;&#64;&#x67;&#x6d;&#x61;&#105;&#108;&#46;&#x63;&#111;&#x6d;</a></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -8778,480 +9048,6 @@ What？服务器不能上网？公司不许随意连公网？能说脏话吗？F
 <p>进入BIOS &ndash;> PXE boot &ndash;> enable &ndash;> save and reboot</p>
 
 <p>如果各位有任何疑问，请留言回复。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Zabbix 源码安装与配置]]></title>
-    <link href="http://agenge.github.io/blog/2013/05/02/zabbix-source-install-conf/"/>
-    <updated>2013-05-02T00:00:00+08:00</updated>
-    <id>http://agenge.github.io/blog/2013/05/02/zabbix-source-install-conf</id>
-    <content type="html"><![CDATA[<h2>1、安装环境</h2>
-
-<ul>
-<li>操作系统：:CentOS 5.5 64位</li>
-<li>Mysql：5.5.27</li>
-<li>Apache httpd：2.4.4</li>
-<li>Zabbix：2.0.6</li>
-</ul>
-
-
-<h2>2、源码安装</h2>
-
-<h3>安装Zabbix</h3>
-
-<h4>创建用户</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
-</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>源码安装Zabbix</h3>
-
-<p>下载页面请点击 <a href="http://www.zabbix.com/download.php">这里</a>。下载之后按照以下步骤执行：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>yum install wget curl-devel net-snmp-devel php-bcmath
-</span><span class='line'>tar zxvf zabbix-2.0.6.tar.gz
-</span><span class='line'>cd zabbix-2.0.6
-</span><span class='line'>./configure --prefix=/data/zabbix \
-</span><span class='line'>  --enable-server --enable-agent \
-</span><span class='line'>  --with-mysql --with-net-snmp \
-</span><span class='line'>  --with-libcurl --enable-proxy
-</span><span class='line'>
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果一切顺利，安装完成。</p>
-
-<h3>创建Zabbix 数据库</h3>
-
-<p>这里假设你已经安装好Mysql数据库，具体的安装方法请自己到网上搜索解决。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>mysql -uroot -p
-</span><span class='line'>Enter password:
-</span><span class='line'>
-</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
-</span><span class='line'>Your MySQL connection id is 63
-</span><span class='line'>Server version: 5.0.95 Source distribution
-</span><span class='line'>
-</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
-</span><span class='line'>
-</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
-</span><span class='line'>affiliates. Other names may be trademarks of their respective owners.
-</span><span class='line'>
-</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-</span><span class='line'>
-</span><span class='line'>mysql&gt; create database zabbix character set utf8;
-</span><span class='line'>mysql&gt; grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
-</span><span class='line'>Query OK, 1 row affected (0.00 sec)
-</span><span class='line'>
-</span><span class='line'>mysql&gt; quit
-</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/schema.sql
-</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/images.sql
-</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/data.sql</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>配置Zabbix</h3>
-
-<p>设置服务自启动：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cp misc/init.d/fedora/core/zabbix_server /etc/init.d/
-</span><span class='line'>chmod +x /etc/init.d/zabbix_server</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改zabbix_server中的BASEDIR=/data/zabbix</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --add zabbix_server
-</span><span class='line'>chkconfig zabbix_server on</span></code></pre></td></tr></table></div></figure>
-
-
-<p>设置zabbix 配置文件：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>vim /data/zabbix/etc/zabbix/zabbix_server.conf
-</span><span class='line'>DBName=zabbix
-</span><span class='line'>DBPassword=zabbix</span></code></pre></td></tr></table></div></figure>
-
-
-<p>只需要修改密码即可，其他都保持默认值。当然如果你的Mysql不是安装在本地，肯定也要修改相应的IP啦。</p>
-
-<h4>启动Zabbix Server</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/zabbix_server start</span></code></pre></td></tr></table></div></figure>
-
-
-<p>确认zabbix server是否已经启动：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>netstat -antulp | grep zabbix
-</span><span class='line'>
-</span><span class='line'>tcp        0      0 0.0.0.0:10051               0.0.0.0:*                   LISTEN      19087/zabbix_server</span></code></pre></td></tr></table></div></figure>
-
-
-<!-- more -->
-
-
-<h2>3、安装Zabbix Web接口</h2>
-
-<p>Zabbix前端使用PHP编写，故Web Server必须支持PHP。</p>
-
-<h4>安装Apr</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirrors.cnnic.cn/apache//apr/apr-1.4.6.tar.gz
-</span><span class='line'>tar zxvf apr-1.4.6.tar.gz
-</span><span class='line'>cd apr-1.4.6
-</span><span class='line'>./configure --prefix=/usr/local/apr
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>安装Apr-utils</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://mirrors.cnnic.cn/apache//apr/apr-util-1.5.2.tar.gz
-</span><span class='line'>tar zxvf apr-util-1.5.2.tar.gz
-</span><span class='line'>cd apr-util-1.5.2
-</span><span class='line'>./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr/
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>安装pcre</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf pcre-8.32.tar.gz
-</span><span class='line'>cd pcre-8.32
-</span><span class='line'>./configure
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>安装Apache httpd</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://labs.mop.com/apache-mirror//httpd/httpd-2.4.4.tar.bz2
-</span><span class='line'>tar jxvf httpd-2.4.4.tar.bz2
-</span><span class='line'>cp -rf apr-1.4.6 /data/software/httpd-2.4.4/srclib/apr
-</span><span class='line'>cp -rf apr-util-1.5.2 /data/software/httpd-2.4.4/srclib/apr-util
-</span><span class='line'>cd httpd-2.4.4
-</span><span class='line'>./configure --prefix=/usr/local/httpd \
-</span><span class='line'>  --enable-modules --enable-ssl --enable-module=so \
-</span><span class='line'>  --with-apr=/usr/local/apr \
-</span><span class='line'>  --with-apr-util=/usr/local/apr-util --with-included-apr \
-</span><span class='line'>  --enable-mods-shared=most --with-included-apr
-</span><span class='line'>
-</span><span class='line'>make && make install
-</span><span class='line'>/usr/local/httpd/bin/apachectl start</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>安装 PHP</h4>
-
-<p>安装gettext（国际化支持）：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.2.tar.gz
-</span><span class='line'>tar zxvf gettext-0.18.2.tar.gz
-</span><span class='line'>cd gettext-0.18.2
-</span><span class='line'>./configure
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>安装libpng：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>tar zxvf libpng-1.6.1.tar.gz
-</span><span class='line'>cd libpng-1.6.1
-</span><span class='line'>./configure --prefix=/usr/local/libpng --enable-shared
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>安装freetype：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>tar jxvf freetype-2.4.11.tar.bz2
-</span><span class='line'>cd freetype-2.4.11
-</span><span class='line'>./configure --prefix=/usr/local/freetype&lt;b&gt;&lt;/b&gt;
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>安装JPEG：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.ijg.org/files/jpegsrc.v9.tar.gz
-</span><span class='line'>tar zxvf jpegsrc.v9.tar.gz
-</span><span class='line'>cd jpeg-9/
-</span><span class='line'>./configure --prefix=/usr/local/jpeg9 --enable-shared --enable-static
-</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>安装GD库：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://bitbucket.org/libgd/gd-libgd/get/GD_2_0_33.tar.gz
-</span><span class='line'>tar zxvf GD_2_0_33.tar.gz
-</span><span class='line'>cd libgd-gd-libgd-486e81dea984/src
-</span><span class='line'>./configure --with-png  --with-freetype  --with-jpeg
-</span><span class='line'>make install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>安装PHP：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget ftp://192.168.30.211:/pub/Tools/php-5.3.19.tar.bz2
-</span><span class='line'>tar jxvf php-5.3.19.tar.bz2
-</span><span class='line'>
-</span><span class='line'>./configure --prefix=/usr/local/php  \
-</span><span class='line'>  --with-config-file-path=/usr/local/php/etc \
-</span><span class='line'>  --disable-debug --disable-rpath --with-gettext  \
-</span><span class='line'>  --with-mcrypt --with-mysql=/usr/local/mysql \
-</span><span class='line'>  --with-mysql-sock=/data/mysqldata/3306/mysql.sock \
-</span><span class='line'>  --with-mysqli=/usr/local/mysql/bin/mysql_config \
-</span><span class='line'>  --enable-mbstring --enable-pdo --with-curl \
-</span><span class='line'>  --enable-inline-optimization --with-bz2 \
-</span><span class='line'>  --with-zlib --enable-sockets --enable-bcmath \
-</span><span class='line'>  --enable-sysvsem --enable-sysvshm --enable-pcntl \
-</span><span class='line'>  --enable-mbregex --with-mhash --enable-xml \
-</span><span class='line'>  --enable-zip --with-pcre-regex --with-gettext \
-</span><span class='line'>  --with-apxs2=/usr/local/httpd/bin/apxs \
-</span><span class='line'>  --with-gd --enable-gd-native-ttf --with-jpeg-dir=/usr/local/include \
-</span><span class='line'>  --with-png-dir=/usr/local/include --with-freetype-dir=/usr/include/freetype2
-</span><span class='line'>  
-</span><span class='line'>make ZEND_EXTRA_LIBS='-liconv'
-</span><span class='line'>make install
-</span><span class='line'>cp php.ini-production /usr/local/php/etc/php.ini
-</span><span class='line'>cp sapi/fpm/init.d.php-fpm.in /etc/init.d/php-fpm
-</span><span class='line'>chmod +x /etc/init.d/php-fpm
-</span><span class='line'>chkconfig php-fpm on
-</span><span class='line'>cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改时区：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>vim /usr/local/php/etc/php.ini</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在 [Date] 之后增加一行：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>date.timezone =  Asia/Chongqing</span></code></pre></td></tr></table></div></figure>
-
-
-<p>将 max_execution_time 的值修改为 300或更大值，将max_input_time的值修改为300或更大值。</p>
-
-<p>修改httpd.conf：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>vim /usr/local/httpd/conf/httpd.conf</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在最后增加：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>AddType application/x-httpd-php  .php
-</span><span class='line'>AddType application/x-httpd-php-source  .phps</span></code></pre></td></tr></table></div></figure>
-
-
-<p>并将：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>DirectoryIndex index.html</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改为：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>DirectoryIndex index.php index.html</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>配置Zabbix Web接口</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir /usr/local/httpd/htdocs/zabbix
-</span><span class='line'>cd frontends/php/
-</span><span class='line'>cp -a . /usr/local/httpd/htdocs/zabbix/
-</span><span class='line'>cd /usr/local/httpd/htdocs/zabbix/
-</span><span class='line'>cp conf/zabbix.conf.php.example conf/zabbix.conf.php
-</span><span class='line'>vim conf/zabbix.conf.php</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改好连接Myql数据库的相关信息。</p>
-
-<h4>安装Zabbix前台</h4>
-
-<p>使用浏览器打开Zabbix URL: <a href="http://server_ip/zabbix">http://server_ip/zabbix</a></p>
-
-<p>用户名：admin</p>
-
-<p>密码：  zabbix</p>
-
-<h2>安装Zabbix Agent</h2>
-
-<h3>Zabbix Agent For Linux</h3>
-
-<p>添加用户：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
-</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
-
-
-<p>下载 Zabbix Agent</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.zabbix.com/downloads/2.0.6/zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
-</span><span class='line'>tar zxvf zabbix_agents_2.0.6.linux2_6.amd64.tar.gz
-</span><span class='line'>mv sbin/zabbix_agent* /usr/sbin/
-</span><span class='line'>mv bin/zabbix_* /usr/bin/
-</span><span class='line'>mkdir -p /etc/zabbix
-</span><span class='line'>mv conf/* /etc/zabbix
-</span><span class='line'>echo "zabbix_agent    10050/tcp" &gt;&gt; /etc/services
-</span><span class='line'>echo "zabbix_agent    10050/udp" &gt;&gt; /etc/services
-</span><span class='line'>sed -i 's/Server=127.0.0.1/Server=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf
-</span><span class='line'>sed -i 's/Hostname=Zabbix server/Hostname=192.168.30.226/' /etc/zabbix/zabbix_agentd.conf</span></code></pre></td></tr></table></div></figure>
-
-
-<p>启动 Zabbix Agent</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf
-</span><span class='line'>ps aux | grep zabbix
-</span><span class='line'>echo "zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf" &gt;&gt; /etc/rc.local</span></code></pre></td></tr></table></div></figure>
-
-
-<p>测试是否正确</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>zabbix_get -s 192.168.30.226 -p 10050 -k agent.ping
-</span><span class='line'>1</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果返回1表示正常。</p>
 ]]></content>
   </entry>
   

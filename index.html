@@ -9,7 +9,9 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="了解Docker Docker可谓是2013年的非主流词语，本篇文章为初学者提供入门参考，不涉及介绍，更多的介绍请参见国内资深人士写的文章： Docker-Getting-Start 由于需要在Linux Kernel 3.8及以上才可以很好的工作，官方更是推荐Ubuntu系统，这里有两种选择： &hellip;">
+  <meta name="description" content="前言 从上篇文章中了解到，push/pull 都是针对的index.docker.io的官方仓库，而实际情况告诉我们，企业大部分服务器是不对外开放权限的，Docker.Inc 其实已经考虑到我们这种实际需求，通过在内网直接搭建私有仓库来解决此问题。 安装Docker-registry 1
+2
+3 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +81,100 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu/">Ubuntu12.04部署Docker内部仓库</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-12T19:54:00+08:00" pubdate data-updated="true">Jan 12<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>前言</h2>
+
+<p>从上篇文章中了解到，push/pull 都是针对的index.docker.io的官方仓库，而实际情况告诉我们，企业大部分服务器是不对外开放权限的，Docker.Inc 其实已经考虑到我们这种实际需求，通过在内网直接搭建私有仓库来解决此问题。</p>
+
+<h2>安装Docker-registry</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone https://github.com/dotcloud/docker-registry
+</span><span class='line'>cd docker-registry/
+</span><span class='line'>cp config/config_sample.yml config/config.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>编辑配置文件，主要是修改镜像的存储路径：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim config/config.yml
+</span><span class='line'>
+</span><span class='line'>dev:
+</span><span class='line'>    storage: local
+</span><span class='line'>    storage_path: /home/taurus/registry
+</span><span class='line'>    loglevel: debug</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  <br/>
+保存退出。并创建存储镜像目录：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /you_path/to/registry</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装依赖包：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install build-essential python-dev libevent-dev python-pip libssl-dev
+</span><span class='line'>sudo pip install -r requirements.txt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动服务：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd docker-registry/
+</span><span class='line'>sudo gunicorn --access-logfile - --debug -k gevent -b 0.0.0.0:80 -w 1 wsgi:application & </span></code></pre></td></tr></table></div></figure>
+
+
+<p>打开浏览器：<a href="http://IP">http://IP</a>   如果正常会显示：&#8221;docker-registry server (dev)&#8221;</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -1517,147 +1613,6 @@ chmod +x /root/realserver.sh</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/10/octopress-personalization-customization/">Octopress个性化定制</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-10T13:39:00+08:00" pubdate data-updated="true">Oct 10<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>设置导航栏</h2>
-
-<p>编辑octopress\source_includes\custom\navigation.html, 并加入以下内容：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;ul class="main-navigation"&gt;
-</span><span class='line'>  &lt;li&gt;&lt;a href="/"&gt;首页&lt;/a&gt;&lt;/li&gt;
-</span><span class='line'>  &lt;li&gt;&lt;a href="/blog/archives"&gt;归档&lt;/a&gt;&lt;/li&gt;
-</span><span class='line'>    &lt;li&gt;&lt;a href="/about"&gt;关于我&lt;/a&gt;&lt;/li&gt;
-</span><span class='line'>&lt;/ul&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>添加 &ldquo;关于我&#8221;导航页</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ rake new_page['about']
-</span><span class='line'>mkdir -p source/about
-</span><span class='line'>Creating new page: source/about/index.markdown</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>侧边栏文章分类</h2>
-
-<p>创建文件：octopress\plugins\category_list_tab.rb，内容如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>module Jekyll 
-</span><span class='line'>  class CategoryListTag &lt; Liquid::Tag 
-</span><span class='line'>    def render(context) 
-</span><span class='line'>      html = "" 
-</span><span class='line'>      categories = context.registers[:site].categories.keys 
-</span><span class='line'>      categories.sort.each do |category| 
-</span><span class='line'>        posts_in_category = context.registers[:site].categories[category].size 
-</span><span class='line'>        category_dir = context.registers[:site].config['category_dir'] 
-</span><span class='line'>        category_url = File.join(category_dir, category.gsub(/_|\P{Word}/, '-').gsub(/-{2,}/, '-').downcase) 
-</span><span class='line'>        html &lt;&lt; "&lt;li class='category'&gt;&lt;a href='/#{category_url}/'&gt;#{category} (#{posts_in_category})&lt;/a&gt;&lt;/li&gt;\n" 
-</span><span class='line'>      end 
-</span><span class='line'>      html 
-</span><span class='line'>    end 
-</span><span class='line'>  end 
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>Liquid::Template.register_tag('category_list', Jekyll::CategoryListTag)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>新建文件 octopress\source_includes\custom\category_list.html,并添加以下内容(由于偶本地生成一直报错，请注意在使用的时候去掉反斜扛)：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;section&gt; 
-</span><span class='line'>  &lt;h1&gt;文章分类&lt;/h1&gt; 
-</span><span class='line'>  &lt;ul id="categories"&gt; 
-</span><span class='line'>    {\% category_list \%} 
-</span><span class='line'>  &lt;/ul&gt; 
-</span><span class='line'>&lt;/section&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改 _config.yml文件 ：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>default_asides: [asides/recent_posts.html, asides/category_list.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改octopress\source_includes\asides\recent_posts.html</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>  &lt;h1&gt;Recent Posts&lt;/h1&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改为</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;h1&gt;最新文章&lt;/h1&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>显示 文章以摘要形式展示</h2>
-
-<p>在markdown文件需要显示的地址添加 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/10/10/octopress-personalization-customization/">阅读全文 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1673,6 +1628,10 @@ chmod +x /root/realserver.sh</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu/">Ubuntu12.04部署Docker内部仓库</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/01/05/docker-install-for-ubuntu/">Ubuntu 12.04 安装Docker</a>
       </li>
     
@@ -1686,10 +1645,6 @@ chmod +x /root/realserver.sh</p>
     
       <li class="post">
         <a href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">Centos 6.X 安装KVM与安装实例</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
       </li>
     
   </ul>

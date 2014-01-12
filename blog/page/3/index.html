@@ -9,7 +9,13 @@
   <meta name="author" content="agenge">
 
   
-  <meta name="description" content="前几天偶打开自己blog时，突然发现无法打开，具体点说是显示数据库连接错误，第一反应是“被黑”，故而排查的第一步就是查看系统log，然而并没有看到相关错误信息，为尽快恢复，偶先尝试重启mysql，提示没有剩余空间，难道数据库数据文件太多导致？通过du后，发现果然如此，通过将过旧的数据文件（ &hellip;">
+  <meta name="description" content="1、安装环境 操作系统：:CentOS 5.5 64位
+Mysql：5.5.27
+Apache httpd：2.4.4
+Zabbix：2.0.6 2、源码安装 安装Zabbix 创建用户 1
+2
+groupadd zabbix
+useradd -g zabbix -M -s /sbin/ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +85,189 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/02/zabbix-source-install-conf/">Zabbix 源码安装与配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-02T00:00:00+08:00" pubdate data-updated="true">May 2<span>nd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1、安装环境</h2>
+
+<ul>
+<li>操作系统：:CentOS 5.5 64位</li>
+<li>Mysql：5.5.27</li>
+<li>Apache httpd：2.4.4</li>
+<li>Zabbix：2.0.6</li>
+</ul>
+
+
+<h2>2、源码安装</h2>
+
+<h3>安装Zabbix</h3>
+
+<h4>创建用户</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>groupadd zabbix
+</span><span class='line'>useradd -g zabbix -M -s /sbin/nologin zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>源码安装Zabbix</h3>
+
+<p>下载页面请点击 <a href="http://www.zabbix.com/download.php">这里</a>。下载之后按照以下步骤执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum install wget curl-devel net-snmp-devel php-bcmath
+</span><span class='line'>tar zxvf zabbix-2.0.6.tar.gz
+</span><span class='line'>cd zabbix-2.0.6
+</span><span class='line'>./configure --prefix=/data/zabbix \
+</span><span class='line'>  --enable-server --enable-agent \
+</span><span class='line'>  --with-mysql --with-net-snmp \
+</span><span class='line'>  --with-libcurl --enable-proxy
+</span><span class='line'>
+</span><span class='line'>make && make install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果一切顺利，安装完成。</p>
+
+<h3>创建Zabbix 数据库</h3>
+
+<p>这里假设你已经安装好Mysql数据库，具体的安装方法请自己到网上搜索解决。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql -uroot -p
+</span><span class='line'>Enter password:
+</span><span class='line'>
+</span><span class='line'>Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span><span class='line'>Your MySQL connection id is 63
+</span><span class='line'>Server version: 5.0.95 Source distribution
+</span><span class='line'>
+</span><span class='line'>Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+</span><span class='line'>
+</span><span class='line'>Oracle is a registered trademark of Oracle Corporation and/or its
+</span><span class='line'>affiliates. Other names may be trademarks of their respective owners.
+</span><span class='line'>
+</span><span class='line'>Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+</span><span class='line'>
+</span><span class='line'>mysql&gt; create database zabbix character set utf8;
+</span><span class='line'>mysql&gt; grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
+</span><span class='line'>Query OK, 1 row affected (0.00 sec)
+</span><span class='line'>
+</span><span class='line'>mysql&gt; quit
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/schema.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/images.sql
+</span><span class='line'>mysql -uzabbix -p zabbix &lt; database/mysql/data.sql</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>配置Zabbix</h3>
+
+<p>设置服务自启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp misc/init.d/fedora/core/zabbix_server /etc/init.d/
+</span><span class='line'>chmod +x /etc/init.d/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改zabbix_server中的BASEDIR=/data/zabbix</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chkconfig --add zabbix_server
+</span><span class='line'>chkconfig zabbix_server on</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置zabbix 配置文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /data/zabbix/etc/zabbix/zabbix_server.conf
+</span><span class='line'>DBName=zabbix
+</span><span class='line'>DBPassword=zabbix</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只需要修改密码即可，其他都保持默认值。当然如果你的Mysql不是安装在本地，肯定也要修改相应的IP啦。</p>
+
+<h4>启动Zabbix Server</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/zabbix_server start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>确认zabbix server是否已经启动：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>netstat -antulp | grep zabbix
+</span><span class='line'>
+</span><span class='line'>tcp        0      0 0.0.0.0:10051               0.0.0.0:*                   LISTEN      19087/zabbix_server</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/02/zabbix-source-install-conf/">阅读全文 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -941,8 +1130,7 @@
 </pre></td><td class='code'><pre><code class=''><span class='line'> ruby -ropenssl -e "puts :yep"</span></code></pre></td></tr></table></div></figure>
 
 
-<p>
- 如果输出“yep”表示无问题。</p>
+<blockquote><p> 如果输出“yep”表示无问题。</p></blockquote>
 
 <p><strong><em>注意：在安装Puppet之前，如果需要，必须将服务器主机名修改好，否则将会出现很多问题哟！</em></strong></p>
 
@@ -1149,6 +1337,10 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/01/12/deploy-docker-internal-repo-for-ubuntu/">Ubuntu12.04部署Docker内部仓库</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/01/05/docker-install-for-ubuntu/">Ubuntu 12.04 安装Docker</a>
       </li>
     
@@ -1162,10 +1354,6 @@ Windows Server 2003参考: <a href="http://zhidao.baidu.com/question/41992099">h
     
       <li class="post">
         <a href="/blog/2013/11/15/centos-install-kvm-and-install-vm/">Centos 6.X 安装KVM与安装实例</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/10/openstack-install-with-deploy-for-havana/">Openstack安装与部署(Havana)</a>
       </li>
     
   </ul>
